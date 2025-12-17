@@ -8,17 +8,108 @@
 
 ## Overview
 
+**FieldFile** is a comprehensive wildlife activity filing management platform designed for landowners to track, document, and file wildlife activities required for tax exemptions and regulatory compliance. The platform streamlines the documentation process, provides guided workflows, and manages submissions to county authorities.
+
+### Project Purpose
+
+FieldFile serves as a "TurboTax for wildlife filing" - guiding landowners through:
+- Documenting wildlife activities with photos and evidence
+- Tracking activity completion across multiple properties
+- Managing deadlines and submission requirements
+- Filing reports with county authorities
+- Maintaining historical records and compliance documentation
+
 This document serves as a comprehensive guide for AI assistants (Claude and others) working on the FieldFile codebase. It outlines the repository structure, development workflows, conventions, and best practices that should be followed.
+
+---
+
+## Domain Context
+
+### Target Users
+- **Landowners**: Property owners managing wildlife tax exemptions
+- **Co-owners**: Additional property owners with shared access
+- **Property Managers**: Professional managers overseeing multiple properties
+- **Ranch Hands**: Staff members who complete activities and upload evidence
+
+### Key Domain Terms
+- **Wildlife Activity**: Required conservation activities (e.g., birdhouse maintenance, habitat management)
+- **Filing**: Annual report submission to county authorities for tax exemption
+- **Property**: Land parcel with wildlife activities being tracked
+- **Documentation**: Evidence package including photos, receipts, and timestamps
+- **County Submission**: The process of filing reports with local government
+- **Tax Exemption**: Agricultural/wildlife tax valuation for property tax reduction
+- **County Standards**: Specific requirements set by local authorities for documentation
+
+### Common Wildlife Activities
+
+Understanding typical activities helps in designing appropriate tracking and documentation:
+
+1. **Birdhouse Installation & Maintenance**
+   - Installation of nest boxes
+   - Regular cleaning and inspection
+   - GPS location tracking
+   - Photo documentation requirements
+
+2. **Habitat Management**
+   - Native plant cultivation
+   - Invasive species removal
+   - Brush pile creation
+   - Water source provision
+
+3. **Food Plot Management**
+   - Seed planting for wildlife
+   - Soil preparation
+   - Seasonal maintenance
+   - Harvest documentation
+
+4. **Predator Control**
+   - Non-lethal deterrents
+   - Fencing maintenance
+   - Documentation of methods
+
+5. **Wildlife Surveys & Census**
+   - Species identification
+   - Population counts
+   - Trail camera data
+   - Observation logs
+
+6. **Erosion Control**
+   - Terracing
+   - Cover crop planting
+   - Water diversion structures
+
+7. **Fencing & Boundaries**
+   - Fence repair/maintenance
+   - Wildlife-friendly fence modifications
+   - Property boundary maintenance
+
+### Compliance Requirements
+
+Different states and counties have varying requirements:
+- **Texas**: 1-D-1 Wildlife Management Use
+- **Minimum Acreage**: Typically 10-20 acres
+- **Activity Requirements**: 3-7 activities per year (varies by county)
+- **Documentation**: Photos with timestamps, receipts, hours logged
+- **Annual Filing**: Deadline varies by county (typically early Q1)
+- **Re-qualification**: Annual review required
 
 ---
 
 ## Repository Status
 
-This repository is in its initial setup phase. As the codebase grows, this document should be updated to reflect:
-- Project purpose and domain
-- Technology stack and frameworks
-- Architecture patterns and design decisions
-- Key modules and their responsibilities
+**Current Status**: Initial repository setup and planning phase
+
+**Planned Core Features**:
+1. Multi-property dashboard with year-over-year filing history
+2. Activity tracking with photo documentation and reminders
+3. Guided filing workflow ("TurboTax-style" questionnaire)
+4. County submission tracking and status management
+5. Document vault with AI-powered validation
+6. Calendar integration for scheduling FieldFile services
+7. Interactive property maps with GPS coordinates
+8. Activity planner with deadline tracking
+9. Role-based access control for team collaboration
+10. Billing and subscription management
 
 ---
 
@@ -30,20 +121,200 @@ FieldFile/
 └── .git/               # Git version control
 ```
 
-### Expected Structure (To be populated as project grows)
+### Expected Structure
 
 ```
 FieldFile/
-├── src/                # Source code
-├── tests/              # Test files
-├── docs/               # Documentation
-├── config/             # Configuration files
-├── scripts/            # Build and utility scripts
-├── .github/            # GitHub workflows and templates
-├── CLAUDE.md           # AI assistant guide
-├── README.md           # Project documentation
-└── package.json        # Dependencies (if Node.js project)
+├── src/
+│   ├── components/          # React components (UI)
+│   │   ├── dashboard/       # Property dashboard views
+│   │   ├── activities/      # Activity tracking components
+│   │   ├── filing/          # Filing workflow components
+│   │   ├── documents/       # Document vault components
+│   │   ├── calendar/        # Scheduling components
+│   │   ├── maps/            # Property map integration
+│   │   ├── billing/         # Subscription management
+│   │   └── shared/          # Reusable UI components
+│   │
+│   ├── pages/               # Page-level components
+│   │   ├── properties/      # Multi-property views
+│   │   ├── filing-wizard/   # Guided filing flow
+│   │   ├── profile/         # User profile management
+│   │   └── admin/           # Administrative pages
+│   │
+│   ├── services/            # Business logic and API calls
+│   │   ├── api/             # API client services
+│   │   ├── auth/            # Authentication service
+│   │   ├── storage/         # File upload/storage service
+│   │   ├── ai/              # AI document validation
+│   │   └── notifications/   # Email/SMS service
+│   │
+│   ├── hooks/               # Custom React hooks
+│   ├── utils/               # Utility functions
+│   ├── types/               # TypeScript type definitions
+│   ├── contexts/            # React context providers
+│   └── constants/           # App constants and enums
+│
+├── server/                  # Backend API (if applicable)
+│   ├── controllers/         # Request handlers
+│   ├── models/              # Data models
+│   ├── routes/              # API routes
+│   ├── middleware/          # Express middleware
+│   └── db/                  # Database migrations/seeds
+│
+├── tests/
+│   ├── unit/                # Unit tests
+│   ├── integration/         # Integration tests
+│   └── e2e/                 # End-to-end tests
+│
+├── docs/                    # Documentation
+│   ├── api/                 # API documentation
+│   ├── architecture/        # Architecture diagrams
+│   └── user-guides/         # User documentation
+│
+├── public/                  # Static assets
+├── config/                  # Configuration files
+├── scripts/                 # Build and utility scripts
+├── .github/                 # GitHub workflows and templates
+├── CLAUDE.md                # This file - AI assistant guide
+├── README.md                # Project documentation
+└── package.json             # Dependencies
 ```
+
+---
+
+## Feature Requirements
+
+### 1. Multi-Property Dashboard
+- **Property Tabs**: Flip between properties with individual dashboards
+- **Historical Filing View**: Show filings by year for retrospective review
+- **Progress Tracking**: Progress bar showing completed vs. remaining activities for the year
+- **Property Map**: Interactive map showing property boundaries and locations
+
+### 2. Activity Tracking & Documentation
+- **Activity Tabs**: Dedicated tab for each wildlife activity
+- **Photo Gallery**: View photos across years for each activity
+- **Activity Reminders**: Automated reminders for when to complete activities
+- **Multiple Upload Methods**:
+  - Text photos to system
+  - Email photos to system
+  - Direct upload through web interface
+- **Supplier Integration**: Sponsored sections showing where to purchase supplies
+- **Activity Status**: Track which activities are complete, in-progress, or pending
+
+### 3. Guided Filing Workflow ("TurboTax for Wildlife")
+Step-by-step questionnaire:
+1. **State Selection**: "What state?"
+2. **Land Size**: "How big is your land?"
+3. **Activity Review**: "What activities did you complete this year?"
+   - Show tags/labels from prior year activities
+4. **Photo Upload Method**: "Would you like to upload, text, or email photos?"
+5. **Filing Option**: "Would you like us to file the report or you?"
+   - Tag with $15 fee for FieldFile filing service
+6. **Review & Submit**: Final review before submission
+
+### 4. County Submission Management
+- **Submission Status Tracking**:
+  - Draft
+  - Ready to file
+  - Filed
+  - Accepted
+  - Needs follow-up
+- **Filing Metadata**:
+  - Date filed
+  - Method of filing (online, mail, county portal)
+  - Confirmation receipt or submission PDF
+- **Deadline Tracking**:
+  - Countdown bar showing days until submission deadline
+  - Color-coded urgency indicators based on deadline proximity
+  - "Get help from FieldFile" support button
+
+### 5. Document Vault
+- **Documentation Checklist**: Required documents for each activity
+- **AI Document Validation**:
+  - Scan documents for county standards compliance
+  - Warning alerts if evidence is insufficient
+  - Smart detection of document types
+- **Evidence Tracking**:
+  - Photos checkbox
+  - Receipts checkbox
+  - Maintenance time/date stamps
+- **Secure Storage**: Historical document retention
+
+### 6. Calendar & Scheduling
+- **Service Booking**: Book FieldFile to:
+  - Come take photos
+  - Complete activities on behalf of customer
+- **Activity Planner**: Annual activity planning with:
+  - DIY option
+  - FieldFile-assisted option
+  - Skip for this year option
+  - Due dates for each activity
+
+### 7. Interactive Property Maps
+- **Property Boundaries**: Visual representation of land
+- **Activity Locations**: Pin specific locations (e.g., birdhouse placement)
+- **Google Maps Integration**:
+  - Walk users through getting GPS coordinates
+  - Add pinpoints to map for specific features
+  - Street view and satellite imagery
+
+### 8. FieldNotes (Activity Journaling)
+- **Free-text Documentation**: Notes for each activity
+- **Weather Logging**: Record weather conditions during activities
+- **Delay Tracking**: Document reasons for delays or partial completion
+- **Action Items**: Create dated action items for follow-up tasks
+
+### 9. Role-Based Access Control
+User roles with different permissions:
+- **Landowner**: Full access and ownership
+- **Co-owner**: Shared ownership access
+- **Property Manager**: Professional management capabilities
+- **Ranch Hand**: Field-level documentation and uploads
+
+Permission levels:
+- View only
+- Upload and notes only
+- Submission permissions
+
+### 10. Billing & Subscriptions
+- **Subscription Dashboard**: Show current subscription tier
+- **Included Services**: What's covered in current plan
+- **Upgrade Options**: Display available upgrade tiers
+- **Add-on Services**:
+  - FieldFile photo services
+  - Activity completion services
+  - Report filing service ($15)
+- **Payment History**: Transaction records
+
+### 11. Profile Management
+- **Landowner Information**:
+  - Names
+  - Phone numbers
+  - Email addresses
+- **Notification Preferences**: Communication settings
+- **Account Settings**: Password, security, preferences
+
+### 12. Referral Program
+- **Referral Bonus**: Incentive for getting neighbors to join
+- **Referral Tracking**: Monitor referred users
+- **Bonus Application**: Automatic credit for successful referrals
+
+### 13. Local Supplier Directory
+- **Supplier Listings**: Local providers for:
+  - Materials
+  - Fence repair services
+  - Seed planting services
+  - Wildlife activity supplies
+- **Contact Information**: Direct links to suppliers
+- **Sponsored Partnerships**: Featured suppliers
+
+### 14. Activity Suggestions
+- **Recommendation Engine**: Suggest additional activities based on:
+  - Property characteristics
+  - Historical activities
+  - Seasonal opportunities
+- **Benefits Explanation**: Why suggested activities help
 
 ---
 
@@ -229,30 +500,199 @@ Use `TodoWrite` tool to:
 
 ## Technology Stack
 
-### To Be Determined
+### Recommended Stack
 
-As the project evolves, document:
-- Programming language(s)
-- Frameworks and libraries
-- Database systems
-- Testing frameworks
-- Build tools
-- CI/CD pipeline
-- Deployment strategy
+#### Frontend
+- **Framework**: React 18+ with TypeScript
+- **Build Tool**: Vite or Next.js (for SSR/SEO benefits)
+- **UI Library**: Tailwind CSS + shadcn/ui or Material-UI
+- **State Management**: React Context + hooks (or Zustand for complex state)
+- **Form Handling**: React Hook Form + Zod validation
+- **Date/Time**: date-fns or Day.js
+- **Maps**: Google Maps JavaScript API + @react-google-maps/api
+- **File Upload**: react-dropzone
+- **Calendar**: FullCalendar or react-big-calendar
+- **Charts**: Recharts or Chart.js
+
+#### Backend (if separate API)
+- **Runtime**: Node.js 20+ with TypeScript
+- **Framework**: Express.js or Fastify
+- **API Style**: RESTful API or GraphQL (Apollo Server)
+- **Authentication**: Auth0, Clerk, or JWT with passport.js
+- **File Storage**: AWS S3, Google Cloud Storage, or Cloudinary
+- **Email/SMS**: SendGrid, Twilio
+- **AI Integration**: OpenAI API for document validation
+
+#### Database
+- **Primary Database**: PostgreSQL (for relational data)
+- **ORM**: Prisma or TypeORM
+- **File Metadata**: Store in PostgreSQL with S3 URLs
+- **Caching**: Redis (optional for session/cache management)
+
+#### Testing
+- **Unit Tests**: Vitest or Jest
+- **Integration Tests**: Supertest (API) + React Testing Library
+- **E2E Tests**: Playwright or Cypress
+- **Coverage**: Built-in coverage tools
+- **Test Data**: Faker.js for mock data
+
+#### DevOps & Infrastructure
+- **Version Control**: Git + GitHub
+- **CI/CD**: GitHub Actions
+- **Hosting Options**:
+  - Frontend: Vercel, Netlify, or AWS Amplify
+  - Backend: AWS (EC2/ECS/Lambda), Railway, or Render
+  - Database: AWS RDS, Supabase, or PlanetScale
+- **Monitoring**: Sentry (error tracking), LogRocket (session replay)
+- **Analytics**: PostHog or Mixpanel
+
+#### Development Tools
+- **Package Manager**: pnpm or npm
+- **Code Quality**: ESLint + Prettier
+- **Git Hooks**: Husky + lint-staged
+- **Type Safety**: TypeScript strict mode
+- **API Documentation**: OpenAPI/Swagger or GraphQL Playground
+- **Environment Management**: dotenv
+
+### Technology Decisions Log
+
+Document key decisions here as they are made:
+- **[Date]**: Decision and rationale
+- Example: "2025-12-17: Chose React + TypeScript for type safety and developer experience"
 
 ---
 
 ## Architecture Patterns
 
-### To Be Documented
+### Recommended Architecture
 
-Document architectural decisions as they are made:
-- Design patterns used
-- Module organization
-- Data flow
-- API design principles
-- Error handling strategies
-- Logging and monitoring
+#### Frontend Architecture
+- **Component Pattern**: Atomic Design (Atoms, Molecules, Organisms, Templates, Pages)
+- **State Management**:
+  - Local state: useState for component-specific state
+  - Global state: Context API for user/auth, property selection
+  - Server state: React Query or SWR for API data caching
+- **Routing**: React Router with protected routes
+- **Code Splitting**: Lazy loading for page-level components
+
+#### Backend Architecture (if applicable)
+- **Pattern**: Layered Architecture
+  - **Controllers**: Handle HTTP requests/responses
+  - **Services**: Business logic layer
+  - **Repositories**: Data access layer
+  - **Models**: Data entities
+- **API Design**: RESTful with resource-based URLs
+  - `/api/properties` - Property management
+  - `/api/properties/:id/activities` - Activity tracking
+  - `/api/filings` - Filing submissions
+  - `/api/documents` - Document management
+
+#### Data Flow
+```
+User Action → Component → Service/API Call → Backend → Database
+                ↓                                ↓
+            Local State Update          Store/Update Data
+                ↓                                ↓
+            UI Re-render            ← Return Response
+```
+
+#### Key Design Patterns
+
+1. **Repository Pattern**: Abstract data access logic
+2. **Service Layer Pattern**: Encapsulate business logic
+3. **Observer Pattern**: For real-time updates (filing status, notifications)
+4. **Strategy Pattern**: For different filing methods (online, mail, portal)
+5. **Factory Pattern**: For creating different document types
+6. **Decorator Pattern**: For role-based permission wrapping
+
+#### Error Handling Strategy
+- **API Errors**: Consistent error response format
+  ```json
+  {
+    "error": {
+      "code": "VALIDATION_ERROR",
+      "message": "User-friendly message",
+      "details": { "field": "specific error" }
+    }
+  }
+  ```
+- **Frontend**: Error boundaries for component errors
+- **Validation**: Zod schemas for runtime validation
+- **Logging**: Structured logging with context
+
+#### Security Architecture
+- **Authentication**: JWT tokens with refresh mechanism
+- **Authorization**: Role-Based Access Control (RBAC)
+  - Roles: landowner, co-owner, property_manager, ranch_hand
+  - Permissions: view, upload, edit, submit, admin
+- **Data Isolation**: Row-level security for multi-tenancy
+- **File Upload**: Virus scanning, type validation, size limits
+- **API Rate Limiting**: Prevent abuse
+
+#### Data Model (Core Entities)
+
+```
+User
+├── Properties (1:many)
+│   ├── Activities (1:many)
+│   │   ├── ActivityRecords (1:many)
+│   │   │   └── Photos/Documents (1:many)
+│   │   └── FieldNotes (1:many)
+│   ├── MapPins (1:many)
+│   └── Filings (1:many)
+│       └── Documents (1:many)
+├── Roles (many:many via PropertyUserRole)
+└── Subscriptions (1:1)
+```
+
+### Architecture Decision Records (ADRs)
+
+Document significant architecture decisions:
+
+**Template:**
+```
+## ADR-001: [Title]
+**Date**: YYYY-MM-DD
+**Status**: Proposed | Accepted | Deprecated
+
+### Context
+What is the issue we're trying to solve?
+
+### Decision
+What decision did we make?
+
+### Consequences
+What are the trade-offs? Positive and negative impacts?
+
+### Alternatives Considered
+What other options did we evaluate?
+```
+
+**Example:**
+```
+## ADR-001: Use PostgreSQL for Primary Database
+**Date**: 2025-12-17
+**Status**: Proposed
+
+### Context
+Need a reliable database for storing property, activity, and filing data.
+Relationships between entities are complex and relational.
+
+### Decision
+Use PostgreSQL with Prisma ORM.
+
+### Consequences
+- ✅ ACID compliance for filing submissions
+- ✅ Complex queries with joins
+- ✅ JSON column support for flexible metadata
+- ⚠️  Requires hosting/management
+- ⚠️  Learning curve for team
+
+### Alternatives Considered
+- MongoDB: Too flexible, relationships harder to maintain
+- MySQL: Less feature-rich than PostgreSQL
+- Supabase: Considered for managed PostgreSQL + auth
+```
 
 ---
 
@@ -472,11 +912,46 @@ This document should be updated when:
 
 ## Version History
 
-- **2025-12-17**: Initial CLAUDE.md creation for empty repository
-  - Established basic structure and conventions
-  - Defined git workflows and branch strategy
-  - Set code quality standards and security practices
-  - Created template sections for future documentation
+### Version 1.1 - 2025-12-17
+**Major Update: Project Specification Integration**
+
+- Added comprehensive project overview and domain context
+- Documented FieldFile as wildlife activity filing management platform
+- Added 14 detailed feature requirement sections:
+  - Multi-property dashboard
+  - Activity tracking & documentation
+  - Guided filing workflow ("TurboTax for Wildlife")
+  - County submission management
+  - Document vault with AI validation
+  - Calendar & scheduling
+  - Interactive property maps
+  - FieldNotes (activity journaling)
+  - Role-based access control
+  - Billing & subscriptions
+  - Profile management
+  - Referral program
+  - Local supplier directory
+  - Activity suggestions
+- Updated project structure with FieldFile-specific directories
+- Added recommended technology stack:
+  - Frontend: React + TypeScript, Tailwind CSS
+  - Backend: Node.js + Express/Fastify
+  - Database: PostgreSQL + Prisma
+  - Testing: Vitest, Playwright
+- Documented architecture patterns and design decisions
+- Added data model and entity relationships
+- Created Architecture Decision Records (ADR) template
+- Enhanced security architecture with RBAC details
+
+### Version 1.0 - 2025-12-17
+**Initial Release**
+
+- Created initial CLAUDE.md structure for empty repository
+- Established basic conventions and workflows
+- Defined git workflows and branch strategy
+- Set code quality standards and security practices
+- Created template sections for future documentation
+- Added AI assistant-specific conventions and FAQ
 
 ---
 
