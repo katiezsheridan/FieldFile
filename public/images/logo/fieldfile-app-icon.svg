@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Green background -->
+  <rect width="512" height="512" rx="96" fill="#2D5016"/>
+  <!-- Centered terrain icon -->
+  <g transform="translate(136, 106) scale(5.2)">
+    <rect x="2" y="1" width="44" height="50" rx="5" fill="none" stroke="#F5F1E8" stroke-width="1.2" opacity="0.3"/>
+    <path d="M2 28C8 22 14 26 20 20C26 14 32 22 38 16C42 12 46 16 46 17V46C46 49 44 51 41 51H7C4 51 2 49 2 46V28Z" fill="#F5F1E8" opacity="0.15"/>
+    <path d="M2 36C9 28 15 33 21 27C27 20 33 29 39 23C43 19 46 24 46 25V46C46 49 44 51 41 51H7C4 51 2 49 2 46V36Z" fill="#F5F1E8"/>
+  </g>
+</svg>

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 60" width="640" height="120">
+  <!-- C1 Classic Stack — Terrain icon (dark bg version) -->
+  <g transform="translate(0, 4)">
+    <rect x="2" y="1" width="44" height="50" rx="5" fill="none" stroke="#5FA833" stroke-width="1.5" opacity="0.35"/>
+    <path d="M2 28C8 22 14 26 20 20C26 14 32 22 38 16C42 12 46 16 46 17V46C46 49 44 51 41 51H7C4 51 2 49 2 46V28Z" fill="#5FA833" opacity="0.15"/>
+    <path d="M2 36C9 28 15 33 21 27C27 20 33 29 39 23C43 19 46 24 46 25V46C46 49 44 51 41 51H7C4 51 2 49 2 46V36Z" fill="#5FA833"/>
+  </g>
+  <!-- Wordmark -->
+  <text x="60" y="42" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-weight="800" font-size="40" letter-spacing="-0.5">
+    <tspan fill="#5FA833">Field</tspan><tspan fill="#FFFFFF">File</tspan>
+  </text>
+</svg>
