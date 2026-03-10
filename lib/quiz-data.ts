@@ -459,17 +459,6 @@ const zipPrefixToRegion: Record<string, TexasRegion> = {
   "794": "south",
   "795": "south",
   "796": "south",
-  // Houston area
-  "770": "south",
-  "771": "south",
-  "772": "south",
-  "773": "south",
-  "774": "south",
-  "775": "east",
-  // San Antonio area
-  "780": "south",
-  "781": "south",
-  "782": "south",
 };
 
 // City name → { county, region } for common Texas cities
