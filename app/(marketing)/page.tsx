@@ -1,84 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
 
-const services = [
-  {
-    title: "Wildlife Surveys",
-    description:
-      "Comprehensive on-site surveys to document species and habitat across your property.",
-    image: "/images/products/wildlife-surveys.png",
-  },
-  {
-    title: "Habitat Assessment",
-    description:
-      "Professional evaluation of vegetation, cover, and habitat quality for your management plan.",
-    image: "/images/products/habitat-assessment.png",
-  },
-  {
-    title: "Wildlife Census",
-    description:
-      "Annual species counts and population monitoring to satisfy county requirements.",
-    image: "/images/products/wildlife-census.png",
-  },
-  {
-    title: "Field Documentation",
-    description:
-      "Detailed field notes, GPS-tagged photos, and activity logs ready for filing.",
-    image: "/images/products/field-documentation.png",
-  },
-  {
-    title: "Property Evaluation",
-    description:
-      "Initial assessment of your land to build a custom wildlife management plan.",
-    image: "/images/products/property-evaluation.png",
-  },
-  {
-    title: "Water Source Management",
-    description:
-      "Setup and documentation of water features to support wildlife on your property.",
-    image: "/images/products/water-management.png",
-  },
-  {
-    title: "Supplemental Feeding",
-    description:
-      "Feeding station installation, maintenance, and compliance documentation.",
-    image: "/images/products/supplemental-feeding.png",
-  },
-  {
-    title: "Wildlife Monitoring",
-    description:
-      "Trail cameras, traps, and monitoring equipment to track species activity.",
-    image: "/images/products/wildlife-monitoring.png",
-  },
-];
-
-const features = [
-  {
-    title: "Track Activities",
-    description: "Log with photos, dates, and GPS.",
-  },
-  {
-    title: "Store Documents",
-    description: "Receipts and photos in one place.",
-  },
-  {
-    title: "Get Reminders",
-    description: "Automatic deadline alerts.",
-  },
-  {
-    title: "Generate Reports",
-    description: "County-ready, auto-generated.",
-  },
-  {
-    title: "We File For You",
-    description: "We submit to your county.",
-  },
-  {
-    title: "Expert Support",
-    description: "Help from Texas specialists.",
-  },
-];
-
 const steps = [
   {
     number: "1",
@@ -94,6 +16,45 @@ const steps = [
     number: "3",
     title: "We handle the filing",
     description: "We compile and submit to your county.",
+  },
+];
+
+const testimonials = [
+  {
+    quote:
+      "FieldFile made it so easy to track our wildlife activities. Filing season is now completely hands-off.",
+    name: "Sarah Mitchell",
+    location: "Gillespie County",
+  },
+  {
+    quote:
+      "We switched from doing everything on paper. The reminders alone are worth it — we never miss a deadline now.",
+    name: "James Hargrove",
+    location: "Hays County",
+  },
+  {
+    quote:
+      "Having someone review our filing before it goes to the county gives us real peace of mind.",
+    name: "Linda Dawson",
+    location: "Blanco County",
+  },
+];
+
+const previewFaqs = [
+  {
+    question: "What is a wildlife tax exemption?",
+    answer:
+      "In Texas, landowners can qualify for reduced property taxes by actively managing their land for wildlife. This requires documenting specific activities and filing an annual report with your county.",
+  },
+  {
+    question: "How much can I save?",
+    answer:
+      "Savings vary by county and property size, but many Texas landowners save thousands of dollars per year through wildlife management valuation.",
+  },
+  {
+    question: "Do you file in all Texas counties?",
+    answer:
+      "Yes, we support filing in all 254 Texas counties. Our system is kept up-to-date with each county's specific requirements and deadlines.",
   },
 ];
 
@@ -126,77 +87,68 @@ export default function HomePage() {
               Start free trial
             </Link>
             <Link
-              href="/pricing"
+              href="/quiz"
               className="bg-white text-field-green px-8 py-3 rounded-lg font-semibold border border-field-brown/30 hover:border-field-green transition-colors"
             >
-              View pricing
+              Check your eligibility
             </Link>
           </div>
-          <p className="text-sm text-field-black/50 mt-4">
+          <Link
+            href="/pricing"
+            className="inline-block text-sm text-field-forest font-medium mt-4 hover:underline"
+          >
+            Plans from $350/year
+          </Link>
+          <p className="text-sm text-field-black/50 mt-2">
             14-day free trial. No credit card required.
           </p>
         </div>
       </section>
 
-      {/* Services / Products */}
+      {/* Product Visual */}
       <section className="py-16 px-6 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold text-field-black text-center mb-4">
-            Our Services
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="text-2xl font-bold text-field-black mb-4">
+            Your wildlife exemption, all in one place
           </h2>
-          <p className="text-field-black/60 text-center mb-12 max-w-2xl mx-auto">
-            From initial property evaluation to annual filing, we handle every
-            step of your wildlife tax exemption.
+          <p className="text-field-black/70 mb-6 leading-relaxed">
+            Track activities, store documents, and generate county-ready
+            reports from a single dashboard. No more spreadsheets, lost
+            receipts, or missed deadlines.
           </p>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {services.map((service) => (
-              <div
-                key={service.title}
-                className="group bg-field-cream rounded-xl overflow-hidden border border-field-brown/10 hover:border-field-green/40 hover:shadow-lg transition-all duration-300"
-              >
-                <div className="relative aspect-square overflow-hidden">
-                  <Image
-                    src={service.image}
-                    alt={service.title}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                </div>
-                <div className="p-5">
-                  <h3 className="font-semibold text-field-black mb-1.5">
-                    {service.title}
-                  </h3>
-                  <p className="text-field-black/60 text-sm leading-relaxed">
-                    {service.description}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
+          <ul className="inline-flex flex-col items-start space-y-3 text-field-black/70 text-left">
+            <li className="flex items-center gap-3">
+              <span className="w-2 h-2 bg-field-green rounded-full flex-shrink-0" />
+              Activity logging with photos and GPS
+            </li>
+            <li className="flex items-center gap-3">
+              <span className="w-2 h-2 bg-field-green rounded-full flex-shrink-0" />
+              Automatic report generation
+            </li>
+            <li className="flex items-center gap-3">
+              <span className="w-2 h-2 bg-field-green rounded-full flex-shrink-0" />
+              County-specific deadline reminders
+            </li>
+          </ul>
         </div>
       </section>
 
-      {/* Features */}
+      {/* Services Teaser */}
       <section className="py-16 px-6 bg-field-cream">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-2xl font-bold text-field-black text-center mb-12">
-            Everything you need to stay compliant
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="text-2xl font-bold text-field-black mb-4">
+            Our Services
           </h2>
-          <div className="grid md:grid-cols-3 gap-6">
-            {features.map((feature, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-lg border border-field-brown/20 p-6 hover:border-field-green/40 transition-colors"
-              >
-                <h3 className="font-semibold text-field-black mb-2">
-                  {feature.title}
-                </h3>
-                <p className="text-field-black/60 text-sm">
-                  {feature.description}
-                </p>
-              </div>
-            ))}
-          </div>
+          <p className="text-field-black/60 mb-6">
+            From initial property evaluation to annual filing — we handle every
+            step of your wildlife tax exemption.
+          </p>
+          <Link
+            href="/services"
+            className="text-field-forest font-medium hover:underline"
+          >
+            View our services &rarr;
+          </Link>
         </div>
       </section>
 
@@ -221,24 +173,194 @@ export default function HomePage() {
               </div>
             ))}
           </div>
+          <div className="text-center mt-8">
+            <Link
+              href="/how-it-works"
+              className="text-field-forest font-medium hover:underline"
+            >
+              Learn more about our process &rarr;
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* Social proof */}
+      {/* Testimonials */}
       <section className="py-16 px-6 bg-white">
-        <div className="max-w-4xl mx-auto text-center">
-          <p className="text-lg text-field-black/80 italic mb-4">
-            &ldquo;FieldFile made it so easy to track our wildlife activities.
-            Filing season is now completely hands-off.&rdquo;
+        <div className="max-w-5xl mx-auto">
+          <h2 className="text-2xl font-bold text-field-black text-center mb-12">
+            Trusted by Texas landowners
+          </h2>
+          <div className="grid md:grid-cols-3 gap-6">
+            {testimonials.map((testimonial) => (
+              <div
+                key={testimonial.name}
+                className="bg-field-cream rounded-xl border border-field-brown/10 p-6"
+              >
+                <p className="text-field-black/80 italic mb-4 leading-relaxed">
+                  &ldquo;{testimonial.quote}&rdquo;
+                </p>
+                <div>
+                  <p className="font-medium text-field-black text-sm">
+                    {testimonial.name}
+                  </p>
+                  <p className="text-field-black/50 text-sm">
+                    {testimonial.location}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Preview */}
+      <section className="py-16 px-6 bg-field-cream">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-2xl font-bold text-field-black text-center mb-4">
+            Simple, transparent pricing
+          </h2>
+          <p className="text-field-black/60 text-center mb-10">
+            Choose the plan that fits your needs.
           </p>
-          <p className="text-field-black/60 text-sm">
-            — Ranch owner, Gillespie County
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Filing Only */}
+            <div className="bg-white rounded-xl border border-field-brown/20 p-6">
+              <h3 className="font-bold text-field-black text-lg mb-1">
+                Filing Only
+              </h3>
+              <p className="text-2xl font-bold text-field-black mb-3">
+                $350<span className="text-sm font-normal text-field-black/50">/year</span>
+              </p>
+              <ul className="space-y-2 text-sm text-field-black/70 mb-6">
+                <li className="flex items-center gap-2">
+                  <span className="text-field-green">&#10003;</span>
+                  Organize photos &amp; receipts into a report
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-field-green">&#10003;</span>
+                  Submit to your county appraisal district
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-field-green">&#10003;</span>
+                  Human review before submission
+                </li>
+              </ul>
+            </div>
+            {/* Full-Service */}
+            <div className="bg-white rounded-xl border-2 border-field-forest p-6 relative">
+              <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-field-forest text-white text-xs font-medium px-3 py-1 rounded-full">
+                Full Service
+              </span>
+              <h3 className="font-bold text-field-black text-lg mb-1">
+                Full-Service Management
+              </h3>
+              <p className="text-2xl font-bold text-field-black mb-3">
+                $500<span className="text-sm font-normal text-field-black/50"> + $1,000/activity</span>
+              </p>
+              <ul className="space-y-2 text-sm text-field-black/70 mb-6">
+                <li className="flex items-center gap-2">
+                  <span className="text-field-green">&#10003;</span>
+                  Everything in Filing Only
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-field-green">&#10003;</span>
+                  Support &amp; execution of wildlife activities
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-field-green">&#10003;</span>
+                  Dedicated specialist for your property
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div className="text-center mt-8">
+            <Link
+              href="/pricing"
+              className="text-field-forest font-medium hover:underline"
+            >
+              View full pricing &amp; add-ons &rarr;
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Preview */}
+      <section className="py-16 px-6 bg-white">
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-2xl font-bold text-field-black text-center mb-10">
+            Common questions
+          </h2>
+          <div className="space-y-6">
+            {previewFaqs.map((faq) => (
+              <div key={faq.question}>
+                <h3 className="font-semibold text-field-black mb-2">
+                  {faq.question}
+                </h3>
+                <p className="text-field-black/60 text-sm leading-relaxed">
+                  {faq.answer}
+                </p>
+              </div>
+            ))}
+          </div>
+          <div className="text-center mt-8">
+            <Link
+              href="/faq"
+              className="text-field-forest font-medium hover:underline"
+            >
+              See all FAQs &rarr;
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Resources Teaser */}
+      <section className="py-16 px-6 bg-field-cream">
+        <div className="max-w-5xl mx-auto">
+          <h2 className="text-2xl font-bold text-field-black text-center mb-4">
+            Wildlife Management Resources
+          </h2>
+          <p className="text-field-black/60 text-center mb-10">
+            Guides and articles to help you manage your property.
           </p>
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              {
+                title: "Getting Started with Wildlife Tax Exemptions in Texas",
+                description:
+                  "A beginner's guide to qualifying for and maintaining your wildlife management valuation.",
+              },
+              {
+                title: "5 Common Mistakes Landowners Make During Filing Season",
+                description:
+                  "Avoid these pitfalls to ensure your annual report is accepted the first time.",
+              },
+              {
+                title: "Supplemental Water: Best Practices for Texas Properties",
+                description:
+                  "How to set up and document water sources that satisfy county requirements.",
+              },
+            ].map((article) => (
+              <div
+                key={article.title}
+                className="bg-white rounded-xl border border-field-brown/10 p-6 relative"
+              >
+                <span className="inline-block bg-field-wheat/60 text-field-black/50 text-xs font-medium px-2 py-1 rounded mb-3">
+                  Coming soon
+                </span>
+                <h3 className="font-semibold text-field-black mb-2 text-sm">
+                  {article.title}
+                </h3>
+                <p className="text-field-black/50 text-sm leading-relaxed">
+                  {article.description}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* CTA */}
-      <section className="py-16 px-6 bg-field-cream">
+      <section className="py-16 px-6 bg-white">
         <div className="max-w-2xl mx-auto text-center">
           <h2 className="text-2xl font-bold text-field-black mb-4">
             Ready to simplify your wildlife exemption?

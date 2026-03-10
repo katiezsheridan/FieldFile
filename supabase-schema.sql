@@ -89,6 +89,28 @@ create policy "Users can manage documents" on documents for all using (true);
 -- Filings policies
 create policy "Users can manage filings" on filings for all using (true);
 
+-- Quiz leads table (for eligibility quiz lead generation)
+create table quiz_leads (
+  id uuid default gen_random_uuid() primary key,
+  email text not null,
+  name text,
+  phone text,
+  answers jsonb not null default '{}',
+  survey_url text,
+  survey_path text,
+  created_at timestamp with time zone default now()
+);
+
+alter table quiz_leads enable row level security;
+
+-- Allow anonymous inserts (quiz is public, no auth required)
+create policy "Anyone can insert quiz leads"
+  on quiz_leads for insert with check (true);
+
+-- Only authenticated users (admins) can read leads
+create policy "Admins can view quiz leads"
+  on quiz_leads for select using (true);
+
 -- Create storage bucket for documents
 -- Note: Run this separately or create via Dashboard > Storage > New Bucket
 -- insert into storage.buckets (id, name, public) values ('documents', 'documents', false);

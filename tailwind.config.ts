@@ -18,6 +18,9 @@ const config: Config = {
           grey: "#E8E8E8",       // Limestone Grey - backgrounds, dividers
           cream: "#F5F1E8",      // Warm Cream - page backgrounds, cards
           red: "#D64545",        // Alert Red - warnings, urgent
+          ink: "#1a1a1a",        // Forest Ink - primary text
+          forest: "#2d5016",     // Deep Forest - CTAs, interactive elements
+          wheat: "#d8d1c9",      // Wheat - borders, dividers, subtle fills
         },
         // Status colors
         status: {

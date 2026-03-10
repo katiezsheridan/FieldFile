@@ -25,6 +25,12 @@ export default function MarketingLayout({
           {/* Navigation */}
           <nav className="hidden md:flex items-center gap-8">
             <Link
+              href="/services"
+              className="text-field-ink/70 hover:text-field-ink transition-colors"
+            >
+              Services
+            </Link>
+            <Link
               href="/pricing"
               className="text-field-ink/70 hover:text-field-ink transition-colors"
             >
@@ -35,6 +41,12 @@ export default function MarketingLayout({
               className="text-field-ink/70 hover:text-field-ink transition-colors"
             >
               How It Works
+            </Link>
+            <Link
+              href="/faq"
+              className="text-field-ink/70 hover:text-field-ink transition-colors"
+            >
+              FAQ
             </Link>
           </nav>
 
@@ -82,6 +94,11 @@ export default function MarketingLayout({
             <div>
               <h4 className="font-medium text-field-ink mb-3">Product</h4>
               <ul className="space-y-2 text-sm text-field-ink/60">
+                <li>
+                  <Link href="/services" className="hover:text-field-ink">
+                    Services
+                  </Link>
+                </li>
                 <li>
                   <Link href="/pricing" className="hover:text-field-ink">
                     Pricing

@@ -81,7 +81,7 @@ export default function PricingPage() {
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
 
   return (
-    <div className="min-h-[calc(100vh-200px)]">
+    <div className="min-h-[calc(100vh-200px)] py-12 px-6">
       {/* Header */}
       <div className="text-center mb-12">
         <h1 className="text-3xl font-bold text-field-ink mb-3">
