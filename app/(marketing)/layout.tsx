@@ -14,10 +14,10 @@ export default function MarketingLayout({
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <Image
-              src="/images/logo/fieldfile-logo-mono.svg"
+              src="/images/logo/fieldfile-logo.png"
               alt="FieldFile"
               width={160}
-              height={30}
+              height={40}
               priority
             />
           </Link>
@@ -79,10 +79,10 @@ export default function MarketingLayout({
             <div>
               <div className="mb-3">
                 <Image
-                  src="/images/logo/fieldfile-logo-mono.svg"
+                  src="/images/logo/fieldfile-logo.png"
                   alt="FieldFile"
                   width={120}
-                  height={22}
+                  height={30}
                 />
               </div>
               <p className="text-sm text-field-ink/60">

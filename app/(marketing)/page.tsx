@@ -65,10 +65,10 @@ export default function HomePage() {
       <section className="py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
           <Image
-            src="/images/logo/fieldfile-logo-mono.svg"
+            src="/images/logo/fieldfile-logo.png"
             alt="FieldFile"
             width={320}
-            height={60}
+            height={80}
             className="mx-auto mb-8"
             priority
           />
