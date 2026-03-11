@@ -365,8 +365,61 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      {/* Features */}
+      {/* Service Area Map */}
       <section className="py-16 px-6 bg-white">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-10">
+            <h2 className="text-2xl font-bold text-field-black mb-4">
+              Where We Serve
+            </h2>
+            <p className="text-field-black/70 max-w-2xl mx-auto">
+              FieldFile currently supports landowners across dozens of Texas
+              counties, with more being added every month.
+            </p>
+          </div>
+
+          <div className="bg-field-cream rounded-xl border border-field-brown/10 p-6 sm:p-8">
+            <div className="relative w-full max-w-3xl mx-auto">
+              <Image
+                src="/images/service-area-map.png"
+                alt="Map of Texas counties serviced by FieldFile"
+                width={1000}
+                height={900}
+                className="w-full h-auto rounded-lg"
+              />
+            </div>
+
+            {/* Legend */}
+            <div className="flex flex-wrap items-center justify-center gap-6 mt-6">
+              <div className="flex items-center gap-2">
+                <span className="w-4 h-4 rounded bg-field-forest flex-shrink-0" />
+                <span className="text-sm text-field-black/70">
+                  Currently servicing
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-4 h-4 rounded bg-[#D4A843] flex-shrink-0" />
+                <span className="text-sm text-field-black/70">
+                  Expanding to
+                </span>
+              </div>
+            </div>
+
+            <p className="text-center text-sm text-field-black/50 mt-4">
+              Don&apos;t see your county?{" "}
+              <Link
+                href="/quiz"
+                className="text-field-forest font-medium hover:underline"
+              >
+                Request availability in your county
+              </Link>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className="py-16 px-6 bg-field-cream">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-2xl font-bold text-field-black text-center mb-12">
             Everything you need to stay compliant

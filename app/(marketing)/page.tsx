@@ -325,27 +325,31 @@ export default function HomePage() {
           <div className="grid md:grid-cols-3 gap-6">
             {[
               {
-                title: "Getting Started with Wildlife Tax Exemptions in Texas",
-                description:
-                  "A beginner's guide to qualifying for and maintaining your wildlife management valuation.",
-              },
-              {
                 title: "5 Common Mistakes Landowners Make During Filing Season",
                 description:
                   "Avoid these pitfalls to ensure your annual report is accepted the first time.",
+                slug: "common-mistakes",
               },
               {
-                title: "Supplemental Water: Best Practices for Texas Properties",
+                title: "Unique County-Specific Requirements in Texas",
                 description:
-                  "How to set up and document water sources that satisfy county requirements.",
+                  "Why filing requirements differ across all 254 Texas counties and what you need to know.",
+                slug: "county-requirements",
+              },
+              {
+                title: "How to Create a Wildlife Management Plan",
+                description:
+                  "Everything you need to build a compliant wildlife management plan from scratch.",
+                slug: "wildlife-management-plan",
               },
             ].map((article) => (
-              <div
+              <Link
                 key={article.title}
-                className="bg-white rounded-xl border border-field-brown/10 p-6 relative"
+                href={`/resources?article=${article.slug}`}
+                className="bg-white rounded-xl border border-field-brown/10 p-6 hover:border-field-green/40 hover:shadow-lg transition-all"
               >
-                <span className="inline-block bg-field-wheat/60 text-field-black/50 text-xs font-medium px-2 py-1 rounded mb-3">
-                  Coming soon
+                <span className="inline-block bg-field-green/10 text-field-green text-xs font-medium px-2 py-1 rounded mb-3">
+                  New
                 </span>
                 <h3 className="font-semibold text-field-black mb-2 text-sm">
                   {article.title}
@@ -353,8 +357,16 @@ export default function HomePage() {
                 <p className="text-field-black/50 text-sm leading-relaxed">
                   {article.description}
                 </p>
-              </div>
+              </Link>
             ))}
+          </div>
+          <div className="text-center mt-8">
+            <Link
+              href="/resources"
+              className="text-field-forest font-medium hover:underline"
+            >
+              View all resources &rarr;
+            </Link>
           </div>
         </div>
       </section>

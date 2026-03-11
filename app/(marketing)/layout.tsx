@@ -48,6 +48,12 @@ export default function MarketingLayout({
             >
               FAQ
             </Link>
+            <Link
+              href="/resources"
+              className="text-field-ink/70 hover:text-field-ink transition-colors"
+            >
+              Resources
+            </Link>
           </nav>
 
           {/* CTAs */}
@@ -107,6 +113,11 @@ export default function MarketingLayout({
                 <li>
                   <Link href="/how-it-works" className="hover:text-field-ink">
                     How It Works
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/resources" className="hover:text-field-ink">
+                    Resources
                   </Link>
                 </li>
               </ul>
