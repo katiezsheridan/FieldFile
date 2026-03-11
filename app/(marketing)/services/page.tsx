@@ -408,7 +408,7 @@ export default function ServicesPage() {
             <p className="text-center text-sm text-field-black/50 mt-4">
               Don&apos;t see your county?{" "}
               <Link
-                href="/quiz"
+                href="/request-availability"
                 className="text-field-forest font-medium hover:underline"
               >
                 Request availability in your county
