@@ -1,7 +1,4 @@
 import { NextResponse } from "next/server";
-import { Resend } from "resend";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Readable labels for quiz answers
 const questionLabels: Record<number, string> = {
@@ -105,11 +102,18 @@ export async function POST(request: Request) {
       </div>
     `;
 
-    await resend.emails.send({
-      from: "FieldFile <katie@fieldfile.com>",
-      to: email,
-      subject: "Your FieldFile Eligibility Report",
-      html,
+    await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: "FieldFile <katie@fieldfile.com>",
+        to: email,
+        subject: "Your FieldFile Eligibility Report",
+        html,
+      }),
     });
 
     return NextResponse.json({ success: true });

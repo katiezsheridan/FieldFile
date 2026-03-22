@@ -1,7 +1,4 @@
 import { NextResponse } from "next/server";
-import { Resend } from "resend";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(request: Request) {
   try {
@@ -20,19 +17,26 @@ export async function POST(request: Request) {
       answersHtml = `<p><strong>Quiz Answers:</strong></p><ul>${answerEntries}</ul>`;
     }
 
-    await resend.emails.send({
-      from: "FieldFile <katie@fieldfile.com>",
-      to: process.env.LEAD_NOTIFICATION_EMAIL!,
-      subject,
-      html: `
-        <h2>${isQuiz ? "New Quiz Lead" : "New Signup Lead"}</h2>
-        <p><strong>Source:</strong> ${isQuiz ? "Eligibility Quiz" : "Get Started Form"}</p>
-        <p><strong>Name:</strong> ${name}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>${isQuiz ? "Phone:" : "Property Address:"}</strong> ${propertyAddress}</p>
-        <p><strong>Submitted:</strong> ${new Date().toLocaleString("en-US", { timeZone: "America/Chicago" })}</p>
-        ${answersHtml}
-      `,
+    await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: "FieldFile <katie@fieldfile.com>",
+        to: process.env.LEAD_NOTIFICATION_EMAIL,
+        subject,
+        html: `
+          <h2>${isQuiz ? "New Quiz Lead" : "New Signup Lead"}</h2>
+          <p><strong>Source:</strong> ${isQuiz ? "Eligibility Quiz" : "Get Started Form"}</p>
+          <p><strong>Name:</strong> ${name}</p>
+          <p><strong>Email:</strong> ${email}</p>
+          <p><strong>${isQuiz ? "Phone:" : "Property Address:"}</strong> ${propertyAddress}</p>
+          <p><strong>Submitted:</strong> ${new Date().toLocaleString("en-US", { timeZone: "America/Chicago" })}</p>
+          ${answersHtml}
+        `,
+      }),
     });
 
     return NextResponse.json({ success: true });
