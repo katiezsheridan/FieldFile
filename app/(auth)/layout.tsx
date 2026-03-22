@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 export default function AuthLayout({
   children,
@@ -10,13 +11,15 @@ export default function AuthLayout({
       {/* Simple header with logo */}
       <header className="py-6 px-8 border-b border-field-wheat/50">
         <div className="max-w-4xl mx-auto">
-          <Image
-            src="/images/logo/fieldfile-logo.png"
-            alt="FieldFile"
-            width={160}
-            height={40}
-            className="h-8 w-auto"
-          />
+          <Link href="/">
+            <Image
+              src="/images/logo/fieldfile-logo.png"
+              alt="FieldFile"
+              width={160}
+              height={40}
+              className="h-8 w-auto"
+            />
+          </Link>
         </div>
       </header>
 
