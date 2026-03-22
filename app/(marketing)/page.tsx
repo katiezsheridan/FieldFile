@@ -322,7 +322,7 @@ export default function HomePage() {
           <p className="text-field-black/60 text-center mb-10">
             Guides and articles to help you manage your property.
           </p>
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
               {
                 title: "5 Common Mistakes Landowners Make During Filing Season",
@@ -341,6 +341,12 @@ export default function HomePage() {
                 description:
                   "Everything you need to build a compliant wildlife management plan from scratch.",
                 slug: "wildlife-management-plan",
+              },
+              {
+                title: "Post-Approval Checklist for Wildlife Management",
+                description:
+                  "Got your wildlife exemption approved? Here are 5 things you need to do every year to keep it.",
+                slug: "post-approval-checklist",
               },
             ].map((article) => (
               <Link

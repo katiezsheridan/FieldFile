@@ -235,6 +235,56 @@ const articles: Article[] = [
       },
     ],
   },
+  {
+    slug: "post-approval-checklist",
+    title: "Post-Approval Checklist for Wildlife Management",
+    readingTime: "5 min read",
+    description:
+      "Got your wildlife exemption approved? Here are 5 things you need to do every year to keep it.",
+    content: [
+      {
+        paragraphs: [
+          "Getting your wildlife management tax exemption approved is a big milestone — but it's not the finish line. To keep your exemption year after year, you need to stay on top of documentation, meet activity requirements, and show that your efforts are making a difference on the land.",
+          "Here's a simple checklist to follow every year after your plan is approved.",
+        ],
+      },
+      {
+        heading: "#1 Keep Up with Documentation",
+        paragraphs: [
+          "To stay in compliance, you must complete at least three wildlife management activities per year and keep a log of what you do and what you notice along the way.",
+          "For example, if you're maintaining birdhouses before nesting season, log what you find and what you do with each one. Maybe the screws on the wren house were rusty and you replaced them. Maybe you cleared out a wasp nest to make it safe for birds again. Or you noticed the tree canopy over one house has really filled in, making it a shaded, sheltered spot.",
+          "You should also track expenses for each activity — this is required if you're ever inspected. Save receipts for tools, materials, and any labor costs.",
+          "FieldFile makes this easy. Log before-and-after photos, receipts, observations, and notes for every activity, every year, all from your property dashboard.",
+        ],
+      },
+      {
+        heading: "#2 Mark the Location of Each Activity",
+        paragraphs: [
+          "Knowing where each activity is located matters, both for your own maintenance and so an inspector can find it quickly. FieldFile uses the location data embedded in your photos to place each activity on your property map automatically — or you can just tap \"Mark Activity Location\" and we handle the rest.",
+        ],
+      },
+      {
+        heading: "#3 Do One More Activity Than Required",
+        paragraphs: [
+          "The minimum is three activities per year, but we recommend planning for four. Life happens — and if one activity doesn't get completed on time, doesn't qualify, or doesn't go according to plan, you don't want to be caught short.",
+        ],
+      },
+      {
+        heading: "#4 Understand the Yearly Requirements",
+        paragraphs: [
+          "Most activities have a minimum area or count you need to hit to qualify. Brush piles, for example, must cover at least 1% of your designated area annually.",
+          "Instead of tracking these requirements yourself, FieldFile tells you exactly what you need to do each year — just open your dashboard and your to-do list is ready.",
+        ],
+      },
+      {
+        heading: "#5 Log Your Results",
+        paragraphs: [
+          "Over time, your efforts should show up on the land. Are the oak canopies fuller after years of cedar clearing? Are you hearing more songbirds in the morning? Seeing more deer near your water and feed sites? Document it. These observations tell the story of your stewardship.",
+          "FieldFile makes it simple with a short observational checklist you can complete on your own or with your kids (there's a scavenger hunt mode!) at regular intervals to track changes over time.",
+        ],
+      },
+    ],
+  },
 ];
 
 function ResourcesContent() {
