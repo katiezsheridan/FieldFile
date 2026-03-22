@@ -106,7 +106,7 @@ export async function POST(request: Request) {
     `;
 
     await resend.emails.send({
-      from: "FieldFile <onboarding@resend.dev>",
+      from: "FieldFile <katie@fieldfile.com>",
       to: email,
       subject: "Your FieldFile Eligibility Report",
       html,

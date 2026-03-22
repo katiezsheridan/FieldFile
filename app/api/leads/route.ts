@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     }
 
     await resend.emails.send({
-      from: "FieldFile <onboarding@resend.dev>",
+      from: "FieldFile <katie@fieldfile.com>",
       to: process.env.LEAD_NOTIFICATION_EMAIL!,
       subject,
       html: `
