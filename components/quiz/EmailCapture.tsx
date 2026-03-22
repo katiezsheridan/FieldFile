@@ -63,7 +63,14 @@ export default function EmailCapture({ answers, surveyFile }: EmailCaptureProps)
 
       setSubmitted(true);
 
-      // Fire-and-forget email notification
+      // Send the report email to the user
+      fetch("/api/quiz-report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, name, answers }),
+      }).catch(() => {});
+
+      // Notify Katie about the new lead
       fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

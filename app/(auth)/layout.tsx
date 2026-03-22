@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 export default function AuthLayout({
   children,
 }: {
@@ -8,14 +10,13 @@ export default function AuthLayout({
       {/* Simple header with logo */}
       <header className="py-6 px-8 border-b border-field-wheat/50">
         <div className="max-w-4xl mx-auto">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-field-forest rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">FF</span>
-            </div>
-            <span className="text-xl font-semibold text-field-ink">
-              FieldFile
-            </span>
-          </div>
+          <Image
+            src="/images/logo/fieldfile-logo.png"
+            alt="FieldFile"
+            width={160}
+            height={40}
+            className="h-8 w-auto"
+          />
         </div>
       </header>
 
