@@ -12,25 +12,25 @@ export function FilingStatus({ status, year }: FilingStatusProps) {
   const getStatusBadgeStyles = () => {
     switch (status) {
       case "draft":
-        return "bg-status-draft text-white";
+        return "bg-field-hero/15 text-field-hero";
       case "ready_to_file":
-        return "bg-status-ready text-white";
+        return "bg-field-gold/15 text-field-gold";
       case "filed":
-        return "bg-status-filed text-white";
+        return "bg-field-gold/15 text-field-earth";
       case "accepted":
-        return "bg-status-accepted text-white";
+        return "bg-field-forest/15 text-field-forest";
       case "needs_followup":
-        return "bg-status-followup text-white";
+        return "bg-field-terra/15 text-field-terra";
       default:
-        return "bg-gray-500 text-white";
+        return "bg-field-mist text-field-earth";
     }
   };
 
   return (
-    <div className="bg-white rounded-lg border border-field-wheat p-6">
-      <h3 className="text-sm font-medium text-field-ink mb-3">Filing Status</h3>
+    <div className="bg-white rounded-xl border border-field-wheat p-6">
+      <h3 className="text-sm font-medium text-field-earth mb-3">Filing Status</h3>
       <div className="flex items-center justify-between">
-        <span className="text-lg font-medium text-field-ink">{year} Filing</span>
+        <span className="text-lg font-semibold text-field-ink">{year} Filing</span>
         <span
           className={cn(
             "px-3 py-1 rounded-full text-sm font-medium",

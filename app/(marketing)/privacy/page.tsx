@@ -135,10 +135,10 @@ export default function PrivacyPage() {
               If you have questions about this privacy policy or your data,
               please contact us at{" "}
               <a
-                href="mailto:support@fieldfile.com"
+                href="mailto:katie@fieldfile.com"
                 className="text-field-forest hover:underline"
               >
-                support@fieldfile.com
+                katie@fieldfile.com
               </a>
               .
             </p>

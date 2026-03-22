@@ -98,8 +98,12 @@ create table quiz_leads (
   answers jsonb not null default '{}',
   survey_url text,
   survey_path text,
+  user_id text,
   created_at timestamp with time zone default now()
 );
+
+-- Add user_id column if table already exists (migration)
+-- alter table quiz_leads add column if not exists user_id text;
 
 alter table quiz_leads enable row level security;
 
@@ -110,6 +114,10 @@ create policy "Anyone can insert quiz leads"
 -- Only authenticated users (admins) can read leads
 create policy "Admins can view quiz leads"
   on quiz_leads for select using (true);
+
+-- Allow updating quiz leads (to link user_id after signup)
+create policy "Anyone can update quiz leads"
+  on quiz_leads for update using (true);
 
 -- Create storage bucket for documents
 -- Note: Run this separately or create via Dashboard > Storage > New Bucket

@@ -9,26 +9,33 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // FieldFile brand colors (from Brand Book v1.0)
+        // FieldFile brand palette (v2 — from Color Palette Studio)
         field: {
-          black: "#1A1A1A",      // Forest Black - primary text, headers
-          green: "#2D5016",      // Field Green - primary brand, CTAs
-          brown: "#5C4033",      // Earth Brown - secondary accents, borders
-          blue: "#4A90E2",       // Sky Blue - links, info
-          grey: "#E8E8E8",       // Limestone Grey - backgrounds, dividers
-          cream: "#F5F1E8",      // Warm Cream - page backgrounds, cards
-          red: "#D64545",        // Alert Red - warnings, urgent
-          ink: "#1a1a1a",        // Forest Ink - primary text
-          forest: "#2d5016",     // Deep Forest - CTAs, interactive elements
-          wheat: "#d8d1c9",      // Wheat - borders, dividers, subtle fills
+          ink: "#322B2A",        // Dark Neutral - primary text, headings
+          cream: "#F7F5EE",      // Light Neutral - page backgrounds
+          wheat: "#D8D2C9",      // Light Neutral - borders, dividers
+          mist: "#EEEFEC",       // Light Neutral - card/section backgrounds
+          forest: "#495336",     // Accent - primary CTAs, nav active
+          hero: "#5E7080",       // Hero - dashboard headers, icons
+          terra: "#B64F2F",      // Accent - secondary CTAs, alerts, deadlines
+          earth: "#6B5E51",      // Accent - subtle text, secondary labels
+          gold: "#CAAC58",       // Accent - highlights, badges, progress
+          // Legacy aliases (keep marketing pages working)
+          black: "#322B2A",
+          green: "#495336",
+          brown: "#6B5E51",
+          blue: "#5E7080",
+          grey: "#EEEFEC",
+          red: "#B64F2F",
+          sage: "#495336",
         },
-        // Status colors
+        // Status colors (aligned with palette)
         status: {
-          draft: "#6B7280",
-          ready: "#3B82F6",
-          filed: "#F59E0B",
-          accepted: "#10B981",
-          followup: "#EF4444",
+          draft: "#5E7080",      // hero slate
+          ready: "#5E7080",      // hero slate
+          filed: "#CAAC58",      // gold
+          accepted: "#495336",   // forest
+          followup: "#B64F2F",   // terra
         },
       },
       fontFamily: {

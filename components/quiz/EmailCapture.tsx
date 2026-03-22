@@ -62,6 +62,19 @@ export default function EmailCapture({ answers, surveyFile }: EmailCaptureProps)
       }
 
       setSubmitted(true);
+
+      // Fire-and-forget email notification
+      fetch("/api/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: name || "Quiz lead",
+          email,
+          propertyAddress: `Quiz submission (phone: ${phone || "not provided"})`,
+          source: "quiz",
+          answers,
+        }),
+      }).catch(() => {});
     } catch (err) {
       console.error("Quiz submission error:", err);
       setError("Something went wrong. Please try again.");

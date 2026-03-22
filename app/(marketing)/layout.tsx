@@ -128,7 +128,7 @@ export default function MarketingLayout({
               <h4 className="font-medium text-field-ink mb-3">Support</h4>
               <ul className="space-y-2 text-sm text-field-ink/60">
                 <li>
-                  <a href="mailto:support@fieldfile.com" className="hover:text-field-ink">
+                  <a href="mailto:katie@fieldfile.com" className="hover:text-field-ink">
                     Contact Us
                   </a>
                 </li>

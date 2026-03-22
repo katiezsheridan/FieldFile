@@ -146,10 +146,10 @@ export default function TermsPage() {
             <p className="text-field-ink/70 leading-relaxed">
               If you have questions about these terms, please contact us at{" "}
               <a
-                href="mailto:support@fieldfile.com"
+                href="mailto:katie@fieldfile.com"
                 className="text-field-forest hover:underline"
               >
-                support@fieldfile.com
+                katie@fieldfile.com
               </a>
               .
             </p>

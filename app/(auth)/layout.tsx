@@ -27,8 +27,8 @@ export default function AuthLayout({
       </main>
 
       {/* Simple footer */}
-      <footer className="py-4 px-8 text-center text-sm text-field-ink/50">
-        Questions? Contact support@fieldfile.com
+      <footer className="py-4 px-8 text-center text-sm text-field-earth">
+        Questions? Contact katie@fieldfile.com
       </footer>
     </div>
   );

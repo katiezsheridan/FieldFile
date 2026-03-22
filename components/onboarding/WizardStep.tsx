@@ -11,6 +11,7 @@ interface WizardStepProps {
   isFirst?: boolean;
   isLast?: boolean;
   nextLabel?: string;
+  nextDisabled?: boolean;
 }
 
 export default function WizardStep({
@@ -22,6 +23,7 @@ export default function WizardStep({
   isFirst = false,
   isLast = false,
   nextLabel,
+  nextDisabled = false,
 }: WizardStepProps) {
   return (
     <div className="flex flex-col h-full">
@@ -56,7 +58,8 @@ export default function WizardStep({
         </div>
         <button
           onClick={onNext}
-          className="px-8 py-3 bg-field-forest text-white font-medium rounded-lg hover:bg-field-forest/90 transition-colors"
+          disabled={nextDisabled}
+          className="px-8 py-3 bg-field-forest text-white font-medium rounded-lg hover:bg-field-forest/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {nextLabel || (isLast ? "Complete" : "Continue")}
         </button>

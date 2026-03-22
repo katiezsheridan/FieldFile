@@ -95,7 +95,7 @@ const faqCategories = [
       {
         question: "Can I delete my account and data?",
         answer:
-          "Yes. You can request account deletion at any time by contacting support@fieldfile.com. We'll remove your personal data within 30 days, except where required for legal compliance.",
+          "Yes. You can request account deletion at any time by contacting katie@fieldfile.com. We'll remove your personal data within 30 days, except where required for legal compliance.",
       },
     ],
   },
@@ -182,7 +182,7 @@ export default function FAQPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
-              href="mailto:support@fieldfile.com"
+              href="mailto:katie@fieldfile.com"
               className="inline-block bg-field-forest text-white px-8 py-3 rounded-lg font-medium hover:bg-field-forest/90 transition-colors"
             >
               Contact support
