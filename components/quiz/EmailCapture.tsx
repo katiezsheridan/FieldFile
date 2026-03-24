@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import Link from "next/link";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { supabase, uploadDocument } from "@/lib/supabase";
 
 interface EmailCaptureProps {
@@ -16,6 +17,7 @@ export default function EmailCapture({ answers, surveyFile }: EmailCaptureProps)
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const { executeRecaptcha } = useGoogleReCaptcha();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -23,6 +25,24 @@ export default function EmailCapture({ answers, surveyFile }: EmailCaptureProps)
     setError("");
 
     try {
+      // Verify reCAPTCHA
+      if (!executeRecaptcha) {
+        setError("reCAPTCHA not ready. Please try again.");
+        setSubmitting(false);
+        return;
+      }
+      const captchaToken = await executeRecaptcha("quiz_submit");
+      const captchaRes = await fetch("/api/verify-captcha", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: captchaToken }),
+      });
+      const captchaData = await captchaRes.json();
+      if (!captchaData.success) {
+        setError("Verification failed. Please try again.");
+        setSubmitting(false);
+        return;
+      }
       // Upload survey file if present
       let surveyUrl: string | null = null;
       let surveyPath: string | null = null;
@@ -119,7 +139,7 @@ export default function EmailCapture({ answers, surveyFile }: EmailCaptureProps)
           href="/signup"
           className="inline-block bg-field-green text-white px-8 py-3 rounded-lg font-semibold hover:bg-field-green/90 transition-colors"
         >
-          Start your free trial
+          Get started free
         </Link>
       </div>
     );

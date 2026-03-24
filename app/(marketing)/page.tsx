@@ -84,7 +84,7 @@ export default function HomePage() {
               href="/signup"
               className="bg-field-green text-white px-8 py-3 rounded-lg font-semibold hover:bg-field-green/90 transition-colors"
             >
-              Start free trial
+              Get started free
             </Link>
             <Link
               href="/quiz"
@@ -93,14 +93,8 @@ export default function HomePage() {
               Check your eligibility
             </Link>
           </div>
-          <Link
-            href="/pricing"
-            className="inline-block text-sm text-field-forest font-medium mt-4 hover:underline"
-          >
-            Plans from $350/year
-          </Link>
-          <p className="text-sm text-field-black/50 mt-2">
-            14-day free trial. No credit card required.
+          <p className="text-sm text-field-black/50 mt-4">
+            Free document storage and report creation. No credit card required.
           </p>
         </div>
       </section>
@@ -217,32 +211,55 @@ export default function HomePage() {
       <section className="py-16 px-6 bg-field-cream">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-2xl font-bold text-field-black text-center mb-4">
-            Simple, transparent pricing
+            Plans & Pricing
           </h2>
           <p className="text-field-black/60 text-center mb-10">
             Choose the plan that fits your needs.
           </p>
-          <div className="grid md:grid-cols-2 gap-6">
-            {/* Filing Only */}
+          <div className="grid md:grid-cols-3 gap-6">
+            {/* Free */}
             <div className="bg-white rounded-xl border border-field-brown/20 p-6">
               <h3 className="font-bold text-field-black text-lg mb-1">
-                Filing Only
+                Free
               </h3>
               <p className="text-2xl font-bold text-field-black mb-3">
-                $350<span className="text-sm font-normal text-field-black/50">/year</span>
+                $0
               </p>
               <ul className="space-y-2 text-sm text-field-black/70 mb-6">
                 <li className="flex items-center gap-2">
                   <span className="text-field-green">&#10003;</span>
-                  Organize photos &amp; receipts into a report
+                  Store &amp; organize photos, receipts, and logs
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="text-field-green">&#10003;</span>
-                  Submit to your county appraisal district
+                  Generate a compliant wildlife report
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="text-field-green">&#10003;</span>
-                  Human review before submission
+                  Deadline reminders and tracking
+                </li>
+              </ul>
+            </div>
+            {/* Document Review */}
+            <div className="bg-white rounded-xl border border-field-brown/20 p-6">
+              <h3 className="font-bold text-field-black text-lg mb-1">
+                Document Review
+              </h3>
+              <p className="text-2xl font-bold text-field-black mb-3">
+                $99
+              </p>
+              <ul className="space-y-2 text-sm text-field-black/70 mb-6">
+                <li className="flex items-center gap-2">
+                  <span className="text-field-green">&#10003;</span>
+                  Expert review for completeness
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-field-green">&#10003;</span>
+                  Catches gaps before they reach the county
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-field-green">&#10003;</span>
+                  Findings delivered in 3 business days
                 </li>
               </ul>
             </div>
@@ -255,20 +272,20 @@ export default function HomePage() {
                 Full-Service Management
               </h3>
               <p className="text-2xl font-bold text-field-black mb-3">
-                $500<span className="text-sm font-normal text-field-black/50"> + $1,000/activity</span>
+                $750<span className="text-sm font-normal text-field-black/50">/activity</span>
               </p>
               <ul className="space-y-2 text-sm text-field-black/70 mb-6">
                 <li className="flex items-center gap-2">
                   <span className="text-field-green">&#10003;</span>
-                  Everything in Filing Only
+                  We execute &amp; document your activities
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="text-field-green">&#10003;</span>
-                  Support &amp; execution of wildlife activities
+                  Filing-ready documentation package
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="text-field-green">&#10003;</span>
-                  Dedicated specialist for your property
+                  Expert review included
                 </li>
               </ul>
             </div>
@@ -390,7 +407,7 @@ export default function HomePage() {
             href="/signup"
             className="inline-block bg-field-green text-white px-8 py-3 rounded-lg font-semibold hover:bg-field-green/90 transition-colors"
           >
-            Start free trial
+            Get started free
           </Link>
         </div>
       </section>

@@ -40,12 +40,12 @@ const faqCategories = [
       {
         question: "How do I get started with FieldFile?",
         answer:
-          "Sign up for a free 14-day trial, add your property details, and start logging activities. You can upload photos, track GPS locations, and add notes as you complete your wildlife management activities throughout the year.",
+          "Sign up for a free account, add your property details, and start logging activities. You can upload photos, track GPS locations, and add notes as you complete your wildlife management activities throughout the year.",
       },
       {
         question: "Do I need a wildlife management plan?",
         answer:
-          "Yes, a wildlife management plan is required for your exemption. If you don't have one, we can create one for you as an add-on service for $500.",
+          "Yes, a wildlife management plan is required for your exemption. If you don't have one, we can create one for you as an add-on service for $1,000.",
       },
       {
         question: "Will a real person review my filing?",
@@ -73,9 +73,9 @@ const faqCategories = [
           "Our wildlife specialists will visit your property to photograph and document your completed wildlife management activities. This provides professional documentation for your filing.",
       },
       {
-        question: "Is there a free trial?",
+        question: "Is FieldFile really free?",
         answer:
-          "Yes! We offer a 14-day free trial with no credit card required. You can explore the platform, add your property, and start tracking activities before committing to a plan.",
+          "Yes! Document storage and report creation are free forever. No credit card required. You can explore the platform, add your property, and start tracking activities at no cost. Paid services like document review and full-service management are available when you need them.",
       },
     ],
   },
@@ -191,7 +191,7 @@ export default function FAQPage() {
               href="/signup"
               className="inline-block bg-field-wheat/50 text-field-ink px-8 py-3 rounded-lg font-medium hover:bg-field-wheat transition-colors"
             >
-              Start free trial
+              Get started free
             </Link>
           </div>
         </div>

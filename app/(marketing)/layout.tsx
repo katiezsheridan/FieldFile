@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import ReCaptchaProvider from "@/components/ReCaptchaProvider";
 
 export default function MarketingLayout({
   children,
@@ -7,6 +8,7 @@ export default function MarketingLayout({
   children: React.ReactNode;
 }) {
   return (
+    <ReCaptchaProvider>
     <div className="min-h-screen bg-field-cream flex flex-col">
       {/* Header */}
       <header className="py-4 px-6 border-b border-field-wheat/50">
@@ -164,5 +166,6 @@ export default function MarketingLayout({
         </div>
       </footer>
     </div>
+    </ReCaptchaProvider>
   );
 }

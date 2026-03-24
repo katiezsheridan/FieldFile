@@ -142,7 +142,7 @@ export default function HowItWorksPage() {
             href="/signup"
             className="inline-block bg-field-forest text-white px-8 py-3 rounded-lg font-medium hover:bg-field-forest/90 transition-colors"
           >
-            Start free trial
+            Get started free
           </Link>
         </div>
       </div>

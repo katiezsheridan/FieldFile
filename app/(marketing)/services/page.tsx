@@ -456,7 +456,7 @@ export default function ServicesPage() {
               href="/signup"
               className="bg-field-green text-white px-8 py-3 rounded-lg font-semibold hover:bg-field-green/90 transition-colors"
             >
-              Start free trial
+              Get started free
             </Link>
             <Link
               href="/quiz"

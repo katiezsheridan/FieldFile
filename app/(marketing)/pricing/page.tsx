@@ -5,48 +5,82 @@ import Link from "next/link";
 
 const pricingTiers = [
   {
-    id: "filing-only",
-    name: "Filing Only",
-    description: "We organize and submit your report to the county",
-    price: 350,
-    priceLabel: "$350/year",
+    id: "free",
+    name: "Free",
+    description: "Get started at no cost — forever.",
+    priceLabel: "Free",
     features: [
-      { name: "Organize photos and receipts into a report", included: true },
-      { name: "Submit to your county appraisal district", included: true },
-      { name: "Reminders to submit documentation", included: true },
-      { name: "Human review before submission", included: true },
+      { name: "Store and organize photos, receipts, and activity logs", included: true },
+      { name: "Generate a compliant wildlife report", included: true },
+      { name: "Deadline reminders and tracking", included: true },
+      { name: "Secure document storage for plans, timber records, and more", included: true },
     ],
     cta: "Get started",
     highlighted: false,
   },
   {
-    id: "full-service",
-    name: "Full-Service Management & Filing",
-    description: "We handle filing plus support and execution of wildlife activities",
-    price: null,
-    priceLabel: "$500 to file + $1,000/activity + supplies",
+    id: "document-review",
+    name: "Document Review",
+    description: "Peace of mind before you submit.",
+    priceLabel: "$99",
     features: [
-      { name: "Everything in Filing Only", included: true },
-      { name: "Support and execution of wildlife activities", included: true },
-      { name: "Dedicated specialist for your property", included: true },
-      { name: "Human review before submission", included: true },
+      { name: "A qualified reviewer checks your report and documents for completeness", included: true },
+      { name: "Catches gaps before they reach the county", included: true },
+      { name: "Written findings summary delivered within 3 business days", included: true },
     ],
     cta: "Get started",
     highlighted: true,
-    badge: "Full Service",
+    badge: "Most Popular",
+  },
+  {
+    id: "full-service",
+    name: "Full-Service Management",
+    description: "We handle everything.",
+    priceLabel: "$750/activity + supplies",
+    features: [
+      { name: "We execute and document your wildlife or timber activities", included: true },
+      { name: "You receive a filing-ready documentation package", included: true },
+      { name: "Expert review included at no extra charge", included: true },
+    ],
+    cta: "Get started",
+    highlighted: false,
   },
 ];
 
 const addOns = [
   {
-    name: "Creation of Wildlife Plan",
-    price: "$500",
+    name: "Wildlife Plan Creation",
+    price: "$1,000",
     description: "We'll create a comprehensive wildlife management plan tailored to your property",
   },
   {
-    name: "Site Visit",
+    name: "Site Visit for Documentation",
     price: "$250/visit",
     description: "On-site documentation of your completed wildlife activities",
+  },
+];
+
+const bundles = [
+  {
+    name: "New Landowner Bundle",
+    price: "$1,100",
+    savings: "save $348",
+    description: "Best for first-time owners who need a plan and two years of compliance covered.",
+    includes: [
+      "Wildlife plan creation",
+      "Document review for year 1 and year 2",
+      "1 site visit",
+    ],
+  },
+  {
+    name: "Comprehensive Care Bundle",
+    price: "$3,000",
+    savings: "save $500",
+    description: "Best for owners with an existing plan who want full hands-on management.",
+    includes: [
+      "Full-service management for 4 activities",
+      "2 site visits for documentation",
+    ],
   },
 ];
 
@@ -56,8 +90,8 @@ const faqs = [
     answer: "In Texas, landowners can qualify for reduced property taxes by actively managing their land for wildlife. This requires documenting specific wildlife management activities and filing an annual report with your county appraisal district.",
   },
   {
-    question: "What's the difference between Filing Only and Full-Service?",
-    answer: "Filing Only covers organizing your documentation and submitting to the county. Full-Service includes everything in Filing Only plus hands-on support executing your wildlife activities throughout the year.",
+    question: "What's the difference between Document Review and Full-Service?",
+    answer: "Document Review checks your existing documentation for completeness before you submit. Full-Service means we actually execute and document the wildlife activities on your behalf, delivering a filing-ready package.",
   },
   {
     question: "What's included in a site visit?",
@@ -69,7 +103,7 @@ const faqs = [
   },
   {
     question: "Do I need a wildlife management plan?",
-    answer: "Yes, a wildlife management plan is required for your exemption. If you don't have one, we can create one for you as an add-on service for $500.",
+    answer: "Yes, a wildlife management plan is required for your exemption. If you don't have one, we can create one for you as an add-on service for $1,000.",
   },
   {
     question: "Will a real person review my filing?",
@@ -85,7 +119,7 @@ export default function PricingPage() {
       {/* Header */}
       <div className="text-center mb-12">
         <h1 className="text-3xl font-bold text-field-ink mb-3">
-          Simple, transparent pricing
+          Plans & Pricing
         </h1>
         <p className="text-lg text-field-ink/60 max-w-2xl mx-auto">
           Choose the plan that fits your needs.
@@ -93,7 +127,7 @@ export default function PricingPage() {
       </div>
 
       {/* Pricing cards */}
-      <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto mb-16">
+      <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-16">
         {pricingTiers.map((tier) => (
           <div
             key={tier.id}
@@ -165,9 +199,9 @@ export default function PricingPage() {
       </div>
 
       {/* Add-ons */}
-      <div className="max-w-4xl mx-auto mb-16">
+      <div className="max-w-5xl mx-auto mb-16">
         <h2 className="text-2xl font-bold text-field-ink text-center mb-8">
-          Add-ons
+          Add-Ons
         </h2>
         <div className="grid md:grid-cols-2 gap-6">
           {addOns.map((addon, index) => (
@@ -180,6 +214,46 @@ export default function PricingPage() {
                 <span className="text-lg font-bold text-field-forest">{addon.price}</span>
               </div>
               <p className="text-sm text-field-ink/60">{addon.description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Bundles */}
+      <div className="max-w-5xl mx-auto mb-16">
+        <h2 className="text-2xl font-bold text-field-ink text-center mb-8">
+          Bundles
+        </h2>
+        <div className="grid md:grid-cols-2 gap-6">
+          {bundles.map((bundle, index) => (
+            <div
+              key={index}
+              className="bg-white rounded-xl border-2 border-field-forest/20 p-6"
+            >
+              <div className="flex items-start justify-between mb-1">
+                <h3 className="font-bold text-lg text-field-ink">{bundle.name}</h3>
+                <div className="text-right flex-shrink-0 ml-4">
+                  <span className="text-lg font-bold text-field-forest">{bundle.price}</span>
+                  <span className="block text-xs text-field-forest/70">{bundle.savings}</span>
+                </div>
+              </div>
+              <p className="text-sm text-field-ink/60 mb-4">{bundle.description}</p>
+              <ul className="space-y-2">
+                {bundle.includes.map((item, i) => (
+                  <li key={i} className="flex items-start gap-3">
+                    <svg
+                      className="w-5 h-5 text-field-forest flex-shrink-0 mt-0.5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span className="text-sm text-field-ink">{item}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
           ))}
         </div>

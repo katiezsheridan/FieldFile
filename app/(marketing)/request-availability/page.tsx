@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
@@ -16,10 +17,38 @@ export default function RequestAvailabilityPage() {
   const [address, setAddress] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const { executeRecaptcha } = useGoogleReCaptcha();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSubmitting(true);
+    setError("");
+
+    // Verify reCAPTCHA
+    if (!executeRecaptcha) {
+      setError("reCAPTCHA not ready. Please try again.");
+      setSubmitting(false);
+      return;
+    }
+    try {
+      const captchaToken = await executeRecaptcha("request_availability");
+      const captchaRes = await fetch("/api/verify-captcha", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: captchaToken }),
+      });
+      const captchaData = await captchaRes.json();
+      if (!captchaData.success) {
+        setError("Verification failed. Please try again.");
+        setSubmitting(false);
+        return;
+      }
+    } catch {
+      setError("Verification failed. Please try again.");
+      setSubmitting(false);
+      return;
+    }
 
     try {
       await supabase.from("availability_requests").insert({
@@ -165,6 +194,9 @@ export default function RequestAvailabilityPage() {
               />
             </div>
 
+            {error && (
+              <p className="text-sm text-field-red">{error}</p>
+            )}
             <button
               type="submit"
               disabled={submitting}
