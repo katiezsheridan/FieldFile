@@ -197,33 +197,6 @@ const services: Service[] = [
   },
 ];
 
-const features = [
-  {
-    title: "Track Activities",
-    description: "Log with photos, dates, and GPS.",
-  },
-  {
-    title: "Store Documents",
-    description: "Receipts and photos in one place.",
-  },
-  {
-    title: "Get Reminders",
-    description: "Automatic deadline alerts.",
-  },
-  {
-    title: "Generate Reports",
-    description: "County-ready, auto-generated.",
-  },
-  {
-    title: "We File For You",
-    description: "We submit to your county.",
-  },
-  {
-    title: "Expert Support",
-    description:
-      "Help from certified wildlife biologists and Texas land specialists.",
-  },
-];
 
 export default function ServicesPage() {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
@@ -414,30 +387,6 @@ export default function ServicesPage() {
                 Request availability in your county
               </Link>
             </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Features */}
-      <section className="py-16 px-6 bg-field-cream">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-2xl font-bold text-field-black text-center mb-12">
-            Everything you need to stay compliant
-          </h2>
-          <div className="grid md:grid-cols-3 gap-6">
-            {features.map((feature, index) => (
-              <div
-                key={index}
-                className="bg-field-cream rounded-lg border border-field-brown/20 p-6 hover:border-field-green/40 transition-colors"
-              >
-                <h3 className="font-semibold text-field-black mb-2">
-                  {feature.title}
-                </h3>
-                <p className="text-field-black/60 text-sm">
-                  {feature.description}
-                </p>
-              </div>
-            ))}
           </div>
         </div>
       </section>
