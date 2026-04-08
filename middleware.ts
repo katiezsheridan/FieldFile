@@ -14,6 +14,7 @@ const isPublicRoute = createRouteMatcher([
   '/services',
   '/resources',
   '/request-availability',
+  '/about',
   '/api/(.*)',
 ])
 

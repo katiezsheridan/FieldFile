@@ -23,7 +23,7 @@ const services: Service[] = [
     title: "Wildlife Surveys",
     description:
       "Comprehensive on-site surveys to document species and habitat across your property.",
-    image: "/images/products/wildlife-surveys.png",
+    image: "/images/products/wildlife-surveys.jpg",
     detail:
       "Wildlife surveys are the foundation of your management plan. They document which species are present, their population levels, and how they use your property throughout the year.",
     responsibilities: [
@@ -42,24 +42,24 @@ const services: Service[] = [
     ],
   },
   {
-    title: "Habitat Assessment",
+    title: "Predator Control",
     description:
-      "Professional evaluation of vegetation, cover, and habitat quality for your management plan.",
-    image: "/images/products/habitat-assessment.png",
+      "Fire ant treatment and predator management to protect wildlife populations on your property.",
+    image: "/images/products/predator-control.jpg",
     detail:
-      "A habitat assessment evaluates your property's vegetation, water sources, cover, and food sources to determine its capacity to support target wildlife species.",
+      "Predator control is a qualifying wildlife management activity. Fire ant treatment and other predator management help protect ground-nesting birds and other vulnerable species on your property.",
     responsibilities: [
       {
-        owner: "Provide property access and share land history",
-        fieldfile: "Professional vegetation and cover analysis",
+        owner: "Identify fire ant mounds and problem areas",
+        fieldfile: "GPS-tagged documentation of treatment sites",
       },
       {
-        owner: "Identify areas of concern or interest",
-        fieldfile: "Habitat quality scoring and mapping",
+        owner: "Apply treatments as recommended",
+        fieldfile: "Treatment schedule tracking and reminders",
       },
       {
-        owner: "Share goals for the property",
-        fieldfile: "Documented assessment with improvement recommendations",
+        owner: "Monitor results and report changes",
+        fieldfile: "Compliance documentation for county filing",
       },
     ],
   },
@@ -67,7 +67,7 @@ const services: Service[] = [
     title: "Wildlife Census",
     description:
       "Annual species counts and population monitoring to satisfy county requirements.",
-    image: "/images/products/wildlife-census.png",
+    image: "/images/products/wildlife-census.jpg",
     detail:
       "Annual census counts are required to demonstrate active wildlife management. We help you set up monitoring systems and compile the data into compliant reports.",
     responsibilities: [
@@ -86,54 +86,10 @@ const services: Service[] = [
     ],
   },
   {
-    title: "Field Documentation",
-    description:
-      "Detailed field notes, GPS-tagged photos, and activity logs ready for filing.",
-    image: "/images/products/field-documentation.png",
-    detail:
-      "Every wildlife management activity needs proper documentation. We make it easy to capture, organize, and store the evidence your county requires.",
-    responsibilities: [
-      {
-        owner: "Take photos during activities",
-        fieldfile: "Automatic GPS tagging and organization",
-      },
-      {
-        owner: "Write brief notes about what you did",
-        fieldfile: "Format notes into structured activity logs",
-      },
-      {
-        owner: "Save receipts for supplies and equipment",
-        fieldfile: "Compile all evidence into filing-ready packages",
-      },
-    ],
-  },
-  {
-    title: "Property Evaluation",
-    description:
-      "Initial assessment of your land to build a custom wildlife management plan.",
-    image: "/images/products/property-evaluation.png",
-    detail:
-      "Before starting a management plan, we evaluate your property's current condition, history, and potential to develop a customized strategy that meets county requirements.",
-    responsibilities: [
-      {
-        owner: "Provide property access and historical info",
-        fieldfile: "Full property condition assessment",
-      },
-      {
-        owner: "Share current land use and goals",
-        fieldfile: "Custom wildlife management plan development",
-      },
-      {
-        owner: "Review and approve the proposed plan",
-        fieldfile: "File management plan with county appraisal district",
-      },
-    ],
-  },
-  {
     title: "Water Source Management",
     description:
       "Setup and documentation of water features to support wildlife on your property.",
-    image: "/images/products/water-management.png",
+    image: "/images/products/water-management.jpg",
     detail:
       "Providing supplemental water is one of the qualifying wildlife management activities. We help you set up, maintain, and document water sources that satisfy county requirements.",
     responsibilities: [
@@ -155,7 +111,7 @@ const services: Service[] = [
     title: "Supplemental Feeding",
     description:
       "Feeding station installation, maintenance, and compliance documentation.",
-    image: "/images/products/supplemental-feeding.png",
+    image: "/images/products/supplemental-feeding.jpg",
     detail:
       "Supplemental feeding supports wildlife populations and counts as a qualifying management activity. Proper documentation of feeding stations is critical for compliance.",
     responsibilities: [
@@ -174,24 +130,46 @@ const services: Service[] = [
     ],
   },
   {
-    title: "Wildlife Monitoring",
+    title: "Bird Houses",
     description:
-      "Trail cameras, traps, and monitoring equipment to track species activity.",
-    image: "/images/products/wildlife-monitoring.png",
+      "Installation, monitoring, and documentation of nesting structures for native bird species.",
+    image: "/images/products/wildlife-monitoring.jpg",
     detail:
-      "Ongoing monitoring provides the data needed to demonstrate active management. We help you set up and manage monitoring equipment and turn the data into actionable reports.",
+      "Providing shelter structures like bird houses is a qualifying wildlife management activity. We help you install, monitor, and document nesting boxes to support native bird populations.",
     responsibilities: [
       {
-        owner: "Check cameras and collect SD cards",
-        fieldfile: "Equipment placement planning and mapping",
+        owner: "Install and maintain bird houses",
+        fieldfile: "GPS mapping of all shelter structure locations",
       },
       {
-        owner: "Note any wildlife activity or tracks",
-        fieldfile: "Photo sorting, species identification, and analysis",
+        owner: "Monitor for nesting activity and species use",
+        fieldfile: "Photo documentation and species tracking",
       },
       {
-        owner: "Maintain equipment and batteries",
-        fieldfile: "Monitoring reports ready for county filing",
+        owner: "Clean and repair structures seasonally",
+        fieldfile: "Compliance documentation for county filing",
+      },
+    ],
+  },
+  {
+    title: "Brush Piles",
+    description:
+      "Creating and documenting brush pile cover to provide wildlife habitat on your property.",
+    image: "/images/products/brush-piles.jpg",
+    detail:
+      "Brush piles provide essential cover for small mammals, reptiles, and ground-nesting birds. Building and maintaining brush piles is a qualifying wildlife management activity.",
+    responsibilities: [
+      {
+        owner: "Build and maintain brush piles in designated areas",
+        fieldfile: "GPS-tagged location mapping and documentation",
+      },
+      {
+        owner: "Monitor wildlife use of brush pile areas",
+        fieldfile: "Photo logs and activity tracking",
+      },
+      {
+        owner: "Add material as piles settle over time",
+        fieldfile: "Compliance documentation for county filing",
       },
     ],
   },

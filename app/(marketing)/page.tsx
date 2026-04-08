@@ -62,8 +62,19 @@ export default function HomePage() {
   return (
     <div className="bg-field-cream">
       {/* Hero */}
-      <section className="py-20 px-6">
-        <div className="max-w-4xl mx-auto text-center">
+      <section className="relative py-24 md:py-32 px-6 overflow-hidden">
+        {/* Background image */}
+        <div className="absolute inset-0">
+          <Image
+            src="/images/hero-landscape.jpg"
+            alt="Texas hill country landscape"
+            fill
+            className="object-cover"
+            priority
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-field-cream/80 via-field-cream/70 to-field-cream/90" />
+        </div>
+        <div className="relative max-w-4xl mx-auto text-center">
           <Image
             src="/images/logo/fieldfile-logo.png"
             alt="FieldFile"
@@ -129,20 +140,32 @@ export default function HomePage() {
 
       {/* Services Teaser */}
       <section className="py-16 px-6 bg-field-cream">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-2xl font-bold text-field-black mb-4">
-            Our Services
-          </h2>
-          <p className="text-field-black/60 mb-6">
-            From initial property evaluation to annual filing — we handle every
-            step of your wildlife tax exemption.
-          </p>
-          <Link
-            href="/services"
-            className="text-field-forest font-medium hover:underline"
-          >
-            View our services &rarr;
-          </Link>
+        <div className="max-w-5xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-10 items-center">
+            <div className="relative aspect-[4/3] rounded-xl overflow-hidden">
+              <Image
+                src="/images/filling-feeder-cowboy.jpg"
+                alt="Filling a wildlife feeder on a Texas property"
+                fill
+                className="object-cover"
+              />
+            </div>
+            <div className="text-center md:text-left">
+              <h2 className="text-2xl font-bold text-field-black mb-4">
+                Our Services
+              </h2>
+              <p className="text-field-black/60 mb-6">
+                From initial property evaluation to annual filing — we handle every
+                step of your wildlife tax exemption.
+              </p>
+              <Link
+                href="/services"
+                className="text-field-forest font-medium hover:underline"
+              >
+                View our services &rarr;
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
 
