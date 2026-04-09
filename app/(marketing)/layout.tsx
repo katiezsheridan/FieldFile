@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import ReCaptchaProvider from "@/components/ReCaptchaProvider";
+import MarketingHeader from "@/components/layout/MarketingHeader";
 
 export default function MarketingLayout({
   children,
@@ -10,77 +11,7 @@ export default function MarketingLayout({
   return (
     <ReCaptchaProvider>
     <div className="min-h-screen bg-field-cream flex flex-col">
-      {/* Header */}
-      <header className="py-4 px-6 border-b border-field-wheat/50">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          {/* Logo */}
-          <Link href="/" className="flex items-center">
-            <Image
-              src="/images/logo/fieldfile-logo.png"
-              alt="FieldFile"
-              width={160}
-              height={40}
-              priority
-            />
-          </Link>
-
-          {/* Navigation */}
-          <nav className="hidden md:flex items-center gap-8">
-            <Link
-              href="/services"
-              className="text-field-ink/70 hover:text-field-ink transition-colors"
-            >
-              Services
-            </Link>
-            <Link
-              href="/pricing"
-              className="text-field-ink/70 hover:text-field-ink transition-colors"
-            >
-              Pricing
-            </Link>
-            <Link
-              href="/how-it-works"
-              className="text-field-ink/70 hover:text-field-ink transition-colors"
-            >
-              How It Works
-            </Link>
-            <Link
-              href="/faq"
-              className="text-field-ink/70 hover:text-field-ink transition-colors"
-            >
-              FAQ
-            </Link>
-            <Link
-              href="/resources"
-              className="text-field-ink/70 hover:text-field-ink transition-colors"
-            >
-              Resources
-            </Link>
-            <Link
-              href="/about"
-              className="text-field-ink/70 hover:text-field-ink transition-colors"
-            >
-              About
-            </Link>
-          </nav>
-
-          {/* CTAs */}
-          <div className="flex items-center gap-3">
-            <Link
-              href="/sign-in"
-              className="text-field-ink/70 hover:text-field-ink transition-colors"
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/signup"
-              className="bg-field-forest text-white px-4 py-2 rounded-lg font-medium hover:bg-field-forest/90 transition-colors"
-            >
-              Get Started
-            </Link>
-          </div>
-        </div>
-      </header>
+      <MarketingHeader />
 
       {/* Main content */}
       <main className="flex-1">{children}</main>

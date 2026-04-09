@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 interface ArticleSection {
@@ -15,6 +16,7 @@ interface Article {
   title: string;
   readingTime: string;
   description: string;
+  image: string;
   content: ArticleSection[];
 }
 
@@ -25,6 +27,7 @@ const articles: Article[] = [
     readingTime: "8 min read",
     description:
       "Avoid these pitfalls to ensure your annual report is accepted the first time.",
+    image: "/images/sunset-property.jpg",
     content: [
       {
         paragraphs: [
@@ -87,6 +90,7 @@ const articles: Article[] = [
     readingTime: "10 min read",
     description:
       "Why filing requirements differ across all 254 Texas counties and what you need to know.",
+    image: "/images/texas-landowners.jpg",
     content: [
       {
         paragraphs: [
@@ -156,6 +160,7 @@ const articles: Article[] = [
     readingTime: "10 min read",
     description:
       "Everything you need to build a compliant wildlife management plan from scratch.",
+    image: "/images/activities/filling-feeder.jpeg",
     content: [
       {
         paragraphs: [
@@ -241,6 +246,7 @@ const articles: Article[] = [
     readingTime: "5 min read",
     description:
       "Got your wildlife exemption approved? Here are 5 things you need to do every year to keep it.",
+    image: "/images/activities/birdhouse.jpeg",
     content: [
       {
         paragraphs: [
@@ -287,100 +293,127 @@ const articles: Article[] = [
   },
 ];
 
+function ArticleCard({
+  article,
+  onClick,
+}: {
+  article: Article;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className="group text-left bg-white rounded-2xl border border-field-brown/10 overflow-hidden hover:shadow-lg hover:border-field-green/30 transition-all duration-300"
+    >
+      <div className="relative h-48 overflow-hidden">
+        <Image
+          src={article.image}
+          alt={article.title}
+          fill
+          className="object-cover group-hover:scale-105 transition-transform duration-500"
+        />
+      </div>
+      <div className="p-6">
+        <span className="text-xs font-medium text-field-green uppercase tracking-wider">
+          {article.readingTime}
+        </span>
+        <h3 className="text-lg font-semibold text-field-ink mt-2 mb-2 group-hover:text-field-forest transition-colors">
+          {article.title}
+        </h3>
+        <p className="text-sm text-field-ink/60 leading-relaxed">
+          {article.description}
+        </p>
+        <span className="inline-flex items-center gap-1 text-sm font-medium text-field-forest mt-4 group-hover:gap-2 transition-all">
+          Read article
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M9 5l7 7-7 7"
+            />
+          </svg>
+        </span>
+      </div>
+    </button>
+  );
+}
+
 function ResourcesContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const paramSlug = searchParams.get("article");
-  const [selectedSlug, setSelectedSlug] = useState(
-    paramSlug && articles.some((a) => a.slug === paramSlug)
-      ? paramSlug
-      : articles[0].slug
+  const [selectedSlug, setSelectedSlug] = useState<string | null>(
+    paramSlug && articles.some((a) => a.slug === paramSlug) ? paramSlug : null
   );
 
   useEffect(() => {
     const param = searchParams.get("article");
     if (param && articles.some((a) => a.slug === param)) {
       setSelectedSlug(param);
+    } else {
+      setSelectedSlug(null);
     }
   }, [searchParams]);
 
-  const selectedArticle =
-    articles.find((a) => a.slug === selectedSlug) || articles[0];
+  const selectedArticle = articles.find((a) => a.slug === selectedSlug);
 
-  return (
-    <div className="bg-field-cream">
-      {/* Hero */}
-      <section className="py-16 px-6">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-3xl md:text-4xl font-bold text-field-black mb-4 tracking-tight">
-            Wildlife Management Resources
-          </h1>
-          <p className="text-lg text-field-black/70 max-w-2xl mx-auto">
-            Guides and articles to help Texas landowners navigate wildlife tax
-            exemptions, filing requirements, and property management.
-          </p>
+  if (selectedArticle) {
+    return (
+      <div className="bg-field-cream">
+        {/* Article hero image */}
+        <div className="relative h-64 sm:h-80 md:h-96 w-full">
+          <Image
+            src={selectedArticle.image}
+            alt={selectedArticle.title}
+            fill
+            className="object-cover"
+            priority
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-field-cream via-field-cream/20 to-transparent" />
         </div>
-      </section>
 
-      {/* Content */}
-      <section className="pb-16 px-6">
-        <div className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-8">
-          {/* Mobile dropdown */}
-          <div className="lg:hidden">
-            <select
-              value={selectedSlug}
-              onChange={(e) => setSelectedSlug(e.target.value)}
-              className="w-full p-3 bg-white rounded-xl border border-field-brown/10 text-field-ink text-sm focus:outline-none focus:border-field-green"
+        <div className="max-w-3xl mx-auto px-6 -mt-16 relative z-10">
+          {/* Back button */}
+          <button
+            onClick={() => router.push("/resources")}
+            className="inline-flex items-center gap-2 text-sm font-medium text-field-forest hover:text-field-ink mb-6 transition-colors"
+          >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
             >
-              {articles.map((a) => (
-                <option key={a.slug} value={a.slug}>
-                  {a.title}
-                </option>
-              ))}
-            </select>
-          </div>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+            All resources
+          </button>
 
-          {/* Desktop sidebar */}
-          <aside className="hidden lg:block w-72 flex-shrink-0">
-            <div className="sticky top-8">
-              <nav className="space-y-2">
-                {articles.map((a) => (
-                  <button
-                    key={a.slug}
-                    onClick={() => setSelectedSlug(a.slug)}
-                    className={cn(
-                      "w-full text-left p-4 rounded-xl border transition-all",
-                      selectedSlug === a.slug
-                        ? "bg-white border-field-green shadow-sm"
-                        : "bg-white/50 border-field-brown/10 hover:bg-white hover:border-field-green/40"
-                    )}
-                  >
-                    <h3 className="font-medium text-field-ink text-sm">
-                      {a.title}
-                    </h3>
-                    <p className="text-field-ink/50 text-xs mt-1">
-                      {a.readingTime}
-                    </p>
-                  </button>
-                ))}
-              </nav>
-            </div>
-          </aside>
-
-          {/* Article */}
-          <article className="flex-1 bg-white rounded-xl border border-field-brown/10 p-6 sm:p-8 lg:p-10">
-            <h2 className="text-2xl font-bold text-field-ink mb-2">
-              {selectedArticle.title}
-            </h2>
-            <p className="text-field-ink/50 text-sm mb-8">
+          <article className="bg-white rounded-2xl border border-field-brown/10 p-6 sm:p-8 lg:p-10 mb-16">
+            <span className="text-xs font-medium text-field-green uppercase tracking-wider">
               {selectedArticle.readingTime}
-            </p>
+            </span>
+            <h1 className="text-2xl sm:text-3xl font-bold text-field-ink mt-2 mb-8">
+              {selectedArticle.title}
+            </h1>
 
             {selectedArticle.content.map((section, i) => (
               <div key={i} className="mb-8">
                 {section.heading && (
-                  <h3 className="text-lg font-semibold text-field-ink mb-3">
+                  <h2 className="text-xl font-semibold text-field-ink mb-3">
                     {section.heading}
-                  </h3>
+                  </h2>
                 )}
                 {section.paragraphs.map((p, j) => (
                   <p
@@ -410,6 +443,36 @@ function ResourcesContent() {
               </Link>
             </div>
           </article>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-field-cream">
+      {/* Hero */}
+      <section className="py-16 sm:py-20 px-6">
+        <div className="max-w-3xl mx-auto text-center">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-field-black mb-4 tracking-tight">
+            Wildlife Management Resources
+          </h1>
+          <p className="text-lg text-field-black/60 max-w-2xl mx-auto">
+            Guides and articles to help Texas landowners navigate wildlife tax
+            exemptions, filing requirements, and property management.
+          </p>
+        </div>
+      </section>
+
+      {/* Article cards grid */}
+      <section className="pb-20 px-6">
+        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+          {articles.map((article) => (
+            <ArticleCard
+              key={article.slug}
+              article={article}
+              onClick={() => router.push(`/resources?article=${article.slug}`)}
+            />
+          ))}
         </div>
       </section>
     </div>
