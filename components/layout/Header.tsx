@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useUser, UserButton } from "@clerk/nextjs";
 import PropertySwitcher from "./PropertySwitcher";
+import Image from "next/image";
 import { useProperties } from "@/lib/hooks";
 import { Property } from "@/lib/types";
 
@@ -20,9 +21,12 @@ export default function Header() {
   return (
     <header className="h-16 bg-white border-b border-field-wheat/50 flex items-center justify-between px-6">
       <div className="flex items-center gap-2">
-        <div className="w-8 h-8 bg-field-forest rounded-lg flex items-center justify-center">
-          <span className="text-white font-bold text-sm">FF</span>
-        </div>
+        <Image
+          src="/images/logo/fieldfile-icon-round.png"
+          alt="FieldFile"
+          width={32}
+          height={32}
+        />
         <span className="text-xl font-semibold text-field-ink">
           FieldFile
         </span>

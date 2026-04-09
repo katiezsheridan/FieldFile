@@ -78,104 +78,19 @@ export function useProperties(userId: string | undefined) {
     setLoading(true);
     setError(null);
 
-    // Fetch properties
-    const { data: propertiesData, error: propertiesError } = await supabase
-      .from("properties")
-      .select("*")
-      .eq("user_id", userId);
-
-    if (propertiesError) {
-      setError(propertiesError.message);
+    try {
+      const res = await fetch("/api/properties");
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to fetch properties");
+      }
+      const data: PropertyWithDetails[] = await res.json();
+      setProperties(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to fetch properties");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    // For each property, fetch activities and filing
-    const propertiesWithDetails: PropertyWithDetails[] = await Promise.all(
-      (propertiesData || []).map(async (prop) => {
-        // Fetch activities
-        const { data: activitiesData } = await supabase
-          .from("activities")
-          .select("*")
-          .eq("property_id", prop.id);
-
-        // Fetch documents for each activity
-        const activitiesWithDocs: Activity[] = await Promise.all(
-          (activitiesData || []).map(async (act) => {
-            const { data: docsData } = await supabase
-              .from("documents")
-              .select("*")
-              .eq("activity_id", act.id);
-
-            return {
-              id: act.id,
-              propertyId: act.property_id,
-              type: act.type,
-              name: act.name,
-              description: act.description || "",
-              status: act.status,
-              requiredEvidence: act.required_evidence || [],
-              documents: (docsData || []).map((doc) => ({
-                id: doc.id,
-                activityId: doc.activity_id,
-                type: doc.type,
-                name: doc.name,
-                url: doc.url,
-                uploadedAt: doc.uploaded_at,
-                metadata: doc.gps_lat
-                  ? { gpsCoordinates: { lat: doc.gps_lat, lng: doc.gps_lng } }
-                  : undefined,
-              })),
-              notes: act.notes || "",
-              dueDate: act.due_date || "",
-              completedDate: act.completed_date,
-              locations: act.locations || [],
-            };
-          })
-        );
-
-        // Fetch filing
-        const { data: filingData } = await supabase
-          .from("filings")
-          .select("*")
-          .eq("property_id", prop.id)
-          .order("year", { ascending: false })
-          .limit(1)
-          .single();
-
-        return {
-          id: prop.id,
-          name: prop.name,
-          slug: prop.slug,
-          address: prop.address,
-          county: prop.county,
-          state: prop.state,
-          acreage: prop.acreage,
-          exemptionType: prop.exemption_type,
-          coordinates: { lat: prop.lat, lng: prop.lng },
-          activities: activitiesWithDocs,
-          filing: filingData
-            ? {
-                id: filingData.id,
-                propertyId: filingData.property_id,
-                year: filingData.year,
-                status: filingData.status,
-                filedDate: filingData.filed_date,
-                method: filingData.method,
-                confirmationNumber: filingData.confirmation_number,
-              }
-            : {
-                id: "",
-                propertyId: prop.id,
-                year: new Date().getFullYear(),
-                status: "draft" as const,
-              },
-        };
-      })
-    );
-
-    setProperties(propertiesWithDetails);
-    setLoading(false);
   }, [userId]);
 
   useEffect(() => {
@@ -200,100 +115,19 @@ export function useProperty(slugOrId: string | undefined) {
     setLoading(true);
     setError(null);
 
-    // Check if it's a UUID or slug
-    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slugOrId);
-
-    const { data: prop, error: propError } = await supabase
-      .from("properties")
-      .select("*")
-      .eq(isUUID ? "id" : "slug", slugOrId)
-      .single();
-
-    if (propError) {
-      setError(propError.message);
+    try {
+      const res = await fetch(`/api/properties/${slugOrId}`);
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to fetch property");
+      }
+      const data: PropertyWithDetails = await res.json();
+      setProperty(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to fetch property");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    // Fetch activities using the actual property ID from DB
-    const { data: activitiesData } = await supabase
-      .from("activities")
-      .select("*")
-      .eq("property_id", prop.id);
-
-    // Fetch documents for each activity
-    const activitiesWithDocs: Activity[] = await Promise.all(
-      (activitiesData || []).map(async (act) => {
-        const { data: docsData } = await supabase
-          .from("documents")
-          .select("*")
-          .eq("activity_id", act.id);
-
-        return {
-          id: act.id,
-          propertyId: act.property_id,
-          type: act.type,
-          name: act.name,
-          description: act.description || "",
-          status: act.status,
-          requiredEvidence: act.required_evidence || [],
-          documents: (docsData || []).map((doc) => ({
-            id: doc.id,
-            activityId: doc.activity_id,
-            type: doc.type,
-            name: doc.name,
-            url: doc.url,
-            uploadedAt: doc.uploaded_at,
-            metadata: doc.gps_lat
-              ? { gpsCoordinates: { lat: doc.gps_lat, lng: doc.gps_lng } }
-              : undefined,
-          })),
-          notes: act.notes || "",
-          dueDate: act.due_date || "",
-          completedDate: act.completed_date,
-          locations: act.locations || [],
-        };
-      })
-    );
-
-    // Fetch filing
-    const { data: filingData } = await supabase
-      .from("filings")
-      .select("*")
-      .eq("property_id", prop.id)
-      .order("year", { ascending: false })
-      .limit(1)
-      .single();
-
-    setProperty({
-      id: prop.id,
-      name: prop.name,
-      slug: prop.slug,
-      address: prop.address,
-      county: prop.county,
-      state: prop.state,
-      acreage: prop.acreage,
-      exemptionType: prop.exemption_type,
-      coordinates: { lat: prop.lat, lng: prop.lng },
-      activities: activitiesWithDocs,
-      filing: filingData
-        ? {
-            id: filingData.id,
-            propertyId: filingData.property_id,
-            year: filingData.year,
-            status: filingData.status,
-            filedDate: filingData.filed_date,
-            method: filingData.method,
-            confirmationNumber: filingData.confirmation_number,
-          }
-        : {
-            id: "",
-            propertyId: prop.id,
-            year: new Date().getFullYear(),
-            status: "draft" as const,
-          },
-    });
-    setLoading(false);
   }, [slugOrId]);
 
   useEffect(() => {

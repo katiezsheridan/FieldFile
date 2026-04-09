@@ -50,7 +50,7 @@ export default function DashboardPage() {
             activities and building your annual report.
           </p>
           <Link
-            href="/signup"
+            href="/setup"
             className="inline-block px-8 py-3 bg-field-forest text-white font-medium rounded-lg hover:bg-field-forest/90 transition-colors"
           >
             Set up your property

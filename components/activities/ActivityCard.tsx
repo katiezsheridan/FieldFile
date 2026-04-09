@@ -42,7 +42,7 @@ export default function ActivityCard({ activity }: ActivityCardProps) {
             : `${documentCount} documents uploaded`}
         </span>
         <span className="text-field-ink/60">
-          Due {formatDate(activity.dueDate)}
+          {activity.dueDate ? `Due ${formatDate(activity.dueDate)}` : ""}
         </span>
       </div>
 

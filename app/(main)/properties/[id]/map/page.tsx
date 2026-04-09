@@ -1,87 +1,360 @@
-import Link from "next/link";
-import { notFound } from "next/navigation";
-import { getProperty } from "@/lib/demo-data";
+"use client";
+
+import { useState } from "react";
+import { useParams } from "next/navigation";
+import { useProperty } from "@/lib/hooks";
+import { supabase } from "@/lib/supabase";
 import MapWrapper from "@/components/map/MapWrapper";
 
-interface MapPageProps {
-  params: Promise<{ id: string }>;
-}
+export default function PropertyMapPage() {
+  const params = useParams();
+  const id = params.id as string;
+  const { property, loading, refetch } = useProperty(id);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [selectedActivity, setSelectedActivity] = useState("");
+  const [lat, setLat] = useState("");
+  const [lng, setLng] = useState("");
+  const [label, setLabel] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [showCorrectionForm, setShowCorrectionForm] = useState(false);
+  const [correctionLat, setCorrectionLat] = useState("");
+  const [correctionLng, setCorrectionLng] = useState("");
+  const [correctionAddress, setCorrectionAddress] = useState("");
+  const [correcting, setCorrecting] = useState(false);
 
-export default async function MapPage({ params }: MapPageProps) {
-  const { id } = await params;
-  const property = getProperty(id);
-
-  if (!property) {
-    notFound();
+  if (loading) {
+    return (
+      <div className="h-[calc(100vh-4rem)] bg-field-cream flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-field-forest mx-auto mb-2" />
+          <p className="text-field-ink/50">Loading property map...</p>
+        </div>
+      </div>
+    );
   }
 
-  // Collect all activity locations from the property
-  const activityLocations = property.activities
-    .filter((activity) => activity.locations && activity.locations.length > 0)
-    .flatMap((activity) => activity.locations || []);
+  if (!property) {
+    return (
+      <div className="h-[calc(100vh-4rem)] bg-field-cream flex items-center justify-center">
+        <p className="text-field-ink/50">Property not found.</p>
+      </div>
+    );
+  }
+
+  // Collect all activity locations for the map
+  const activityPins = property.activities.flatMap((activity) =>
+    (activity.locations || []).map((loc) => ({
+      ...loc,
+      label: loc.label || activity.name,
+      activityType: activity.type,
+    }))
+  );
+
+  // Default map center: first pin, or central Texas
+  const mapCenter =
+    property.coordinates.lat && property.coordinates.lng
+      ? property.coordinates
+      : activityPins.length > 0
+      ? { lat: activityPins[0].lat, lng: activityPins[0].lng }
+      : { lat: 30.25, lng: -97.75 };
+
+  const handleAddLocation = async () => {
+    if (!selectedActivity || !lat || !lng) return;
+
+    const parsedLat = parseFloat(lat);
+    const parsedLng = parseFloat(lng);
+    if (isNaN(parsedLat) || isNaN(parsedLng)) return;
+
+    setSaving(true);
+
+    const activity = property.activities.find((a) => a.id === selectedActivity);
+    if (!activity) {
+      setSaving(false);
+      return;
+    }
+
+    const newLocation = {
+      lat: parsedLat,
+      lng: parsedLng,
+      label: label || activity.name,
+    };
+
+    const updatedLocations = [...(activity.locations || []), newLocation];
+
+    const { error } = await supabase
+      .from("activities")
+      .update({
+        locations: updatedLocations,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", selectedActivity);
+
+    setSaving(false);
+
+    if (!error) {
+      setLat("");
+      setLng("");
+      setLabel("");
+      setSelectedActivity("");
+      setShowAddForm(false);
+      refetch();
+    }
+  };
+
+  const handleCorrectLocation = async () => {
+    setCorrecting(true);
+
+    let newLat = parseFloat(correctionLat);
+    let newLng = parseFloat(correctionLng);
+
+    // If they entered an address instead of coordinates, geocode it
+    if (correctionAddress && (isNaN(newLat) || isNaN(newLng))) {
+      try {
+        const query = encodeURIComponent(
+          `${correctionAddress}, ${property.county} County, TX`
+        );
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1`
+        );
+        const data = await res.json();
+        if (data.length > 0) {
+          newLat = parseFloat(data[0].lat);
+          newLng = parseFloat(data[0].lon);
+        } else {
+          setCorrecting(false);
+          return;
+        }
+      } catch {
+        setCorrecting(false);
+        return;
+      }
+    }
+
+    if (isNaN(newLat) || isNaN(newLng)) {
+      setCorrecting(false);
+      return;
+    }
+
+    const { error } = await supabase
+      .from("properties")
+      .update({ lat: newLat, lng: newLng, updated_at: new Date().toISOString() })
+      .eq("id", property.id);
+
+    setCorrecting(false);
+
+    if (!error) {
+      setCorrectionLat("");
+      setCorrectionLng("");
+      setCorrectionAddress("");
+      setShowCorrectionForm(false);
+      refetch();
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-field-cream">
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        {/* Back link */}
-        <Link
-          href={`/properties/${id}`}
-          className="inline-flex items-center text-field-forest hover:text-field-forest/80 text-sm font-medium mb-6"
-        >
-          <svg
-            className="w-4 h-4 mr-1"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
+    <div className="h-[calc(100vh-4rem)] flex flex-col">
+      {/* Header */}
+      <div className="flex items-center justify-between px-6 py-4 bg-white border-b border-field-wheat/50">
+        <div>
+          <h1 className="text-xl font-semibold text-field-ink">Property Map</h1>
+          <p className="text-sm text-field-ink/60">
+            {property.name} &middot; {activityPins.length}{" "}
+            {activityPins.length === 1 ? "location" : "locations"} marked
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              setShowCorrectionForm(!showCorrectionForm);
+              if (showAddForm) setShowAddForm(false);
+            }}
+            className="px-4 py-2 border border-field-wheat text-field-ink text-sm font-medium rounded-lg hover:bg-field-mist transition-colors"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M15 19l-7-7 7-7"
-            />
-          </svg>
-          Back to Property
-        </Link>
-
-        {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-field-ink">
-            {property.name} - Property Map
-          </h1>
-          <p className="text-field-ink/70 mt-1">{property.address}</p>
+            {showCorrectionForm ? "Cancel" : "Correct location"}
+          </button>
+          <button
+            onClick={() => {
+              setShowAddForm(!showAddForm);
+              if (showCorrectionForm) setShowCorrectionForm(false);
+            }}
+            className="px-4 py-2 bg-field-forest text-white text-sm font-medium rounded-lg hover:bg-field-forest/90 transition-colors"
+          >
+            {showAddForm ? "Cancel" : "+ Add Location"}
+          </button>
         </div>
-
-        {/* Map container */}
-        <div className="bg-white border border-field-wheat rounded-lg overflow-hidden">
-          <div className="h-[600px]">
-            <MapWrapper
-              center={property.coordinates}
-              propertyName={property.name}
-              locations={activityLocations}
-            />
-          </div>
-        </div>
-
-        {/* Legend */}
-        {activityLocations.length > 0 && (
-          <div className="mt-4 bg-white border border-field-wheat rounded-lg p-4">
-            <h2 className="text-sm font-semibold text-field-ink mb-2">
-              Activity Locations
-            </h2>
-            <ul className="space-y-1">
-              {activityLocations.map((location, index) => (
-                <li
-                  key={`${location.lat}-${location.lng}-${index}`}
-                  className="text-sm text-field-ink/70"
-                >
-                  {location.label || `Location ${index + 1}`}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
       </div>
+
+      {/* Correct property location form */}
+      {showCorrectionForm && (
+        <div className="px-6 py-4 bg-white border-b border-field-wheat/50">
+          <p className="text-sm font-medium text-field-ink mb-3">
+            Update your property&apos;s map location
+          </p>
+          <div className="max-w-3xl flex flex-wrap items-end gap-4">
+            <div className="flex-1 min-w-[220px]">
+              <label className="block text-sm font-medium text-field-ink mb-1">
+                Re-enter address
+              </label>
+              <input
+                type="text"
+                value={correctionAddress}
+                onChange={(e) => setCorrectionAddress(e.target.value)}
+                placeholder="e.g. 210 Cuesta Pass, Driftwood, TX"
+                className="w-full px-3 py-2 border border-field-wheat rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-field-forest/20"
+              />
+            </div>
+            <span className="text-sm text-field-ink/40 pb-2">or</span>
+            <div className="w-32">
+              <label className="block text-sm font-medium text-field-ink mb-1">
+                Latitude
+              </label>
+              <input
+                type="text"
+                value={correctionLat}
+                onChange={(e) => setCorrectionLat(e.target.value)}
+                placeholder="30.2500"
+                className="w-full px-3 py-2 border border-field-wheat rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-field-forest/20"
+              />
+            </div>
+            <div className="w-32">
+              <label className="block text-sm font-medium text-field-ink mb-1">
+                Longitude
+              </label>
+              <input
+                type="text"
+                value={correctionLng}
+                onChange={(e) => setCorrectionLng(e.target.value)}
+                placeholder="-97.7500"
+                className="w-full px-3 py-2 border border-field-wheat rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-field-forest/20"
+              />
+            </div>
+            <button
+              onClick={handleCorrectLocation}
+              disabled={(!correctionAddress && (!correctionLat || !correctionLng)) || correcting}
+              className="px-5 py-2 bg-field-forest text-white text-sm font-medium rounded-lg hover:bg-field-forest/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              {correcting ? "Updating..." : "Update location"}
+            </button>
+          </div>
+          <p className="text-xs text-field-ink/40 mt-3">
+            Enter a full street address to re-geocode, or paste exact GPS coordinates from Google/Apple Maps.
+          </p>
+        </div>
+      )}
+
+      {/* Add location form */}
+      {showAddForm && (
+        <div className="px-6 py-4 bg-white border-b border-field-wheat/50">
+          <div className="max-w-4xl flex flex-wrap items-end gap-4">
+            <div className="flex-1 min-w-[180px]">
+              <label className="block text-sm font-medium text-field-ink mb-1">
+                Activity
+              </label>
+              <select
+                value={selectedActivity}
+                onChange={(e) => setSelectedActivity(e.target.value)}
+                className="w-full px-3 py-2 border border-field-wheat rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-field-forest/20"
+              >
+                <option value="">Select an activity</option>
+                {property.activities.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="w-32">
+              <label className="block text-sm font-medium text-field-ink mb-1">
+                Latitude
+              </label>
+              <input
+                type="text"
+                value={lat}
+                onChange={(e) => setLat(e.target.value)}
+                placeholder="30.2500"
+                className="w-full px-3 py-2 border border-field-wheat rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-field-forest/20"
+              />
+            </div>
+            <div className="w-32">
+              <label className="block text-sm font-medium text-field-ink mb-1">
+                Longitude
+              </label>
+              <input
+                type="text"
+                value={lng}
+                onChange={(e) => setLng(e.target.value)}
+                placeholder="-97.7500"
+                className="w-full px-3 py-2 border border-field-wheat rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-field-forest/20"
+              />
+            </div>
+            <div className="flex-1 min-w-[140px]">
+              <label className="block text-sm font-medium text-field-ink mb-1">
+                Label{" "}
+                <span className="text-field-ink/40 font-normal">(optional)</span>
+              </label>
+              <input
+                type="text"
+                value={label}
+                onChange={(e) => setLabel(e.target.value)}
+                placeholder="e.g. North feeder"
+                className="w-full px-3 py-2 border border-field-wheat rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-field-forest/20"
+              />
+            </div>
+            <button
+              onClick={handleAddLocation}
+              disabled={!selectedActivity || !lat || !lng || saving}
+              className="px-5 py-2 bg-field-forest text-white text-sm font-medium rounded-lg hover:bg-field-forest/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              {saving ? "Saving..." : "Add pin"}
+            </button>
+          </div>
+          <p className="text-xs text-field-ink/40 mt-3">
+            To find GPS coordinates: open Google Maps or Apple Maps, long-press
+            on the exact location, and copy the coordinates shown.
+          </p>
+        </div>
+      )}
+
+      {/* Map */}
+      <div className="flex-1">
+        <MapWrapper
+          center={mapCenter}
+          propertyName={property.name}
+          locations={activityPins}
+        />
+      </div>
+
+      {/* Activity legend */}
+      {activityPins.length > 0 && (
+        <div className="px-6 py-3 bg-white border-t border-field-wheat/50">
+          <div className="flex flex-wrap gap-4 text-sm">
+            {property.activities
+              .filter((a) => a.locations && a.locations.length > 0)
+              .map((a) => (
+                <div key={a.id} className="flex items-center gap-2">
+                  <div
+                    className="w-3 h-3 rounded-full"
+                    style={{
+                      backgroundColor:
+                        {
+                          feeders: "#B8860B",
+                          water_sources: "#2E86C1",
+                          birdhouses: "#8B4513",
+                          census: "#6C3483",
+                          brush_management: "#27AE60",
+                          native_planting: "#1E8449",
+                          predator_management: "#C0392B",
+                        }[a.type] || "#495336",
+                    }}
+                  />
+                  <span className="text-field-ink/70">
+                    {a.name} ({a.locations?.length})
+                  </span>
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

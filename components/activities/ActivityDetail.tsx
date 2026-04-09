@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { Activity, ActivityStatus } from "@/lib/types";
 import { formatDate, getStatusColor, getStatusLabel } from "@/lib/utils";
-import { useDebounce } from "@/lib/hooks";
 import { supabase } from "@/lib/supabase";
 import ActivityChecklist from "./ActivityChecklist";
 
@@ -18,33 +17,61 @@ export default function ActivityDetail({
   propertyId,
   onUpdate,
 }: ActivityDetailProps) {
-  const [notes, setNotes] = useState(activity.notes);
+  // Parse notes as dated entries (JSON array) or migrate from plain string
+  const parseNotes = (raw: string): { date: string; text: string }[] => {
+    if (!raw) return [];
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    } catch {
+      // Legacy plain text — migrate to a single dated entry
+      if (raw.trim()) {
+        return [{ date: new Date().toISOString().split("T")[0], text: raw }];
+      }
+    }
+    return [];
+  };
+
+  const [noteEntries, setNoteEntries] = useState(parseNotes(activity.notes));
+  const [newNote, setNewNote] = useState("");
   const [status, setStatus] = useState<ActivityStatus>(activity.status);
+  const [dueDate, setDueDate] = useState(activity.dueDate || `${new Date().getFullYear()}-12-31`);
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
-  const debouncedNotes = useDebounce(notes, 1000);
+  const today = new Date().toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
 
-  // Auto-save notes when they change
-  useEffect(() => {
-    if (debouncedNotes === activity.notes) return;
+  const saveNote = async () => {
+    if (!newNote.trim()) return;
 
-    const saveNotes = async () => {
-      setIsSaving(true);
-      const { error } = await supabase
-        .from("activities")
-        .update({ notes: debouncedNotes, updated_at: new Date().toISOString() })
-        .eq("id", activity.id);
-
-      setIsSaving(false);
-      if (!error) {
-        setLastSaved(new Date());
-        onUpdate?.({ ...activity, notes: debouncedNotes });
-      }
+    const entry = {
+      date: new Date().toISOString().split("T")[0],
+      text: newNote.trim(),
     };
+    const updated = [entry, ...noteEntries];
+    setNoteEntries(updated);
+    setNewNote("");
 
-    saveNotes();
-  }, [debouncedNotes, activity, onUpdate]);
+    setIsSaving(true);
+    const { error } = await supabase
+      .from("activities")
+      .update({
+        notes: JSON.stringify(updated),
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", activity.id);
+
+    setIsSaving(false);
+    if (!error) {
+      setLastSaved(new Date());
+      onUpdate?.({ ...activity, notes: JSON.stringify(updated) });
+    }
+  };
 
   // Save status changes immediately
   const handleStatusChange = async (newStatus: ActivityStatus) => {
@@ -83,6 +110,22 @@ export default function ActivityDetail({
     }
   };
 
+  const handleDueDateChange = async (newDate: string) => {
+    setDueDate(newDate);
+    setIsSaving(true);
+
+    const { error } = await supabase
+      .from("activities")
+      .update({ due_date: newDate, updated_at: new Date().toISOString() })
+      .eq("id", activity.id);
+
+    setIsSaving(false);
+    if (!error) {
+      setLastSaved(new Date());
+      onUpdate?.({ ...activity, dueDate: newDate });
+    }
+  };
+
   const getDocumentTypeLabel = (type: string): string => {
     const labels: Record<string, string> = {
       photo: "Photo",
@@ -95,10 +138,36 @@ export default function ActivityDetail({
   const statusOptions: { value: ActivityStatus; label: string }[] = [
     { value: "not_started", label: "Not Started" },
     { value: "in_progress", label: "In Progress" },
-    { value: "evidence_uploaded", label: "Evidence Uploaded" },
-    { value: "needs_followup", label: "Needs Follow-up" },
     { value: "complete", label: "Complete" },
   ];
+
+  // Auto-compute status based on evidence completion
+  useEffect(() => {
+    if (activity.requiredEvidence.length === 0) return;
+
+    const requiredItems = activity.requiredEvidence.filter((r) => r.required);
+    const hasAnyDoc = activity.documents.length > 0;
+
+    const allRequiredMet = requiredItems.every((req) => {
+      if (req.type === "photo") return activity.documents.some((d) => d.type === "photo");
+      if (req.type === "receipt") return activity.documents.some((d) => d.type === "receipt");
+      if (req.type === "gps") return activity.documents.some((d) => d.metadata?.gpsCoordinates);
+      if (req.type === "date") return activity.documents.some((d) => d.metadata?.timestamp || d.uploadedAt);
+      return false;
+    });
+
+    let newStatus: ActivityStatus = "not_started";
+    if (allRequiredMet && requiredItems.length > 0) {
+      newStatus = "complete";
+    } else if (hasAnyDoc) {
+      newStatus = "in_progress";
+    }
+
+    if (newStatus !== status) {
+      handleStatusChange(newStatus);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activity.documents.length]);
 
   return (
     <div className="space-y-8">
@@ -138,12 +207,15 @@ export default function ActivityDetail({
         </div>
 
         {/* Dates */}
-        <div className="flex flex-wrap gap-6 text-sm">
-          <div>
-            <span className="text-field-ink/60">Due date:</span>{" "}
-            <span className="text-field-ink font-medium">
-              {formatDate(activity.dueDate)}
-            </span>
+        <div className="flex flex-wrap items-center gap-6 text-sm">
+          <div className="flex items-center gap-2">
+            <span className="text-field-ink/60">Due date:</span>
+            <input
+              type="date"
+              value={dueDate}
+              onChange={(e) => handleDueDateChange(e.target.value)}
+              className="px-2 py-1 border border-field-wheat rounded-lg text-field-ink font-medium text-sm focus:outline-none focus:ring-2 focus:ring-field-forest/20 focus:border-field-forest"
+            />
           </div>
           {activity.completedDate && (
             <div>
@@ -164,6 +236,8 @@ export default function ActivityDetail({
         <ActivityChecklist
           requiredEvidence={activity.requiredEvidence}
           documents={activity.documents}
+          propertyId={propertyId}
+          hasLocations={!!(activity.locations && activity.locations.length > 0)}
         />
       </div>
 
@@ -231,15 +305,72 @@ export default function ActivityDetail({
         )}
       </div>
 
-      {/* Notes - Editable */}
+      {/* Notes */}
       <div className="bg-white border border-field-wheat rounded-lg p-6">
-        <h2 className="text-lg font-semibold text-field-ink mb-4">Notes</h2>
-        <textarea
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          placeholder="Add notes about this activity..."
-          className="w-full min-h-[120px] p-3 border border-field-wheat rounded-lg text-field-ink/80 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-field-forest/20 focus:border-field-forest"
-        />
+        <h2 className="text-lg font-semibold text-field-ink mb-4">
+          Activity Notes
+        </h2>
+
+        {/* New note input */}
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-2">
+            <svg className="w-4 h-4 text-field-ink/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+            </svg>
+            <span className="text-sm text-field-ink/50">{today}</span>
+          </div>
+          <textarea
+            value={newNote}
+            onChange={(e) => setNewNote(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && e.metaKey) {
+                e.preventDefault();
+                saveNote();
+              }
+            }}
+            placeholder="Add a note about what you did today..."
+            className="w-full min-h-[80px] p-3 border border-field-wheat rounded-lg text-field-ink/80 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-field-forest/20 focus:border-field-forest"
+          />
+          <div className="flex items-center justify-between mt-2">
+            <span className="text-xs text-field-ink/40">
+              This note will be saved with today&apos;s date
+            </span>
+            <button
+              onClick={saveNote}
+              disabled={!newNote.trim()}
+              className="px-4 py-1.5 bg-field-forest text-white text-sm font-medium rounded-lg hover:bg-field-forest/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              Save note
+            </button>
+          </div>
+        </div>
+
+        {/* Previous notes */}
+        {noteEntries.length > 0 ? (
+          <div className="space-y-4 border-t border-field-wheat pt-4">
+            {noteEntries.map((entry, i) => (
+              <div key={i} className="flex gap-3">
+                <div className="flex-shrink-0 w-1 bg-field-forest/20 rounded-full" />
+                <div>
+                  <p className="text-xs font-medium text-field-ink/50 mb-1">
+                    {new Date(entry.date + "T12:00:00").toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
+                  </p>
+                  <p className="text-sm text-field-ink/80 whitespace-pre-wrap">
+                    {entry.text}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-field-ink/40 border-t border-field-wheat pt-4">
+            No notes yet. Add your first note above.
+          </p>
+        )}
       </div>
 
       {/* Locations */}

@@ -1,40 +1,66 @@
 "use client";
 
 import "leaflet/dist/leaflet.css";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Tooltip } from "react-leaflet";
 import L, { LatLngExpression } from "leaflet";
 import { useEffect } from "react";
 
-// Fix Leaflet default marker icon issue in Next.js/webpack
-// The default icons don't load properly due to how webpack handles assets
-const DefaultIcon = L.icon({
-  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-  iconRetinaUrl:
-    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
+// Activity icon images mapped to types
+const ACTIVITY_ICONS: Record<string, string> = {
+  feeders: "/images/activities/icons/feeding.png",
+  water_sources: "/images/activities/icons/water.png",
+  birdhouses: "/images/activities/icons/shelters.png",
+  census: "/images/activities/icons/census.png",
+  brush_management: "/images/activities/icons/habitat.png",
+  native_planting: "/images/activities/icons/erosion.png",
+  predator_management: "/images/activities/icons/predator.png",
+};
+
+function getActivityIcon(type?: string) {
+  const iconSrc = type && ACTIVITY_ICONS[type];
+  if (iconSrc) {
+    return L.divIcon({
+      html: `<div style="width:40px;height:40px;background:white;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;padding:4px;">
+        <img src="${iconSrc}" style="width:28px;height:28px;object-fit:contain;" />
+      </div>`,
+      iconSize: [44, 44],
+      iconAnchor: [22, 22],
+      popupAnchor: [0, -24],
+      className: "",
+    });
+  }
+  // Fallback green circle
+  return L.divIcon({
+    html: `<div style="width:32px;height:32px;background:#495336;border:3px solid white;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,0.4);"></div>`,
+    iconSize: [32, 32],
+    iconAnchor: [16, 16],
+    popupAnchor: [0, -18],
+    className: "",
+  });
+}
+
+// Property center icon (larger, distinct)
+const PropertyCenterIcon = L.divIcon({
+  html: `<div style="width:48px;height:48px;background:white;border-radius:50%;box-shadow:0 2px 10px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;padding:6px;">
+    <img src="/images/activities/icons/house.png" style="width:32px;height:32px;object-fit:contain;" />
+  </div>`,
+  iconSize: [48, 48],
+  iconAnchor: [24, 24],
+  popupAnchor: [0, -26],
+  className: "",
 });
 
-// Custom green icon for property center
-const PropertyIcon = L.icon({
-  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-  iconRetinaUrl:
-    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
-  className: "property-marker",
-});
+interface ActivityLocation {
+  lat: number;
+  lng: number;
+  label?: string;
+  activityType?: string;
+}
 
 interface PropertyMapProps {
   center: { lat: number; lng: number };
   propertyName: string;
-  locations?: { lat: number; lng: number; label?: string }[];
+  locations?: ActivityLocation[];
 }
 
 export default function PropertyMap({
@@ -43,11 +69,6 @@ export default function PropertyMap({
   locations = [],
 }: PropertyMapProps) {
   const position: LatLngExpression = [center.lat, center.lng];
-
-  // Set default icon for all markers
-  useEffect(() => {
-    L.Marker.prototype.options.icon = DefaultIcon;
-  }, []);
 
   return (
     <MapContainer
@@ -58,15 +79,27 @@ export default function PropertyMap({
       className="rounded-lg"
     >
       <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        attribution='&copy; <a href="https://www.esri.com/">Esri</a>'
+        url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+      />
+      <TileLayer
+        attribution=""
+        url="https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}"
       />
 
-      {/* Center marker for property */}
-      <Marker position={position} icon={PropertyIcon}>
+      {/* Center marker for property — always shows name label */}
+      <Marker position={position} icon={PropertyCenterIcon}>
+        <Tooltip
+          permanent
+          direction="top"
+          offset={[0, -22]}
+          className="property-tooltip"
+        >
+          <strong>{propertyName}</strong>
+        </Tooltip>
         <Popup>
           <div className="text-sm">
-            <strong style={{ color: "#4A7C59" }}>{propertyName}</strong>
+            <strong style={{ color: "#495336" }}>{propertyName}</strong>
             <p className="text-gray-500 text-xs mt-1">Property Center</p>
           </div>
         </Popup>
@@ -77,11 +110,14 @@ export default function PropertyMap({
         <Marker
           key={`${location.lat}-${location.lng}-${index}`}
           position={[location.lat, location.lng]}
-          icon={DefaultIcon}
+          icon={getActivityIcon(location.activityType)}
         >
+          <Tooltip direction="top" offset={[0, -16]}>
+            {location.label || `Location ${index + 1}`}
+          </Tooltip>
           <Popup>
             <div className="text-sm">
-              <strong style={{ color: "#4A7C59" }}>
+              <strong style={{ color: "#495336" }}>
                 {location.label || `Location ${index + 1}`}
               </strong>
               <p className="text-gray-500 text-xs mt-1">

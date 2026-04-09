@@ -41,7 +41,7 @@ export default function Sidebar() {
   // Extract property ID from path if on a property page, otherwise use first real property
   const propertyMatch = pathname.match(/\/properties\/([^/]+)/);
   const currentPropertyId =
-    propertyMatch?.[1] || (properties.length > 0 ? properties[0].id : null);
+    propertyMatch?.[1] || (properties && properties.length > 0 ? properties[0].id : null);
 
   const navItems = [
     { href: "/dashboard", label: "Dashboard" },

@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 interface MapWrapperProps {
   center: { lat: number; lng: number };
   propertyName: string;
-  locations?: { lat: number; lng: number; label?: string }[];
+  locations?: { lat: number; lng: number; label?: string; activityType?: string }[];
 }
 
 const PropertyMap = dynamic(() => import("./PropertyMap"), {
