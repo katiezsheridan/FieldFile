@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { supabase } from "@/lib/supabase";
 
 export default function SignupPage() {
   const [name, setName] = useState("");
@@ -17,29 +16,19 @@ export default function SignupPage() {
     setError("");
 
     try {
-      // Save to signups table
-      const { error: dbError } = await supabase.from("signups").insert({
-        name,
-        email,
-        property_address: propertyAddress,
+      const res = await fetch("/api/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, propertyAddress }),
       });
 
-      if (dbError) {
-        console.error("Signup save error:", dbError);
+      if (!res.ok) {
         setError("Something went wrong. Please try again.");
         setSubmitting(false);
         return;
       }
 
-      // Show success immediately, send email in background
       setSubmitted(true);
-
-      // Fire-and-forget email notification
-      fetch("/api/leads", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, propertyAddress }),
-      }).catch(() => {});
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {

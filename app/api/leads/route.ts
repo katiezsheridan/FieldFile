@@ -1,8 +1,26 @@
 import { NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
+
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 export async function POST(request: Request) {
   try {
     const { name, email, propertyAddress, source, answers } = await request.json();
+
+    // Save to Supabase
+    const { error: dbError } = await supabaseAdmin.from("signups").insert({
+      name,
+      email,
+      property_address: propertyAddress,
+      source: source || "signup",
+    });
+
+    if (dbError) {
+      console.error("Supabase insert error:", dbError);
+    }
 
     const isQuiz = source === "quiz";
     const subject = isQuiz
