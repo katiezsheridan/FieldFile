@@ -47,7 +47,7 @@ export default function MarketingHeader() {
         <div className="hidden lg:flex items-center gap-3">
           <Link
             href="/sign-in"
-            className="text-field-ink/70 hover:text-field-ink text-sm transition-colors"
+            className="border border-field-forest text-field-forest px-4 py-2 rounded-lg text-sm font-medium hover:bg-field-forest/10 transition-colors"
           >
             Sign In
           </Link>
@@ -63,7 +63,7 @@ export default function MarketingHeader() {
         <div className="lg:hidden flex items-center gap-3">
           <Link
             href="/sign-in"
-            className="text-field-ink/70 hover:text-field-ink text-sm transition-colors"
+            className="border border-field-forest text-field-forest px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-field-forest/10 transition-colors"
           >
             Sign In
           </Link>
