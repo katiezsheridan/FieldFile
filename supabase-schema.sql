@@ -122,3 +122,84 @@ create policy "Anyone can update quiz leads"
 -- Create storage bucket for documents
 -- Note: Run this separately or create via Dashboard > Storage > New Bucket
 -- insert into storage.buckets (id, name, public) values ('documents', 'documents', false);
+
+-- ============================================================
+-- Wildlife Census Monitoring Log (Session 1: schema foundation)
+-- ============================================================
+
+-- One observation session = one field visit / data pull.
+create table census_observations (
+  id uuid default gen_random_uuid() primary key,
+  property_id uuid not null references properties(id) on delete cascade,
+  observed_on date not null,
+  observed_at_time time,
+  method text not null check (method in (
+    'spotlight',
+    'aerial',
+    'daylight_count',
+    'photo_station',
+    'harvest_record',
+    'browse_utilization',
+    'endangered_species',
+    'nongame',
+    'time_area_count',
+    'roost_count',
+    'songbird_transect',
+    'quail_call_covey',
+    'point_count',
+    'game_camera',
+    'track_survey',
+    'direct_observation',
+    'other'
+  )),
+  location_label text,
+  lat numeric,
+  lng numeric,
+  weather text,
+  notes text,
+  miles_surveyed numeric,
+  duration_minutes integer,
+  created_at timestamp with time zone default now(),
+  updated_at timestamp with time zone default now()
+);
+
+create index census_observations_property_id_idx on census_observations(property_id);
+create index census_observations_observed_on_idx on census_observations(observed_on);
+
+-- Per-species counts for a given observation. One row per species seen.
+create table census_species_counts (
+  id uuid default gen_random_uuid() primary key,
+  observation_id uuid not null references census_observations(id) on delete cascade,
+  category text not null,   -- e.g. 'deer', 'bird', 'predator'
+  species text not null,    -- e.g. 'whitetail', 'bobwhite_quail'
+  -- sex/age breakdown (nullable — not every species uses every field)
+  count_total integer,
+  count_buck integer,
+  count_doe integer,
+  count_fawn integer,
+  count_male integer,
+  count_female integer,
+  count_juvenile integer,
+  count_unknown integer,
+  notes text,
+  created_at timestamp with time zone default now()
+);
+
+create index census_species_counts_observation_id_idx on census_species_counts(observation_id);
+create index census_species_counts_species_idx on census_species_counts(species);
+
+-- Photos/receipts attached to an observation (Session 2 will wire uploads).
+-- Reuses the documents pattern with a nullable FK to observations.
+alter table documents add column if not exists observation_id uuid references census_observations(id) on delete cascade;
+alter table documents alter column activity_id drop not null;
+
+alter table census_observations enable row level security;
+alter table census_species_counts enable row level security;
+
+-- RLS: permissive at the DB layer (matches existing pattern).
+-- Auth is enforced in API routes via Clerk userId + property.user_id join.
+create policy "Users can manage census observations"
+  on census_observations for all using (true);
+create policy "Users can manage census species counts"
+  on census_species_counts for all using (true);
+
