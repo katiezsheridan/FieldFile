@@ -28,6 +28,16 @@ export function getStatusColor(status: string): string {
   return colors[status] || "bg-gray-100";
 }
 
+export function slugify(name: string): string {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
 export function getStatusLabel(status: string): string {
   const labels: Record<string, string> = {
     draft: "Draft",

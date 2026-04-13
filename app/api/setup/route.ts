@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
+import { slugify } from "@/lib/utils";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -90,12 +91,27 @@ export async function POST(request: Request) {
     }
   }
 
+  // Generate a unique slug from the name (append -2, -3, ... if taken for this user)
+  const baseSlug = slugify(property.name) || "property";
+  let slug = baseSlug;
+  for (let i = 2; i < 100; i++) {
+    const { data: existing } = await supabase
+      .from("properties")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("slug", slug)
+      .maybeSingle();
+    if (!existing) break;
+    slug = `${baseSlug}-${i}`;
+  }
+
   // Create property
   const { data: propertyData, error: propertyError } = await supabase
     .from("properties")
     .insert({
       user_id: userId,
       name: property.name,
+      slug,
       address: property.address,
       county: property.county,
       state: property.state,
