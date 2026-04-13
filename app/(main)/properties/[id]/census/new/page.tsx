@@ -12,6 +12,8 @@ import {
 } from "@/lib/census-species";
 import type { CensusMethod } from "@/lib/types";
 import CensusLocationPicker from "@/components/census/CensusLocationPickerWrapper";
+import { FileUploader } from "@/components/documents/FileUploader";
+import { uploadObservationPhoto } from "@/lib/supabase";
 
 type SpeciesEntry = {
   categoryId: string;
@@ -36,6 +38,7 @@ export default function NewCensusEntryPage() {
 
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [species, setSpecies] = useState<SpeciesEntry[]>([]);
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
 
   const [propertyCenter, setPropertyCenter] = useState<{ lat: number; lng: number } | null>(null);
   const [pinCoords, setPinCoords] = useState<{ lat: number; lng: number } | null>(null);
@@ -136,6 +139,24 @@ export default function NewCensusEntryPage() {
         body: JSON.stringify(payload),
       });
       if (!r.ok) throw new Error((await r.json()).error || "Failed to save");
+      const created = await r.json();
+      const newObsId: string = created.id;
+
+      for (const file of pendingFiles) {
+        const up = await uploadObservationPhoto(file, newObsId);
+        if (!up) continue;
+        await fetch(`/api/properties/${id}/census/${newObsId}/documents`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: file.name,
+            url: up.url,
+            storagePath: up.path,
+            type: file.type.startsWith("image/") ? "photo" : "receipt",
+          }),
+        });
+      }
+
       router.push(`/properties/${id}/census`);
     } catch (e: any) {
       setError(e.message);
@@ -408,6 +429,39 @@ export default function NewCensusEntryPage() {
                 })}
               </div>
             )}
+          </section>
+
+          <section className="bg-white border border-field-wheat rounded-xl p-5 space-y-4">
+            <h2 className="font-semibold text-field-ink">Photos & evidence</h2>
+            {pendingFiles.length > 0 && (
+              <ul className="space-y-2">
+                {pendingFiles.map((file, i) => (
+                  <li
+                    key={`${file.name}-${i}`}
+                    className="flex items-center justify-between text-sm p-2 bg-field-cream/50 rounded"
+                  >
+                    <span className="truncate text-field-ink">
+                      {file.name}{" "}
+                      <span className="text-field-ink/60">
+                        ({(file.size / 1024).toFixed(1)} KB)
+                      </span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setPendingFiles((prev) => prev.filter((_, idx) => idx !== i))
+                      }
+                      className="text-xs text-field-terra hover:underline ml-3"
+                    >
+                      Remove
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <FileUploader
+              onUpload={(files) => setPendingFiles((prev) => [...prev, ...files])}
+            />
           </section>
 
           {error && (

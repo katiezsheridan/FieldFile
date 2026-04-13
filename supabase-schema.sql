@@ -121,7 +121,9 @@ create policy "Anyone can update quiz leads"
 
 -- Create storage bucket for documents
 -- Note: Run this separately or create via Dashboard > Storage > New Bucket
--- insert into storage.buckets (id, name, public) values ('documents', 'documents', false);
+-- insert into storage.buckets (id, name, public) values ('documents', 'documents', true);
+-- If the bucket was previously created as private, flip it to public so getPublicUrl() works:
+-- update storage.buckets set public = true where id = 'documents';
 
 -- ============================================================
 -- Wildlife Census Monitoring Log (Session 1: schema foundation)

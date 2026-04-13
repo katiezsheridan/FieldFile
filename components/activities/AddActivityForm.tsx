@@ -1,8 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { createActivity } from "@/lib/hooks";
+import { createActivity, createDocument } from "@/lib/hooks";
+import { uploadDocument } from "@/lib/supabase";
 import { ActivityType } from "@/lib/types";
+import { EvidenceUploader } from "@/components/documents/EvidenceUploader";
+
+type PendingDoc = { file: File; type: "photo" | "receipt" | "note"; date?: string };
 
 interface AddActivityFormProps {
   propertyId: string;
@@ -39,6 +43,15 @@ export default function AddActivityForm({ propertyId, onSuccess, onCancel }: Add
   const [dueDate, setDueDate] = useState(getDefaultDueDate());
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pendingDocs, setPendingDocs] = useState<PendingDoc[]>([]);
+
+  const handleStage = (file: File, docType: "photo" | "receipt" | "note", date?: string) => {
+    setPendingDocs((prev) => [...prev, { file, type: docType, date }]);
+  };
+
+  const handleRemovePending = (index: number) => {
+    setPendingDocs((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const selectedActivity = activityTypes.find(a => a.value === type);
 
@@ -48,7 +61,7 @@ export default function AddActivityForm({ propertyId, onSuccess, onCancel }: Add
     setError(null);
 
     try {
-      await createActivity(propertyId, {
+      const created = await createActivity(propertyId, {
         type,
         name: name || selectedActivity?.label || "",
         description: description || selectedActivity?.description || "",
@@ -57,6 +70,20 @@ export default function AddActivityForm({ propertyId, onSuccess, onCancel }: Add
         notes: "",
         dueDate: dueDate || new Date(new Date().getFullYear() + 1, 1, 1).toISOString().split("T")[0],
       });
+
+      if (created?.id && pendingDocs.length > 0) {
+        for (const pending of pendingDocs) {
+          const result = await uploadDocument(pending.file, created.id);
+          if (result) {
+            await createDocument(created.id, {
+              type: pending.type,
+              name: pending.file.name,
+              url: result.url,
+              storagePath: result.path,
+            });
+          }
+        }
+      }
       onSuccess();
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Failed to create activity";
@@ -131,6 +158,34 @@ export default function AddActivityForm({ propertyId, onSuccess, onCancel }: Add
             className="w-full p-2 border border-field-wheat rounded-lg focus:outline-none focus:ring-2 focus:ring-field-forest/20"
           />
         </div>
+      </div>
+
+      <div className="mt-6">
+        <label className="block text-sm font-medium text-field-ink mb-2">
+          Evidence (optional)
+        </label>
+        {pendingDocs.length > 0 && (
+          <ul className="mb-3 space-y-2">
+            {pendingDocs.map((doc, i) => (
+              <li
+                key={i}
+                className="flex items-center justify-between text-sm p-2 bg-field-cream/50 rounded"
+              >
+                <span className="truncate text-field-ink">
+                  {doc.file.name} <span className="text-field-ink/60">({doc.type})</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => handleRemovePending(i)}
+                  className="text-xs text-red-600 hover:underline ml-3"
+                >
+                  Remove
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+        <EvidenceUploader onUpload={handleStage} />
       </div>
 
       <div className="flex gap-3 mt-6">
