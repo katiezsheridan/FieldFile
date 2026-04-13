@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Activity } from "@/lib/types";
 import { formatDate, getStatusColor, getStatusLabel } from "@/lib/utils";
 
@@ -10,6 +11,8 @@ interface ActivityCardProps {
 
 export default function ActivityCard({ activity }: ActivityCardProps) {
   const documentCount = activity.documents.length;
+  const router = useRouter();
+  const isCensus = activity.type === "census";
 
   return (
     <Link
@@ -46,10 +49,23 @@ export default function ActivityCard({ activity }: ActivityCardProps) {
         </span>
       </div>
 
-      <div className="mt-4 pt-3 border-t border-field-wheat">
+      <div className="mt-4 pt-3 border-t border-field-wheat flex items-center justify-between gap-3">
         <span className="text-field-forest text-sm font-medium">
           View details →
         </span>
+        {isCensus && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              router.push(`/properties/${activity.propertyId}/census/new`);
+            }}
+            className="text-xs font-medium px-3 py-1.5 rounded-lg bg-field-forest text-white hover:bg-field-forest/90"
+          >
+            Start census count
+          </button>
+        )}
       </div>
     </Link>
   );

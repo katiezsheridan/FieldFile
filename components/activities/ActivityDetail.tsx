@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { Activity, ActivityStatus } from "@/lib/types";
 import { formatDate, getStatusColor, getStatusLabel } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
@@ -205,6 +206,17 @@ export default function ActivityDetail({
             ))}
           </select>
         </div>
+
+        {activity.type === "census" && (
+          <div className="mb-4">
+            <Link
+              href={`/properties/${propertyId}/census/new`}
+              className="inline-flex items-center px-4 py-2 bg-field-forest text-white text-sm font-medium rounded-lg hover:bg-field-forest/90"
+            >
+              Start census count →
+            </Link>
+          </div>
+        )}
 
         {/* Dates */}
         <div className="flex flex-wrap items-center gap-6 text-sm">
