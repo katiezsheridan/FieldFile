@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
+import { slugify } from "@/lib/utils";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -24,6 +25,31 @@ export async function GET() {
       { error: propertiesError.message },
       { status: 400 }
     );
+  }
+
+  // Backfill any missing/empty slugs so URLs render the property name, not the UUID.
+  const usedSlugs = new Set(
+    (properties || [])
+      .map((p) => p.slug)
+      .filter((s): s is string => !!s && s.length > 0)
+  );
+  for (const prop of properties || []) {
+    if (prop.slug && prop.slug.length > 0) continue;
+    const base = slugify(prop.name);
+    let candidate = base;
+    let i = 2;
+    while (usedSlugs.has(candidate)) {
+      candidate = `${base}-${i++}`;
+    }
+    const { error: slugErr } = await supabase
+      .from("properties")
+      .update({ slug: candidate })
+      .eq("id", prop.id)
+      .eq("user_id", userId);
+    if (!slugErr) {
+      prop.slug = candidate;
+      usedSlugs.add(candidate);
+    }
   }
 
   // For each property, fetch activities with documents, and filing

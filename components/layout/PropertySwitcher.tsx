@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import Link from "next/link";
 import { Property } from "@/lib/types";
 
 interface PropertySwitcherProps {
@@ -88,6 +89,18 @@ export default function PropertySwitcher({
               </li>
             ))}
           </ul>
+          <div className="border-t border-field-wheat/60">
+            <Link
+              href="/setup"
+              onClick={() => setIsOpen(false)}
+              className="flex items-center gap-2 px-4 py-3 text-sm font-medium text-field-forest hover:bg-field-wheat/30 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Add another property
+            </Link>
+          </div>
         </div>
       )}
     </div>

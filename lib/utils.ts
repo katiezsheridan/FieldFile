@@ -29,13 +29,14 @@ export function getStatusColor(status: string): string {
 }
 
 export function slugify(name: string): string {
-  return name
+  const slug = (name || "")
     .toLowerCase()
     .trim()
     .replace(/[^a-z0-9\s-]/g, "")
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "");
+  return slug || "property";
 }
 
 export function getStatusLabel(status: string): string {
