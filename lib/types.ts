@@ -33,7 +33,8 @@ export type EvidenceRequirement = {
 
 export type Document = {
   id: string;
-  activityId: string;
+  activityId?: string;
+  propertyId?: string;
   type: "photo" | "receipt" | "note";
   name: string;
   url: string;

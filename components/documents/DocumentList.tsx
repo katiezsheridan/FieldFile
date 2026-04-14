@@ -65,7 +65,15 @@ export function DocumentList({ documents }: DocumentListProps) {
               className="border-b border-field-wheat/50 hover:bg-field-cream/50"
             >
               <td className="py-3 px-4">
-                <span className="text-field-ink">{doc.name}</span>
+                <a
+                  href={doc.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  download={doc.name}
+                  className="text-field-forest hover:underline"
+                >
+                  {doc.name}
+                </a>
               </td>
               <td className="py-3 px-4">
                 <span

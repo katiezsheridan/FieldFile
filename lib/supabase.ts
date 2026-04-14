@@ -59,6 +59,30 @@ export const uploadObservationPhoto = async (
   return { path: data.path, url: urlData.publicUrl }
 }
 
+export const uploadLandDocument = async (
+  file: File,
+  propertyId: string
+): Promise<{ path: string; url: string } | null> => {
+  const fileExt = file.name.split('.').pop()
+  const fileName = `properties/${propertyId}/${Date.now()}.${fileExt}`
+
+  const { data, error } = await supabase.storage
+    .from('documents')
+    .upload(fileName, file)
+
+  if (error) {
+    console.error('Land document upload error:', error.message)
+    alert(`Upload failed: ${error.message}`)
+    return null
+  }
+
+  const { data: urlData } = supabase.storage
+    .from('documents')
+    .getPublicUrl(data.path)
+
+  return { path: data.path, url: urlData.publicUrl }
+}
+
 export const deleteDocument = async (path: string): Promise<boolean> => {
   const { error } = await supabase.storage.from('documents').remove([path])
   return !error

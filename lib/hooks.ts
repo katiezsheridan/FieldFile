@@ -274,6 +274,103 @@ export async function createActivity(
   return data;
 }
 
+// Create a land document record (attached to property, not an activity)
+export async function createLandDocument(
+  propertyId: string,
+  doc: {
+    type: "photo" | "receipt" | "note";
+    name: string;
+    url: string;
+    storagePath?: string;
+  }
+) {
+  const { data, error } = await supabase
+    .from("documents")
+    .insert({
+      property_id: propertyId,
+      type: doc.type,
+      name: doc.name,
+      url: doc.url,
+      storage_path: doc.storagePath,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Land document creation error:", error);
+    alert(`Failed to save document record: ${error.message}`);
+    throw error;
+  }
+  return data;
+}
+
+// Fetch all documents for a property: land docs (property_id) + activity evidence
+export function usePropertyDocuments(propertyId: string | undefined) {
+  const [landDocuments, setLandDocuments] = useState<Document[]>([]);
+  const [activityDocuments, setActivityDocuments] = useState<Document[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchDocs = useCallback(async () => {
+    if (!propertyId) {
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    setError(null);
+
+    const { data: activities, error: actErr } = await supabase
+      .from("activities")
+      .select("id")
+      .eq("property_id", propertyId);
+    if (actErr) {
+      setError(actErr.message);
+      setLoading(false);
+      return;
+    }
+    const activityIds = (activities || []).map((a) => a.id);
+
+    const [landRes, evidenceRes] = await Promise.all([
+      supabase.from("documents").select("*").eq("property_id", propertyId),
+      activityIds.length
+        ? supabase.from("documents").select("*").in("activity_id", activityIds)
+        : Promise.resolve({ data: [], error: null } as { data: unknown[]; error: null }),
+    ]);
+
+    if (landRes.error) {
+      setError(landRes.error.message);
+      setLoading(false);
+      return;
+    }
+    if (evidenceRes.error) {
+      setError(evidenceRes.error.message);
+      setLoading(false);
+      return;
+    }
+
+    const map = (rows: unknown[]): Document[] =>
+      (rows as Array<Record<string, unknown>>).map((d) => ({
+        id: d.id as string,
+        activityId: (d.activity_id as string | null) ?? undefined,
+        propertyId: (d.property_id as string | null) ?? undefined,
+        type: d.type as Document["type"],
+        name: d.name as string,
+        url: d.url as string,
+        uploadedAt: d.uploaded_at as string,
+      }));
+
+    setLandDocuments(map((landRes.data || []) as unknown[]));
+    setActivityDocuments(map((evidenceRes.data || []) as unknown[]));
+    setLoading(false);
+  }, [propertyId]);
+
+  useEffect(() => {
+    fetchDocs();
+  }, [fetchDocs]);
+
+  return { landDocuments, activityDocuments, loading, error, refetch: fetchDocs };
+}
+
 // Create document record
 export async function createDocument(
   activityId: string,
