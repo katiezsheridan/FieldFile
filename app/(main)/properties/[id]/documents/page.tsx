@@ -3,7 +3,13 @@
 import { useCallback, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { useProperty, usePropertyDocuments, createLandDocument } from "@/lib/hooks";
+import {
+  useProperty,
+  usePropertyDocuments,
+  createLandDocument,
+  updateDocumentName,
+  deleteDocumentRecord,
+} from "@/lib/hooks";
 import { uploadLandDocument } from "@/lib/supabase";
 import { FileUploader } from "@/components/documents/FileUploader";
 import { DocumentList } from "@/components/documents/DocumentList";
@@ -28,6 +34,22 @@ export default function DocumentsPage() {
   } = usePropertyDocuments(propertyId);
 
   const [uploading, setUploading] = useState(false);
+
+  const handleRename = useCallback(
+    async (doc: Document, name: string) => {
+      await updateDocumentName(doc.id, name);
+      await refetch();
+    },
+    [refetch]
+  );
+
+  const handleDelete = useCallback(
+    async (doc: Document) => {
+      await deleteDocumentRecord(doc.id, doc.storagePath);
+      await refetch();
+    },
+    [refetch]
+  );
 
   const handleLandUpload = useCallback(
     async (files: File[]) => {
@@ -110,7 +132,11 @@ export default function DocumentsPage() {
           {docsLoading ? (
             <div className="text-field-ink/60 text-sm">Loading…</div>
           ) : (
-            <DocumentList documents={landDocuments} />
+            <DocumentList
+              documents={landDocuments}
+              onRename={handleRename}
+              onDelete={handleDelete}
+            />
           )}
         </section>
 
@@ -134,7 +160,11 @@ export default function DocumentsPage() {
                   >
                     {activity.name}
                   </Link>
-                  <DocumentList documents={docs} />
+                  <DocumentList
+                    documents={docs}
+                    onRename={handleRename}
+                    onDelete={handleDelete}
+                  />
                 </div>
               ))}
             </div>

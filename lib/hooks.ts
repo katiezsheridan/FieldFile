@@ -184,6 +184,7 @@ export function useActivity(activityId: string | undefined) {
         type: doc.type,
         name: doc.name,
         url: doc.url,
+        storagePath: doc.storage_path ?? undefined,
         uploadedAt: doc.uploaded_at,
         metadata: doc.gps_lat
           ? { gpsCoordinates: { lat: doc.gps_lat, lng: doc.gps_lng } }
@@ -274,6 +275,27 @@ export async function createActivity(
   return data;
 }
 
+// Rename an existing document
+export async function updateDocumentName(id: string, name: string) {
+  const { error } = await supabase
+    .from("documents")
+    .update({ name })
+    .eq("id", id);
+  if (error) throw error;
+}
+
+// Delete a document: storage object (if path) then DB row
+export async function deleteDocumentRecord(id: string, storagePath?: string) {
+  if (storagePath) {
+    const { error: storageErr } = await supabase.storage
+      .from("documents")
+      .remove([storagePath]);
+    if (storageErr) console.error("Storage delete error:", storageErr);
+  }
+  const { error } = await supabase.from("documents").delete().eq("id", id);
+  if (error) throw error;
+}
+
 // Create a land document record (attached to property, not an activity)
 export async function createLandDocument(
   propertyId: string,
@@ -356,6 +378,7 @@ export function usePropertyDocuments(propertyId: string | undefined) {
         type: d.type as Document["type"],
         name: d.name as string,
         url: d.url as string,
+        storagePath: (d.storage_path as string | null) ?? undefined,
         uploadedAt: d.uploaded_at as string,
       }));
 

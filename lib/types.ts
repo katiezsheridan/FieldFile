@@ -38,6 +38,7 @@ export type Document = {
   type: "photo" | "receipt" | "note";
   name: string;
   url: string;
+  storagePath?: string;
   uploadedAt: string;
   metadata?: {
     gpsCoordinates?: { lat: number; lng: number };

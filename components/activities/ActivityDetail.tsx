@@ -5,19 +5,52 @@ import Link from "next/link";
 import { Activity, ActivityStatus } from "@/lib/types";
 import { formatDate, getStatusColor, getStatusLabel } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
+import { updateDocumentName, deleteDocumentRecord } from "@/lib/hooks";
 import ActivityChecklist from "./ActivityChecklist";
 
 interface ActivityDetailProps {
   activity: Activity;
   propertyId: string;
   onUpdate?: (activity: Activity) => void;
+  onDocsChange?: () => void;
 }
 
 export default function ActivityDetail({
   activity,
   propertyId,
   onUpdate,
+  onDocsChange,
 }: ActivityDetailProps) {
+  const [editingDocId, setEditingDocId] = useState<string | null>(null);
+  const [docDraftName, setDocDraftName] = useState("");
+  const [docBusyId, setDocBusyId] = useState<string | null>(null);
+
+  const saveDocName = async (docId: string, currentName: string) => {
+    const name = docDraftName.trim();
+    if (!name || name === currentName) {
+      setEditingDocId(null);
+      return;
+    }
+    setDocBusyId(docId);
+    try {
+      await updateDocumentName(docId, name);
+      setEditingDocId(null);
+      onDocsChange?.();
+    } finally {
+      setDocBusyId(null);
+    }
+  };
+
+  const deleteDoc = async (docId: string, name: string, storagePath?: string) => {
+    if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
+    setDocBusyId(docId);
+    try {
+      await deleteDocumentRecord(docId, storagePath);
+      onDocsChange?.();
+    } finally {
+      setDocBusyId(null);
+    }
+  };
   // Parse notes as dated entries (JSON array) or migrate from plain string
   const parseNotes = (raw: string): { date: string; text: string }[] => {
     if (!raw) return [];
@@ -264,50 +297,110 @@ export default function ActivityDetail({
           </p>
         ) : (
           <div className="space-y-3">
-            {activity.documents.map((doc) => (
-              <a
-                key={doc.id}
-                href={doc.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-between py-3 border-b border-field-wheat last:border-b-0 hover:bg-field-cream/40"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-field-cream rounded flex items-center justify-center overflow-hidden">
-                    {doc.type === "photo" && doc.url ? (
-                      <img
-                        src={doc.url}
-                        alt={doc.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <svg
-                        className="w-5 h-5 text-field-forest"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={1.5}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"
+            {activity.documents.map((doc) => {
+              const isEditing = editingDocId === doc.id;
+              const isBusy = docBusyId === doc.id;
+              return (
+                <div
+                  key={doc.id}
+                  className="flex items-center justify-between py-3 border-b border-field-wheat last:border-b-0 hover:bg-field-cream/40"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 bg-field-cream rounded flex items-center justify-center overflow-hidden flex-shrink-0">
+                      {doc.type === "photo" && doc.url ? (
+                        <img
+                          src={doc.url}
+                          alt={doc.name}
+                          className="w-full h-full object-cover"
                         />
-                      </svg>
+                      ) : (
+                        <svg
+                          className="w-5 h-5 text-field-forest"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth={1.5}
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"
+                          />
+                        </svg>
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      {isEditing ? (
+                        <input
+                          autoFocus
+                          value={docDraftName}
+                          onChange={(e) => setDocDraftName(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") saveDocName(doc.id, doc.name);
+                            if (e.key === "Escape") setEditingDocId(null);
+                          }}
+                          className="border border-field-sage rounded px-2 py-1 text-sm w-full"
+                        />
+                      ) : (
+                        <a
+                          href={doc.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          download={doc.name}
+                          className="text-sm font-medium text-field-ink hover:text-field-forest hover:underline block truncate"
+                        >
+                          {doc.name}
+                        </a>
+                      )}
+                      <p className="text-xs text-field-ink/60">
+                        {getDocumentTypeLabel(doc.type)} - Uploaded{" "}
+                        {formatDate(doc.uploadedAt)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-3 text-sm flex-shrink-0 ml-3">
+                    {isEditing ? (
+                      <>
+                        <button
+                          onClick={() => saveDocName(doc.id, doc.name)}
+                          disabled={isBusy}
+                          className="text-field-forest hover:underline disabled:opacity-50"
+                        >
+                          Save
+                        </button>
+                        <button
+                          onClick={() => setEditingDocId(null)}
+                          disabled={isBusy}
+                          className="text-field-ink/60 hover:underline disabled:opacity-50"
+                        >
+                          Cancel
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => {
+                            setEditingDocId(doc.id);
+                            setDocDraftName(doc.name);
+                          }}
+                          disabled={isBusy}
+                          className="text-field-ink/70 hover:text-field-forest disabled:opacity-50"
+                        >
+                          Rename
+                        </button>
+                        <button
+                          onClick={() => deleteDoc(doc.id, doc.name, doc.storagePath)}
+                          disabled={isBusy}
+                          className="text-red-600 hover:text-red-700 disabled:opacity-50"
+                        >
+                          Delete
+                        </button>
+                      </>
                     )}
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-field-ink">
-                      {doc.name}
-                    </p>
-                    <p className="text-xs text-field-ink/60">
-                      {getDocumentTypeLabel(doc.type)} - Uploaded{" "}
-                      {formatDate(doc.uploadedAt)}
-                    </p>
-                  </div>
                 </div>
-              </a>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

@@ -134,7 +134,7 @@ export default function ActivityDetailPage() {
         </Link>
 
         {/* Activity Detail Component */}
-        <ActivityDetail activity={activity} propertyId={id} />
+        <ActivityDetail activity={activity} propertyId={id} onDocsChange={refetchActivity} />
 
         {/* File Uploader */}
         {showUploader && (
