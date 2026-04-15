@@ -20,6 +20,10 @@ export async function POST(request: Request) {
 
     if (dbError) {
       console.error("Supabase insert error:", dbError);
+      return NextResponse.json(
+        { success: false, error: "Failed to save signup" },
+        { status: 500 }
+      );
     }
 
     const isQuiz = source === "quiz";
@@ -35,31 +39,38 @@ export async function POST(request: Request) {
       answersHtml = `<p><strong>Quiz Answers:</strong></p><ul>${answerEntries}</ul>`;
     }
 
-    await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from: "FieldFile <katie@fieldfile.com>",
-        to: process.env.LEAD_NOTIFICATION_EMAIL,
-        subject,
-        html: `
-          <h2>${isQuiz ? "New Quiz Lead" : "New Signup Lead"}</h2>
-          <p><strong>Source:</strong> ${isQuiz ? "Eligibility Quiz" : "Get Started Form"}</p>
-          <p><strong>Name:</strong> ${name}</p>
-          <p><strong>Email:</strong> ${email}</p>
-          <p><strong>${isQuiz ? "Phone:" : "Property Address:"}</strong> ${propertyAddress}</p>
-          <p><strong>Submitted:</strong> ${new Date().toLocaleString("en-US", { timeZone: "America/Chicago" })}</p>
-          ${answersHtml}
-        `,
-      }),
-    });
+    try {
+      await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from: "FieldFile <katie@fieldfile.com>",
+          to: process.env.LEAD_NOTIFICATION_EMAIL,
+          subject,
+          html: `
+            <h2>${isQuiz ? "New Quiz Lead" : "New Signup Lead"}</h2>
+            <p><strong>Source:</strong> ${isQuiz ? "Eligibility Quiz" : "Get Started Form"}</p>
+            <p><strong>Name:</strong> ${name}</p>
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>${isQuiz ? "Phone:" : "Property Address:"}</strong> ${propertyAddress}</p>
+            <p><strong>Submitted:</strong> ${new Date().toLocaleString("en-US", { timeZone: "America/Chicago" })}</p>
+            ${answersHtml}
+          `,
+        }),
+      });
+    } catch (emailError) {
+      console.error("Lead notification email failed:", emailError);
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Lead notification email failed:", error);
-    return NextResponse.json({ success: false }, { status: 200 });
+    console.error("Signup lead handler failed:", error);
+    return NextResponse.json(
+      { success: false, error: "Signup failed" },
+      { status: 500 }
+    );
   }
 }
