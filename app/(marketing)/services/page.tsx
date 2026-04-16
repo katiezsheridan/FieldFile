@@ -33,7 +33,7 @@ const services: Service[] = [
       },
       {
         owner: "Note seasonal patterns and species",
-        fieldfile: "Compile into county-ready survey report",
+        fieldfile: "Compile into a county-ready survey summary",
       },
       {
         owner: "Report any unusual sightings",
@@ -59,7 +59,7 @@ const services: Service[] = [
       },
       {
         owner: "Monitor results and report changes",
-        fieldfile: "Compliance documentation for county filing",
+        fieldfile: "Compliance documentation for your annual report",
       },
     ],
   },
@@ -69,7 +69,7 @@ const services: Service[] = [
       "Annual species counts and population monitoring to satisfy county requirements.",
     image: "/images/products/wildlife-census.jpg",
     detail:
-      "Annual census counts are required to demonstrate active wildlife management. We help you set up monitoring systems and compile the data into compliant reports.",
+      "Annual census counts are required to demonstrate active wildlife management. We help you set up monitoring systems and compile the data into compliant documentation.",
     responsibilities: [
       {
         owner: "Set up and check trail cameras",
@@ -125,7 +125,7 @@ const services: Service[] = [
       },
       {
         owner: "Report equipment issues or damage",
-        fieldfile: "Compliance documentation and filing",
+        fieldfile: "Compliance documentation for your annual report",
       },
     ],
   },
@@ -147,7 +147,7 @@ const services: Service[] = [
       },
       {
         owner: "Clean and repair structures seasonally",
-        fieldfile: "Compliance documentation for county filing",
+        fieldfile: "Compliance documentation for your annual report",
       },
     ],
   },
@@ -169,7 +169,7 @@ const services: Service[] = [
       },
       {
         owner: "Add material as piles settle over time",
-        fieldfile: "Compliance documentation for county filing",
+        fieldfile: "Compliance documentation for your annual report",
       },
     ],
   },
@@ -192,9 +192,9 @@ export default function ServicesPage() {
             Our Services
           </h1>
           <p className="text-lg text-field-black/70 max-w-2xl mx-auto">
-            From initial property evaluation to annual filing, we handle every
-            step of your wildlife tax exemption. Click any service to see
-            what&apos;s involved.
+            From property setup to annual report preparation, we help you
+            manage every step of your wildlife tax exemption. Click any service
+            to see what&apos;s involved.
           </p>
         </div>
       </section>

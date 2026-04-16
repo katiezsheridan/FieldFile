@@ -6,7 +6,6 @@ import { useProperties } from "@/lib/hooks";
 import { getDeadlineDays } from "@/lib/demo-data";
 import { ProgressBar } from "@/components/dashboard/ProgressBar";
 import { DeadlineCountdown } from "@/components/dashboard/DeadlineCountdown";
-import { FilingStatus } from "@/components/dashboard/FilingStatus";
 import { QuickActions } from "@/components/dashboard/QuickActions";
 
 export default function DashboardPage() {
@@ -89,10 +88,6 @@ export default function DashboardPage() {
             total={totalActivities}
           />
           <DeadlineCountdown daysRemaining={daysRemaining} />
-          <FilingStatus
-            status={property.filing.status}
-            year={property.filing.year}
-          />
           <QuickActions />
         </div>
       </div>

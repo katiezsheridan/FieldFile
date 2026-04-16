@@ -22,15 +22,9 @@ const steps = [
   },
   {
     number: "4",
-    title: "We compile & review your report",
+    title: "We prepare & review your annual report",
     description:
-      "Our team organizes your documentation into a county-ready report. A real person reviews every filing for accuracy and completeness before it goes out.",
-  },
-  {
-    number: "5",
-    title: "We file with your county",
-    description:
-      "We submit your completed report to your county appraisal district on your behalf. You'll receive confirmation once it's filed and can track the status in your dashboard.",
+      "Our team organizes your documentation into a county-ready annual report. A real person reviews it for accuracy and completeness, so it's ready for you to submit to your county.",
   },
 ];
 
@@ -43,8 +37,8 @@ export default function HowItWorksPage() {
           How FieldFile Works
         </h1>
         <p className="text-lg text-field-ink/60 max-w-2xl mx-auto">
-          From signup to filing, we handle the heavy lifting so you can focus on
-          your land.
+          From signup to your annual report, we handle the heavy lifting so you
+          can focus on your land.
         </p>
       </div>
 
@@ -87,7 +81,7 @@ export default function HowItWorksPage() {
               </h2>
               <p className="text-field-ink/70 leading-relaxed mb-4">
                 Snap a photo, add your notes, and we&apos;ll handle the rest.
-                Every activity is organized and ready for your annual filing.
+                Every activity is organized and ready for your annual report.
               </p>
               <ul className="space-y-2 text-sm text-field-ink/60">
                 <li className="flex items-center gap-2">
@@ -135,8 +129,8 @@ export default function HowItWorksPage() {
             Ready to get started?
           </h2>
           <p className="text-field-ink/60 mb-6">
-            Join Texas landowners who trust FieldFile to handle their wildlife
-            exemption.
+            Join Texas landowners who trust FieldFile to stay organized and
+            prepared for wildlife exemption season.
           </p>
           <Link
             href="/signup"

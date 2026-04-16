@@ -14,29 +14,8 @@ const steps = [
   },
   {
     number: "3",
-    title: "We handle the filing",
-    description: "We compile and submit to your county.",
-  },
-];
-
-const testimonials = [
-  {
-    quote:
-      "FieldFile made it so easy to track our wildlife activities. Filing season is now completely hands-off.",
-    name: "Sarah Mitchell",
-    location: "Gillespie County",
-  },
-  {
-    quote:
-      "We switched from doing everything on paper. The reminders alone are worth it — we never miss a deadline now.",
-    name: "James Hargrove",
-    location: "Hays County",
-  },
-  {
-    quote:
-      "Having someone review our filing before it goes to the county gives us real peace of mind.",
-    name: "Linda Dawson",
-    location: "Blanco County",
+    title: "Prepare your report",
+    description: "We prepare your annual report for you to submit to the county.",
   },
 ];
 
@@ -44,7 +23,7 @@ const previewFaqs = [
   {
     question: "What is a wildlife tax exemption?",
     answer:
-      "In Texas, landowners can qualify for reduced property taxes by actively managing their land for wildlife. This requires documenting specific activities and filing an annual report with your county.",
+      "In Texas, landowners can qualify for reduced property taxes by actively managing their land for wildlife. This requires documenting specific activities and submitting an annual report to your county.",
   },
   {
     question: "How much can I save?",
@@ -52,9 +31,9 @@ const previewFaqs = [
       "Savings vary by county and property size, but many Texas landowners save thousands of dollars per year through wildlife management valuation.",
   },
   {
-    question: "Do you file in all Texas counties?",
+    question: "Which counties do you serve?",
     answer:
-      "Yes, we support filing in all 254 Texas counties. Our system is kept up-to-date with each county's specific requirements and deadlines.",
+      "We're primarily focused on Central Texas for now and expanding to additional counties. If your county isn't currently supported, you can submit a request at fieldfile.com/request-availability and we'll let you know when we're available in your area.",
   },
 ];
 
@@ -88,7 +67,7 @@ export default function HomePage() {
             <span className="text-field-green">simplified</span>
           </h1>
           <p className="text-lg text-field-black/70 mb-8 max-w-2xl mx-auto">
-            Organize. Document. File. Done.
+            Store. Document. Organize. Done.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
@@ -117,9 +96,9 @@ export default function HomePage() {
             Your wildlife exemption, all in one place
           </h2>
           <p className="text-field-black/70 mb-6 leading-relaxed">
-            Track activities, store documents, and generate county-ready
-            reports from a single dashboard. No more spreadsheets, lost
-            receipts, or missed deadlines.
+            Log activities, store documents, and prepare your annual report
+            from a single dashboard. No more spreadsheets, lost receipts, or
+            missed deadlines.
           </p>
           <ul className="inline-flex flex-col items-start space-y-3 text-field-black/70 text-left">
             <li className="flex items-center gap-3">
@@ -128,7 +107,7 @@ export default function HomePage() {
             </li>
             <li className="flex items-center gap-3">
               <span className="w-2 h-2 bg-field-green rounded-full flex-shrink-0" />
-              Automatic report generation
+              Annual report preparation
             </li>
             <li className="flex items-center gap-3">
               <span className="w-2 h-2 bg-field-green rounded-full flex-shrink-0" />
@@ -155,8 +134,8 @@ export default function HomePage() {
                 Our Services
               </h2>
               <p className="text-field-black/60 mb-6">
-                From initial property evaluation to annual filing — we handle every
-                step of your wildlife tax exemption.
+                From property setup to annual report preparation — we help you
+                manage every step of your wildlife tax exemption.
               </p>
               <Link
                 href="/services"
@@ -201,35 +180,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="py-16 px-6 bg-white">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-2xl font-bold text-field-black text-center mb-12">
-            Trusted by Texas landowners
-          </h2>
-          <div className="grid md:grid-cols-3 gap-6">
-            {testimonials.map((testimonial) => (
-              <div
-                key={testimonial.name}
-                className="bg-field-cream rounded-xl border border-field-brown/10 p-6"
-              >
-                <p className="text-field-black/80 italic mb-4 leading-relaxed">
-                  &ldquo;{testimonial.quote}&rdquo;
-                </p>
-                <div>
-                  <p className="font-medium text-field-black text-sm">
-                    {testimonial.name}
-                  </p>
-                  <p className="text-field-black/50 text-sm">
-                    {testimonial.location}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Pricing Preview */}
       <section className="py-16 px-6 bg-field-cream">
         <div className="max-w-4xl mx-auto">
@@ -255,7 +205,7 @@ export default function HomePage() {
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="text-field-green">&#10003;</span>
-                  Generate a compliant wildlife report
+                  Log wildlife activities year-round
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="text-field-green">&#10003;</span>
@@ -263,10 +213,10 @@ export default function HomePage() {
                 </li>
               </ul>
             </div>
-            {/* Document Review */}
+            {/* Annual Report Review */}
             <div className="bg-white rounded-xl border border-field-brown/20 p-6">
               <h3 className="font-bold text-field-black text-lg mb-1">
-                Document Review
+                Annual Report Review
               </h3>
               <p className="text-2xl font-bold text-field-black mb-3">
                 $99
@@ -274,11 +224,11 @@ export default function HomePage() {
               <ul className="space-y-2 text-sm text-field-black/70 mb-6">
                 <li className="flex items-center gap-2">
                   <span className="text-field-green">&#10003;</span>
-                  Expert review for completeness
+                  Expert review of your annual report for completeness
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="text-field-green">&#10003;</span>
-                  Catches gaps before they reach the county
+                  Catches gaps before you submit to the county
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="text-field-green">&#10003;</span>
@@ -304,11 +254,11 @@ export default function HomePage() {
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="text-field-green">&#10003;</span>
-                  Filing-ready documentation package
+                  Organized documentation package ready for your report
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="text-field-green">&#10003;</span>
-                  Expert review included
+                  Annual report review included
                 </li>
               </ul>
             </div>
@@ -348,70 +298,6 @@ export default function HomePage() {
               className="text-field-forest font-medium hover:underline"
             >
               See all FAQs &rarr;
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Resources Teaser */}
-      <section className="py-16 px-6 bg-field-cream">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-2xl font-bold text-field-black text-center mb-4">
-            Wildlife Management Resources
-          </h2>
-          <p className="text-field-black/60 text-center mb-10">
-            Guides and articles to help you manage your property.
-          </p>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              {
-                title: "5 Common Mistakes Landowners Make During Filing Season",
-                description:
-                  "Avoid these pitfalls to ensure your annual report is accepted the first time.",
-                slug: "common-mistakes",
-              },
-              {
-                title: "Unique County-Specific Requirements in Texas",
-                description:
-                  "Why filing requirements differ across all 254 Texas counties and what you need to know.",
-                slug: "county-requirements",
-              },
-              {
-                title: "How to Create a Wildlife Management Plan",
-                description:
-                  "Everything you need to build a compliant wildlife management plan from scratch.",
-                slug: "wildlife-management-plan",
-              },
-              {
-                title: "Post-Approval Checklist for Wildlife Management",
-                description:
-                  "Got your wildlife exemption approved? Here are 5 things you need to do every year to keep it.",
-                slug: "post-approval-checklist",
-              },
-            ].map((article) => (
-              <Link
-                key={article.title}
-                href={`/resources?article=${article.slug}`}
-                className="bg-white rounded-xl border border-field-brown/10 p-6 hover:border-field-green/40 hover:shadow-lg transition-all"
-              >
-                <span className="inline-block bg-field-green/10 text-field-green text-xs font-medium px-2 py-1 rounded mb-3">
-                  New
-                </span>
-                <h3 className="font-semibold text-field-black mb-2 text-sm">
-                  {article.title}
-                </h3>
-                <p className="text-field-black/50 text-sm leading-relaxed">
-                  {article.description}
-                </p>
-              </Link>
-            ))}
-          </div>
-          <div className="text-center mt-8">
-            <Link
-              href="/resources"
-              className="text-field-forest font-medium hover:underline"
-            >
-              View all resources &rarr;
             </Link>
           </div>
         </div>

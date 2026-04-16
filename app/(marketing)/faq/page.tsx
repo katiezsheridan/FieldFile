@@ -10,7 +10,7 @@ const faqCategories = [
       {
         question: "What is a wildlife tax exemption?",
         answer:
-          "In Texas, landowners can qualify for reduced property taxes by actively managing their land for wildlife. This requires documenting specific wildlife management activities and filing an annual report with your county appraisal district.",
+          "In Texas, landowners can qualify for reduced property taxes by actively managing their land for wildlife. This requires documenting specific wildlife management activities and submitting an annual report to your county appraisal district.",
       },
       {
         question: "How much can I save with a wildlife exemption?",
@@ -30,7 +30,7 @@ const faqCategories = [
       {
         question: "What's the minimum acreage required?",
         answer:
-          "Minimum acreage varies by county. Most counties require at least 10-15 acres, but some may require more. Contact your county appraisal district or ask us — we know the requirements for all 254 Texas counties.",
+          "Minimum acreage varies by county. Most counties require at least 10-15 acres, but some may require more. Contact your county appraisal district to confirm requirements for your area.",
       },
     ],
   },
@@ -48,14 +48,14 @@ const faqCategories = [
           "Yes, a wildlife management plan is required for your exemption. If you don't have one, we can create one for you as an add-on service for $1,000.",
       },
       {
-        question: "Will a real person review my filing?",
+        question: "Will a real person review my annual report?",
         answer:
-          "Yes! Every filing is reviewed by a human before submission to ensure accuracy and completeness. You'll have a chance to review and approve the final version before we submit.",
+          "Yes! With our Annual Report Review add-on, a qualified reviewer checks your report for accuracy and completeness before you submit it to the county.",
       },
       {
-        question: "Do you file in all Texas counties?",
+        question: "Which counties do you serve?",
         answer:
-          "Yes, we support filing in all 254 Texas counties. Our system is kept up-to-date with each county's specific requirements and deadlines.",
+          "We're primarily focused on Central Texas for now and actively expanding to additional counties. If your county isn't currently supported, you can submit a request at https://www.fieldfile.com/request-availability and we'll notify you when FieldFile is available in your area.",
       },
     ],
   },
@@ -63,19 +63,19 @@ const faqCategories = [
     title: "Pricing & Billing",
     faqs: [
       {
-        question: "What's the difference between Filing Only and Full-Service?",
+        question: "What's the difference between Annual Report Review and Full-Service?",
         answer:
-          "Filing Only covers organizing your documentation and submitting to the county. Full-Service includes everything in Filing Only plus hands-on support executing your wildlife activities throughout the year.",
+          "Annual Report Review covers a qualified reviewer checking your annual report and supporting documentation for completeness before you submit to the county. Full-Service includes hands-on support executing and documenting your wildlife activities on the ground throughout the year.",
       },
       {
         question: "What's included in a site visit?",
         answer:
-          "Our wildlife specialists will visit your property to photograph and document your completed wildlife management activities. This provides professional documentation for your filing.",
+          "Our wildlife specialists will visit your property to photograph and document your completed wildlife management activities. This provides professional documentation for your annual report.",
       },
       {
         question: "Is FieldFile really free?",
         answer:
-          "Yes! Document storage and report creation are free forever. No credit card required. You can explore the platform, add your property, and start tracking activities at no cost. Paid services like document review and full-service management are available when you need them.",
+          "Yes! Document storage and annual report preparation are free forever. No credit card required. You can explore the platform, add your property, and start tracking activities at no cost. Paid services like Annual Report Review and Full-Service Management are available when you need them.",
       },
     ],
   },
@@ -90,7 +90,7 @@ const faqCategories = [
       {
         question: "Who can see my property information?",
         answer:
-          "Only you and authorized FieldFile team members who review your filing can access your data. We never sell or share your information with third parties for marketing purposes.",
+          "Only you and authorized FieldFile team members who review your annual report can access your data. We never sell or share your information with third parties for marketing purposes.",
       },
       {
         question: "Can I delete my account and data?",
