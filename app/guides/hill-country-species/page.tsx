@@ -113,7 +113,7 @@ export default function SpeciesIdGuidePage() {
           Hill Country Species ID
         </h1>
         <p className="text-field-ink/70 mb-8">
-          Quick field tells for the wildlife you're most likely to see while doing a census
+          Quick field tells for the wildlife you&apos;re most likely to see while doing a census
           in the Texas Hill Country. One or two features per species — enough to log with
           confidence.
         </p>
@@ -143,7 +143,7 @@ export default function SpeciesIdGuidePage() {
         </div>
 
         <p className="text-xs text-field-ink/50 mt-8">
-          When you're unsure, log the category (e.g. "Bird → Other") and add a note —
+          When you&apos;re unsure, log the category (e.g. &ldquo;Bird → Other&rdquo;) and add a note —
           you can refine later from a photo.
         </p>
       </div>
