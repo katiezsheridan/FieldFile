@@ -324,7 +324,7 @@ export default function ServicesPage() {
               Where We Serve
             </h2>
             <p className="text-field-black/70 max-w-2xl mx-auto">
-              FieldFile currently supports landowners across dozens of Texas
+              FieldFile currently supports landowners across central Texas
               counties, with more being added every month.
             </p>
           </div>
