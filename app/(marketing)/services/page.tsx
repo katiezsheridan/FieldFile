@@ -345,13 +345,13 @@ export default function ServicesPage() {
               <div className="flex items-center gap-2">
                 <span className="w-4 h-4 rounded bg-field-forest flex-shrink-0" />
                 <span className="text-sm text-field-black/70">
-                  Currently servicing
+                  Counties currently serviced
                 </span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="w-4 h-4 rounded bg-[#D4A843] flex-shrink-0" />
                 <span className="text-sm text-field-black/70">
-                  Expanding to
+                  Counties coming soon
                 </span>
               </div>
             </div>
