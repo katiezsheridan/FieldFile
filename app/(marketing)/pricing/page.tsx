@@ -6,12 +6,12 @@ import Link from "next/link";
 const pricingTiers = [
   {
     id: "free",
-    name: "Free",
+    name: "Free Document Storage",
     description: "Get started at no cost — forever.",
     priceLabel: "Free",
     features: [
       { name: "Store and organize photos, receipts, and activity logs", included: true },
-      { name: "Generate a compliant wildlife report", included: true },
+      { name: "Log wildlife activities year-round", included: true },
       { name: "Deadline reminders and tracking", included: true },
       { name: "Secure document storage for plans, timber records, and more", included: true },
     ],
@@ -19,13 +19,13 @@ const pricingTiers = [
     highlighted: false,
   },
   {
-    id: "document-review",
-    name: "Document Review",
+    id: "annual-report-review",
+    name: "Annual Report Review",
     description: "Peace of mind before you submit.",
     priceLabel: "$99",
     features: [
-      { name: "A qualified reviewer checks your report and documents for completeness", included: true },
-      { name: "Catches gaps before they reach the county", included: true },
+      { name: "A qualified reviewer checks your annual report and documents for completeness", included: true },
+      { name: "Catches gaps before you submit to the county", included: true },
       { name: "Written findings summary delivered within 3 business days", included: true },
     ],
     cta: "Get started",
@@ -35,12 +35,12 @@ const pricingTiers = [
   {
     id: "full-service",
     name: "Full-Service Management",
-    description: "We handle everything.",
+    description: "We handle your activities on the ground.",
     priceLabel: "$750/activity + supplies",
     features: [
       { name: "We execute and document your wildlife or timber activities", included: true },
-      { name: "You receive a filing-ready documentation package", included: true },
-      { name: "Expert review included at no extra charge", included: true },
+      { name: "You receive an organized documentation package ready for your annual report", included: true },
+      { name: "Annual report review included at no extra charge", included: true },
     ],
     cta: "Get started",
     highlighted: false,
@@ -68,7 +68,7 @@ const bundles = [
     description: "Best for first-time owners who need a plan and two years of compliance covered.",
     includes: [
       "Wildlife plan creation",
-      "Document review for year 1 and year 2",
+      "Annual report review for year 1 and year 2",
       "1 site visit",
     ],
   },
@@ -87,27 +87,27 @@ const bundles = [
 const faqs = [
   {
     question: "What is a wildlife tax exemption?",
-    answer: "In Texas, landowners can qualify for reduced property taxes by actively managing their land for wildlife. This requires documenting specific wildlife management activities and filing an annual report with your county appraisal district.",
+    answer: "In Texas, landowners can qualify for reduced property taxes by actively managing their land for wildlife. This requires documenting specific wildlife management activities and submitting an annual report to your county appraisal district.",
   },
   {
-    question: "What's the difference between Document Review and Full-Service?",
-    answer: "Document Review checks your existing documentation for completeness before you submit. Full-Service means we actually execute and document the wildlife activities on your behalf, delivering a filing-ready package.",
+    question: "What's the difference between Annual Report Review and Full-Service?",
+    answer: "Annual Report Review checks your report and supporting documentation for completeness before you submit to the county. Full-Service means we actually execute and document the wildlife activities on the ground, delivering an organized documentation package ready for your annual report.",
   },
   {
     question: "What's included in a site visit?",
-    answer: "Our wildlife specialists will visit your property to photograph and document your completed wildlife management activities. This provides professional documentation for your filing.",
+    answer: "Our wildlife specialists will visit your property to photograph and document your completed wildlife management activities. This provides professional documentation for your annual report.",
   },
   {
-    question: "Do you file in all Texas counties?",
-    answer: "Yes, we support filing in all 254 Texas counties. Our system is kept up-to-date with each county's specific requirements and deadlines.",
+    question: "Which counties do you serve?",
+    answer: "We're primarily focused on Central Texas for now and expanding to additional counties. If your county isn't currently supported, submit a request at fieldfile.com/request-availability and we'll notify you when we're available in your area.",
   },
   {
     question: "Do I need a wildlife management plan?",
     answer: "Yes, a wildlife management plan is required for your exemption. If you don't have one, we can create one for you as an add-on service for $1,000.",
   },
   {
-    question: "Will a real person review my filing?",
-    answer: "Yes! Every filing is reviewed by a human before submission to ensure accuracy and completeness. You'll have a chance to review and approve the final version before we submit.",
+    question: "Will a real person review my annual report?",
+    answer: "Yes! With the Annual Report Review add-on, a qualified reviewer checks your report for accuracy and completeness, so you can submit to the county with confidence.",
   },
 ];
 
@@ -301,7 +301,7 @@ export default function PricingPage() {
       <div className="text-center mt-16 p-8 bg-field-forest/5 rounded-2xl max-w-2xl mx-auto">
         <h2 className="text-xl font-bold text-field-ink mb-2">Ready to get started?</h2>
         <p className="text-field-ink/60 mb-6">
-          Let us handle your wildlife exemption filing.
+          Keep your wildlife exemption organized, documented, and ready.
         </p>
         <Link
           href="/signup"

@@ -37,10 +37,10 @@ export default function TermsPage() {
             </h2>
             <p className="text-field-ink/70 leading-relaxed">
               FieldFile provides a platform for Texas landowners to organize,
-              document, and file wildlife management activities for the purpose
+              document, and log wildlife management activities for the purpose
               of maintaining wildlife tax exemptions. Our services include
-              activity tracking, document management, report generation, and
-              filing with county appraisal districts.
+              activity tracking, document management, and annual report
+              preparation for submission to county appraisal districts.
             </p>
           </section>
 
@@ -57,7 +57,8 @@ export default function TermsPage() {
             <p className="text-field-ink/70 leading-relaxed">
               You must be at least 18 years old to create an account. By
               registering, you represent that you are a lawful owner or
-              authorized manager of the property for which you are filing.
+              authorized manager of the property for which you are submitting a
+              wildlife tax exemption report.
             </p>
           </section>
 
@@ -98,8 +99,11 @@ export default function TermsPage() {
                 regarding wildlife management and property tax exemptions
               </li>
               <li>
-                Reviewing your filing before submission and confirming its
-                accuracy
+                Reviewing your annual report before submission to the county
+                and confirming its accuracy
+              </li>
+              <li>
+                Submitting your annual report to your county appraisal district
               </li>
             </ul>
           </section>
@@ -109,7 +113,8 @@ export default function TermsPage() {
               Limitation of Liability
             </h2>
             <p className="text-field-ink/70 leading-relaxed mb-3">
-              FieldFile is a documentation and filing service.{" "}
+              FieldFile is a documentation and annual report preparation
+              service.{" "}
               <strong>
                 We do not provide tax advice, legal advice, or wildlife
                 management consulting.

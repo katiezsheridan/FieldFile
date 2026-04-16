@@ -48,11 +48,11 @@ export default function AboutPage() {
               <div className="space-y-4 text-field-black/70 leading-relaxed">
                 <p>
                   When I went through the wildlife tax valuation process on my
-                  Hays County property, I kept thinking: this should not be this
-                  hard. The requirements are manageable. The process around them
-                  isn&apos;t. Spreadsheets, scattered notes, annual deadlines,
-                  county-specific rules. It&apos;s a system that was never
-                  designed with the landowner in mind.
+                  Hays County property, I kept thinking that it shouldn&apos;t
+                  be this hard. The requirements are manageable. The process
+                  around them isn&apos;t. Spreadsheets, scattered notes, annual
+                  deadlines, county-specific rules. It&apos;s a system that was
+                  never designed with the landowner in mind.
                 </p>
                 <p>
                   I&apos;ve spent my career building products that make
@@ -61,10 +61,10 @@ export default function AboutPage() {
                   couldn&apos;t find that for managing my own land, I built it.
                 </p>
                 <p>
-                  It&apos;s built around how landowners actually work: tracking
-                  activities in the field, generating reports when it&apos;s time
-                  to file, and staying organized year over year without starting
-                  from scratch every season.
+                  It&apos;s built around how landowners actually work. Tracking
+                  activities in the field, preparing annual reports when
+                  it&apos;s time to submit, staying organized year over year
+                  without starting from scratch every season.
                 </p>
               </div>
             </div>
@@ -114,7 +114,7 @@ export default function AboutPage() {
             Ready to simplify your wildlife exemption?
           </h2>
           <p className="text-field-black/60 mb-8">
-            Let&apos;s get your property set up and your filing on track.
+            Let&apos;s get your property set up and your annual report on track.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link

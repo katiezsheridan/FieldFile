@@ -31,7 +31,8 @@ export default function MarketingLayout({
                 />
               </div>
               <p className="text-sm text-field-ink/60">
-                Simplifying wildlife tax exemption filing for Texas landowners.
+                Document storage and annual report preparation for Texas
+                landowners with wildlife tax exemptions.
               </p>
             </div>
 
@@ -52,11 +53,6 @@ export default function MarketingLayout({
                 <li>
                   <Link href="/how-it-works" className="hover:text-field-ink">
                     How It Works
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/resources" className="hover:text-field-ink">
-                    Resources
                   </Link>
                 </li>
                 <li>
