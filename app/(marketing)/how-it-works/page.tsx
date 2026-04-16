@@ -12,7 +12,7 @@ const steps = [
     number: "2",
     title: "Build your wildlife management plan",
     description:
-      "Already have a plan? Upload it. Need one? We'll create a comprehensive wildlife management plan tailored to your property for $500.",
+      "Already have a plan? Upload it. Need one? We'll create a comprehensive wildlife management plan tailored to your property.",
   },
   {
     number: "3",

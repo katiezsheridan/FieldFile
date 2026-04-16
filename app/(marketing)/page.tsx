@@ -214,7 +214,10 @@ export default function HomePage() {
               </ul>
             </div>
             {/* Annual Report Review */}
-            <div className="bg-white rounded-xl border border-field-brown/20 p-6">
+            <div className="bg-white rounded-xl border-2 border-field-forest p-6 relative">
+              <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-field-forest text-white text-xs font-medium px-3 py-1 rounded-full">
+                Most Popular
+              </span>
               <h3 className="font-bold text-field-black text-lg mb-1">
                 Annual Report Review
               </h3>
@@ -237,10 +240,7 @@ export default function HomePage() {
               </ul>
             </div>
             {/* Full-Service */}
-            <div className="bg-white rounded-xl border-2 border-field-forest p-6 relative">
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-field-forest text-white text-xs font-medium px-3 py-1 rounded-full">
-                Full Service
-              </span>
+            <div className="bg-white rounded-xl border border-field-brown/20 p-6">
               <h3 className="font-bold text-field-black text-lg mb-1">
                 Full-Service Management
               </h3>

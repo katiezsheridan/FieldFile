@@ -45,7 +45,7 @@ const faqCategories = [
       {
         question: "Do I need a wildlife management plan?",
         answer:
-          "Yes, a wildlife management plan is required for your exemption. If you don't have one, we can create one for you as an add-on service for $1,000.",
+          "Yes, a wildlife management plan is required for your exemption. If you don't have one, we can create one for you as an add-on service.",
       },
       {
         question: "Will a real person review my annual report?",

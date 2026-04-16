@@ -36,7 +36,7 @@ const pricingTiers = [
     id: "full-service",
     name: "Full-Service Management",
     description: "We handle your activities on the ground.",
-    priceLabel: "$750/activity + supplies",
+    priceLabel: "$750/activity",
     features: [
       { name: "We execute and document your wildlife or timber activities", included: true },
       { name: "You receive an organized documentation package ready for your annual report", included: true },
@@ -103,7 +103,7 @@ const faqs = [
   },
   {
     question: "Do I need a wildlife management plan?",
-    answer: "Yes, a wildlife management plan is required for your exemption. If you don't have one, we can create one for you as an add-on service for $1,000.",
+    answer: "Yes, a wildlife management plan is required for your exemption. If you don't have one, we can create one for you as an add-on service.",
   },
   {
     question: "Will a real person review my annual report?",
