@@ -318,6 +318,12 @@ export default function HomePage() {
           >
             Get started free
           </Link>
+          <p className="text-sm text-field-black/60 mt-6">
+            Prefer to talk? Call{" "}
+            <a href="tel:+15122002054" className="text-field-forest hover:underline">
+              (512) 200-2054
+            </a>
+          </p>
         </div>
       </section>
     </div>
