@@ -73,6 +73,11 @@ export default function MarketingLayout({
                   </a>
                 </li>
                 <li>
+                  <a href="tel:+15122002054" className="hover:text-field-ink">
+                    (512) 200-2054
+                  </a>
+                </li>
+                <li>
                   <Link href="/faq" className="hover:text-field-ink">
                     FAQ
                   </Link>
