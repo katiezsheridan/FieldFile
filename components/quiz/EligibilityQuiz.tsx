@@ -6,11 +6,13 @@ import QuizProgress from "./QuizProgress";
 import QuestionCard from "./QuestionCard";
 import CountyLookup from "./CountyLookup";
 import QuizReport from "./QuizReport";
+import WildlifeFastTrack from "./WildlifeFastTrack";
 
 export default function EligibilityQuiz() {
   const [currentStep, setCurrentStep] = useState(1);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [showReport, setShowReport] = useState(false);
+  const [showWildlifeFastTrack, setShowWildlifeFastTrack] = useState(false);
   const surveyFileRef = useRef<File | null>(null);
 
   const totalSteps = quizQuestions.length;
@@ -30,6 +32,12 @@ export default function EligibilityQuiz() {
 
   function handleNext() {
     if (!hasAnswer) return;
+    // Q3 branch: if user already has wildlife valuation, skip straight to the
+    // FieldFile fast-track page instead of the full eligibility flow.
+    if (currentStep === 3 && answers[3] === "wildlife-valuation") {
+      setShowWildlifeFastTrack(true);
+      return;
+    }
     if (currentStep === totalSteps) {
       setShowReport(true);
     } else {
@@ -38,7 +46,9 @@ export default function EligibilityQuiz() {
   }
 
   function handleBack() {
-    if (showReport) {
+    if (showWildlifeFastTrack) {
+      setShowWildlifeFastTrack(false);
+    } else if (showReport) {
       setShowReport(false);
     } else if (currentStep > 1) {
       setCurrentStep((prev) => prev - 1);
@@ -49,6 +59,7 @@ export default function EligibilityQuiz() {
     setCurrentStep(1);
     setAnswers({});
     setShowReport(false);
+    setShowWildlifeFastTrack(false);
     surveyFileRef.current = null;
   }
 
@@ -61,6 +72,33 @@ export default function EligibilityQuiz() {
       title: `Endangered & threatened species in ${regionLabels[selectedRegion]}`,
       content: `Common protected species in your region include: ${species.join(", ")}. If any of these are present on your property, it can strengthen your wildlife management plan and may open doors to conservation grants.`,
     };
+  }
+
+  if (showWildlifeFastTrack) {
+    return (
+      <div className="min-h-screen bg-field-cream py-12 px-4">
+        <div className="max-w-2xl mx-auto mb-6">
+          <button
+            onClick={handleBack}
+            className="text-sm text-field-ink/60 hover:text-field-ink font-medium transition-colors"
+          >
+            &larr; Back to questions
+          </button>
+        </div>
+        <WildlifeFastTrack
+          answers={answers}
+          surveyFile={surveyFileRef.current}
+        />
+        <div className="max-w-2xl mx-auto mt-8 text-center">
+          <button
+            onClick={handleRestart}
+            className="text-sm text-field-ink/50 hover:text-field-ink font-medium transition-colors"
+          >
+            Start over
+          </button>
+        </div>
+      </div>
+    );
   }
 
   if (showReport) {
@@ -109,7 +147,7 @@ export default function EligibilityQuiz() {
             options={currentQuestion.options}
             selectedValue={answers[currentStep]}
             onSelect={handleSelect}
-            onFileUpload={currentStep === 6 ? handleFileUpload : undefined}
+            onFileUpload={currentStep === 7 ? handleFileUpload : undefined}
             extraInfo={getSpeciesInfo()}
           />
         )}
