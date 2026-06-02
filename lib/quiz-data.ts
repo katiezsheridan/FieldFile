@@ -76,9 +76,58 @@ export const quizQuestions: QuizQuestion[] = [
     options: [], // Not used for county-lookup type
   },
 
-  // Q3: Property size
+  // Q3: Existing ag/wildlife valuation (moved up — branches to wildlife fast-track if "wildlife-valuation")
   {
     id: 3,
+    title: "Does the property currently have an ag or wildlife tax valuation?",
+    description:
+      "This is sometimes called an 'ag exemption' — it's technically a special valuation, not an exemption.",
+    type: "single-select",
+    reportSection: "tax-valuation",
+    options: [
+      {
+        label: "Yes, agricultural (1-d-1) valuation",
+        value: "ag-valuation",
+        info: {
+          title: "FieldFile can help you convert to wildlife management",
+          content:
+            "Your property is currently valued based on its agricultural productivity rather than market value. If you're considering switching to wildlife management, you can do so without a gap in valuation. FieldFile helps landowners through the entire conversion process — from building your wildlife management plan to filing it with your county appraisal district. The conversion typically happens at the start of a new tax year, and we'll guide you through every step.",
+          resources: [
+            {
+              label: "Texas Comptroller: 1-d-1 Appraisal",
+              url: "https://comptroller.texas.gov/taxes/property-tax/ag-timber/",
+            },
+          ],
+        },
+      },
+      {
+        label: "Yes, wildlife management (1-d-1w) valuation",
+        value: "wildlife-valuation",
+      },
+      {
+        label: "No, market value (no special valuation)",
+        value: "no-valuation",
+        info: {
+          title: "Getting started with special valuation",
+          content:
+            "To qualify for agricultural or wildlife management valuation, Texas requires that the land has been used for agriculture for at least 5 of the past 7 years (for 1-d-1). If the property doesn't have this history, you may need to establish agricultural use first before converting to wildlife management. Talk to your county appraisal district about requirements.",
+        },
+      },
+      {
+        label: "I'm not sure",
+        value: "unsure",
+        info: {
+          title: "How to check your property's valuation",
+          content:
+            "You can check your property's current tax valuation status through your county appraisal district's website. Search by address or owner name. The property record will show whether it has an agricultural or wildlife management special valuation. You can also call your county appraisal district directly.",
+        },
+      },
+    ],
+  },
+
+  // Q4: Property size (was Q3)
+  {
+    id: 4,
     title: "How large is the property?",
     description: "Approximate acreage is fine.",
     type: "single-select",
@@ -100,9 +149,9 @@ export const quizQuestions: QuizQuestion[] = [
     ],
   },
 
-  // Q4: Primary goal
+  // Q5: Primary goal (was Q4)
   {
-    id: 4,
+    id: 5,
     title: "What's your primary goal for the land?",
     type: "single-select",
     reportSection: "land-use",
@@ -115,9 +164,9 @@ export const quizQuestions: QuizQuestion[] = [
     ],
   },
 
-  // Q5: Secondary goal
+  // Q6: Secondary goal (was Q5)
   {
-    id: 5,
+    id: 6,
     title: "Are there any secondary goals?",
     description: "Select the most relevant one.",
     type: "single-select",
@@ -131,9 +180,9 @@ export const quizQuestions: QuizQuestion[] = [
     ],
   },
 
-  // Q6: Survey (with optional upload)
+  // Q7: Survey w/ optional upload (was Q6)
   {
-    id: 6,
+    id: 7,
     title: "Do you have a current property survey?",
     description: "A boundary survey showing exact property lines and acreage.",
     type: "single-select",
@@ -163,9 +212,9 @@ export const quizQuestions: QuizQuestion[] = [
     ],
   },
 
-  // Q7: Title
+  // Q8: Title (was Q7)
   {
-    id: 7,
+    id: 8,
     title: "Is the property title clear?",
     description: "No liens, disputes, or unresolved inheritance issues.",
     type: "single-select",
@@ -185,9 +234,9 @@ export const quizQuestions: QuizQuestion[] = [
     ],
   },
 
-  // Q8: Access
+  // Q9: Access (was Q8)
   {
-    id: 8,
+    id: 9,
     title: "Does the property have reliable road access?",
     type: "single-select",
     reportSection: "property-status",
@@ -206,9 +255,9 @@ export const quizQuestions: QuizQuestion[] = [
     ],
   },
 
-  // Q9: Easements
+  // Q10: Easements (was Q9)
   {
-    id: 9,
+    id: 10,
     title: "Are there any easements on the property?",
     description:
       "Easements grant others rights to use part of your land (utilities, pipelines, access roads).",
@@ -244,9 +293,9 @@ export const quizQuestions: QuizQuestion[] = [
     ],
   },
 
-  // Q10: Previous land use
+  // Q11: Previous land use (was Q10)
   {
-    id: 10,
+    id: 11,
     title: "What has the land been used for previously?",
     type: "single-select",
     reportSection: "tax-valuation",
@@ -257,60 +306,6 @@ export const quizQuestions: QuizQuestion[] = [
       { label: "Undeveloped / natural state", value: "undeveloped" },
       { label: "Mixed use", value: "mixed" },
       { label: "I don't know", value: "unknown" },
-    ],
-  },
-
-  // Q11: Existing ag/wildlife exemption
-  {
-    id: 11,
-    title: "Does the property currently have an ag or wildlife tax valuation?",
-    description:
-      "This is sometimes called an 'ag exemption' — it's technically a special valuation, not an exemption.",
-    type: "single-select",
-    reportSection: "tax-valuation",
-    options: [
-      {
-        label: "Yes, agricultural (1-d-1) valuation",
-        value: "ag-valuation",
-        info: {
-          title: "FieldFile can help you convert to wildlife management",
-          content:
-            "Your property is currently valued based on its agricultural productivity rather than market value. If you're considering switching to wildlife management, you can do so without a gap in valuation. FieldFile helps landowners through the entire conversion process — from building your wildlife management plan to filing it with your county appraisal district. The conversion typically happens at the start of a new tax year, and we'll guide you through every step.",
-          resources: [
-            {
-              label: "Texas Comptroller: 1-d-1 Appraisal",
-              url: "https://comptroller.texas.gov/taxes/property-tax/ag-timber/",
-            },
-          ],
-        },
-      },
-      {
-        label: "Yes, wildlife management valuation",
-        value: "wildlife-valuation",
-        info: {
-          title: "Wildlife management valuation",
-          content:
-            "Great — your property already qualifies under wildlife management. The key is maintaining compliance with annual activity requirements and filing your report on time each year. FieldFile helps you track activities, store documentation, and generate county-ready reports automatically.",
-        },
-      },
-      {
-        label: "No, market value (no special valuation)",
-        value: "no-valuation",
-        info: {
-          title: "Getting started with special valuation",
-          content:
-            "To qualify for agricultural or wildlife management valuation, Texas requires that the land has been used for agriculture for at least 5 of the past 7 years (for 1-d-1). If the property doesn't have this history, you may need to establish agricultural use first before converting to wildlife management. Talk to your county appraisal district about requirements.",
-        },
-      },
-      {
-        label: "I'm not sure",
-        value: "unsure",
-        info: {
-          title: "How to check your property's valuation",
-          content:
-            "You can check your property's current tax valuation status through your county appraisal district's website. Search by address or owner name. The property record will show whether it has an agricultural or wildlife management special valuation. You can also call your county appraisal district directly.",
-        },
-      },
     ],
   },
 
@@ -712,10 +707,10 @@ export interface ReportSectionConfig {
 }
 
 export const reportSections: ReportSectionConfig[] = [
-  { id: "property-overview", title: "Property Overview", questionIds: [1, 2, 3] },
-  { id: "land-use", title: "Land Use & Goals", questionIds: [4, 5] },
-  { id: "property-status", title: "Property Status", questionIds: [6, 7, 8, 9] },
-  { id: "tax-valuation", title: "Tax Valuation Status", questionIds: [10, 11] },
+  { id: "property-overview", title: "Property Overview", questionIds: [1, 2, 4] },
+  { id: "tax-valuation", title: "Tax Valuation Status", questionIds: [3, 11] },
+  { id: "land-use", title: "Land Use & Goals", questionIds: [5, 6] },
+  { id: "property-status", title: "Property Status", questionIds: [7, 8, 9, 10] },
   { id: "environmental", title: "Environmental Considerations", questionIds: [12, 13] },
   { id: "infrastructure", title: "Infrastructure", questionIds: [14] },
 ];

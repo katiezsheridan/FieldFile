@@ -99,6 +99,16 @@ create table quiz_leads (
   survey_url text,
   survey_path text,
   user_id text,
+  -- Reworked eligibility quiz: flat, typed columns for segmentation/routing.
+  q1_situation text,                       -- own | buying | inherited
+  zip_raw text,                            -- 5-digit string
+  county text,                             -- derived from zip (null if unknown)
+  in_target_county boolean default false,
+  q3_valuation text,                       -- ag | wildlife | market | unsure
+  q4_acreage text,                         -- lt10 | 10_50 | 50_100 | 100_500 | 500plus
+  q5_goal text,                            -- maintain_wildlife | convert_to_wildlife | new_valuation | exploring
+  segment text,                            -- computed segment
+  lead_temp text,                          -- hot | warm | nurture
   created_at timestamp with time zone default now()
 );
 

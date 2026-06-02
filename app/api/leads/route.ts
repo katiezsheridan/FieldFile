@@ -8,7 +8,8 @@ const supabaseAdmin = createClient(
 
 export async function POST(request: Request) {
   try {
-    const { name, email, propertyAddress, source, answers } = await request.json();
+    const { name, email, propertyAddress, source, answers, segment, leadTemp, county, inTargetCounty } =
+      await request.json();
 
     // Save to Supabase
     const { error: dbError } = await supabaseAdmin.from("signups").insert({
@@ -28,19 +29,28 @@ export async function POST(request: Request) {
 
     const isQuiz = source === "quiz";
     const subject = isQuiz
-      ? `New Quiz Lead: ${name}`
+      ? `New Quiz Lead${leadTemp ? ` [${leadTemp.toUpperCase()}]` : ""}: ${county || email}`
       : `New Signup Lead: ${name}`;
 
     let answersHtml = "";
-    if (isQuiz && answers) {
-      const answerEntries = Object.entries(answers)
-        .map(([q, a]) => `<li>Q${q}: ${a}</li>`)
-        .join("");
-      answersHtml = `<p><strong>Quiz Answers:</strong></p><ul>${answerEntries}</ul>`;
+    if (isQuiz) {
+      const tempBadge = leadTemp ? leadTemp.toUpperCase() : "—";
+      const targetBadge = inTargetCounty ? "✓ target county" : "outside target counties";
+      answersHtml = `
+        <p><strong>Segment:</strong> ${segment || "—"}</p>
+        <p><strong>Lead temperature:</strong> ${tempBadge}</p>
+        <p><strong>County:</strong> ${county || "Unknown"} (${targetBadge})</p>
+      `;
+      if (answers) {
+        const answerEntries = Object.entries(answers)
+          .map(([q, a]) => `<li>${q}: ${a}</li>`)
+          .join("");
+        answersHtml += `<p><strong>Answers:</strong></p><ul>${answerEntries}</ul>`;
+      }
     }
 
     try {
-      await fetch("https://api.resend.com/emails", {
+      const res = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
@@ -55,12 +65,16 @@ export async function POST(request: Request) {
             <p><strong>Source:</strong> ${isQuiz ? "Eligibility Quiz" : "Get Started Form"}</p>
             <p><strong>Name:</strong> ${name}</p>
             <p><strong>Email:</strong> ${email}</p>
-            <p><strong>${isQuiz ? "Phone:" : "Property Address:"}</strong> ${propertyAddress}</p>
+            <p><strong>${isQuiz ? "Location:" : "Property Address:"}</strong> ${propertyAddress}</p>
             <p><strong>Submitted:</strong> ${new Date().toLocaleString("en-US", { timeZone: "America/Chicago" })}</p>
             ${answersHtml}
           `,
         }),
       });
+      if (!res.ok) {
+        const body = await res.text().catch(() => "");
+        console.error(`Lead notification email failed: Resend ${res.status} ${body}`);
+      }
     } catch (emailError) {
       console.error("Lead notification email failed:", emailError);
     }

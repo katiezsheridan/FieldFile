@@ -48,22 +48,22 @@ function evaluatePropertyOverview(answers: Record<number, string>): SectionResul
     },
     {
       label: "Property size",
-      value: getAnswerLabel(3, answers[3]),
-      status: (answers[3] === "under-10" ? "yellow" : "green") as Status,
+      value: getAnswerLabel(4, answers[4]),
+      status: (answers[4] === "under-10" ? "yellow" : "green") as Status,
       note:
-        answers[3] === "under-10"
+        answers[4] === "under-10"
           ? "Smaller properties may face stricter requirements"
           : undefined,
     },
   ];
-  const status: Status = answers[3] === "under-10" ? "yellow" : "green";
+  const status: Status = answers[4] === "under-10" ? "yellow" : "green";
   return { status, items };
 }
 
 function evaluateLandUse(answers: Record<number, string>): SectionResult {
   const items = [
-    { label: "Primary goal", value: getAnswerLabel(4, answers[4]) },
-    { label: "Secondary goal", value: getAnswerLabel(5, answers[5]) },
+    { label: "Primary goal", value: getAnswerLabel(5, answers[5]) },
+    { label: "Secondary goal", value: getAnswerLabel(6, answers[6]) },
   ];
   return { status: "green", items };
 }
@@ -72,31 +72,31 @@ function evaluatePropertyStatus(
   answers: Record<number, string>,
   hasSurveyFile: boolean
 ): SectionResult {
-  const surveyValue = getAnswerLabel(6, answers[6]);
+  const surveyValue = getAnswerLabel(7, answers[7]);
   const items = [
     {
       label: "Property survey",
       value: hasSurveyFile ? `${surveyValue} (uploaded)` : surveyValue,
-      status: (answers[6] === "no" ? "yellow" : "green") as Status,
-      note: answers[6] === "no" ? "Consider getting a boundary survey" : undefined,
+      status: (answers[7] === "no" ? "yellow" : "green") as Status,
+      note: answers[7] === "no" ? "Consider getting a boundary survey" : undefined,
     },
     {
       label: "Title status",
-      value: getAnswerLabel(7, answers[7]),
-      status: (answers[7] === "issues" ? "red" : "green") as Status,
+      value: getAnswerLabel(8, answers[8]),
+      status: (answers[8] === "issues" ? "red" : "green") as Status,
       note:
-        answers[7] === "issues"
+        answers[8] === "issues"
           ? "Resolve title issues before filing"
           : undefined,
     },
     {
       label: "Road access",
-      value: getAnswerLabel(8, answers[8]),
-      status: (answers[8] === "limited" ? "yellow" : "green") as Status,
+      value: getAnswerLabel(9, answers[9]),
+      status: (answers[9] === "limited" ? "yellow" : "green") as Status,
     },
     {
       label: "Easements",
-      value: getAnswerLabel(9, answers[9]),
+      value: getAnswerLabel(10, answers[10]),
     },
   ];
 
@@ -110,26 +110,26 @@ function evaluatePropertyStatus(
 function evaluateTaxValuation(answers: Record<number, string>): SectionResult {
   const items = [
     {
-      label: "Previous land use",
-      value: getAnswerLabel(10, answers[10]),
-    },
-    {
       label: "Current valuation",
-      value: getAnswerLabel(11, answers[11]),
-      status: (answers[11] === "no-valuation" ? "yellow" : "green") as Status,
+      value: getAnswerLabel(3, answers[3]),
+      status: (answers[3] === "no-valuation" ? "yellow" : "green") as Status,
       note:
-        answers[11] === "no-valuation"
+        answers[3] === "no-valuation"
           ? "You may need to establish ag use history before qualifying"
-          : answers[11] === "ag-valuation"
+          : answers[3] === "ag-valuation"
           ? "FieldFile can help you file a wildlife management plan and convert your valuation"
-          : answers[11] === "wildlife-valuation"
+          : answers[3] === "wildlife-valuation"
           ? "Maintain annual compliance to keep your valuation"
           : undefined,
+    },
+    {
+      label: "Previous land use",
+      value: getAnswerLabel(11, answers[11]),
     },
   ];
 
   const status: Status =
-    answers[11] === "no-valuation" ? "yellow" : "green";
+    answers[3] === "no-valuation" ? "yellow" : "green";
   return { status, items };
 }
 
@@ -173,25 +173,25 @@ function evaluateInfrastructure(answers: Record<number, string>): SectionResult 
 function getNextSteps(answers: Record<number, string>): string[] {
   const steps: string[] = [];
 
-  if (answers[11] === "no-valuation") {
+  if (answers[3] === "no-valuation") {
     steps.push(
       "Contact your county appraisal district to understand ag history requirements"
     );
   }
-  if (answers[11] === "ag-valuation") {
+  if (answers[3] === "ag-valuation") {
     steps.push(
       "Use FieldFile to build and file a wildlife management plan — we handle the entire conversion process for you"
     );
   }
-  if (answers[11] === "wildlife-valuation") {
+  if (answers[3] === "wildlife-valuation") {
     steps.push(
       "Use FieldFile to track your annual activities and file on time"
     );
   }
-  if (answers[6] === "no") {
+  if (answers[7] === "no") {
     steps.push("Get a boundary survey to document your exact acreage");
   }
-  if (answers[7] === "issues") {
+  if (answers[8] === "issues") {
     steps.push("Consult a real estate attorney to resolve title issues");
   }
   if (answers[12] === "none") {
@@ -286,9 +286,9 @@ export default function QuizReport({ answers, surveyFile }: QuizReportProps) {
 
   const sections = [
     { title: "Property Overview", result: evaluatePropertyOverview(answers) },
+    { title: "Tax Valuation Status", result: evaluateTaxValuation(answers) },
     { title: "Land Use & Goals", result: evaluateLandUse(answers) },
     { title: "Property Status", result: evaluatePropertyStatus(answers, !!surveyFile) },
-    { title: "Tax Valuation Status", result: evaluateTaxValuation(answers) },
     {
       title: "Environmental Considerations",
       result: evaluateEnvironmental(answers, region),
