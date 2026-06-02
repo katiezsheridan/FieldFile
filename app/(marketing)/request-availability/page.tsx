@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { createClient } from "@supabase/supabase-js";
@@ -19,20 +19,32 @@ export default function RequestAvailabilityPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const { executeRecaptcha } = useGoogleReCaptcha();
+  // Keep a ref so the submit handler can poll for the latest value
+  // instead of reading the stale closure value.
+  const executeRecaptchaRef = useRef(executeRecaptcha);
+  useEffect(() => {
+    executeRecaptchaRef.current = executeRecaptcha;
+  }, [executeRecaptcha]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSubmitting(true);
     setError("");
 
-    // Verify reCAPTCHA
-    if (!executeRecaptcha) {
+    // Wait briefly for the reCAPTCHA script to finish loading if the user
+    // submits before it's ready.
+    const start = Date.now();
+    while (!executeRecaptchaRef.current && Date.now() - start < 3000) {
+      await new Promise((r) => setTimeout(r, 100));
+    }
+    const execute = executeRecaptchaRef.current;
+    if (!execute) {
       setError("reCAPTCHA not ready. Please try again.");
       setSubmitting(false);
       return;
     }
     try {
-      const captchaToken = await executeRecaptcha("request_availability");
+      const captchaToken = await execute("request_availability");
       const captchaRes = await fetch("/api/verify-captcha", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

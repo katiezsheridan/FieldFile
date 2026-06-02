@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { supabase, uploadDocument } from "@/lib/supabase";
@@ -18,6 +18,12 @@ export default function EmailCapture({ answers, surveyFile }: EmailCaptureProps)
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const { executeRecaptcha } = useGoogleReCaptcha();
+  // Keep a ref so the submit handler can poll for the latest value
+  // instead of reading the stale closure value.
+  const executeRecaptchaRef = useRef(executeRecaptcha);
+  useEffect(() => {
+    executeRecaptchaRef.current = executeRecaptcha;
+  }, [executeRecaptcha]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -25,13 +31,19 @@ export default function EmailCapture({ answers, surveyFile }: EmailCaptureProps)
     setError("");
 
     try {
-      // Verify reCAPTCHA
-      if (!executeRecaptcha) {
+      // Wait briefly for the reCAPTCHA script to finish loading if the user
+      // submits before it's ready.
+      const start = Date.now();
+      while (!executeRecaptchaRef.current && Date.now() - start < 3000) {
+        await new Promise((r) => setTimeout(r, 100));
+      }
+      const execute = executeRecaptchaRef.current;
+      if (!execute) {
         setError("reCAPTCHA not ready. Please try again.");
         setSubmitting(false);
         return;
       }
-      const captchaToken = await executeRecaptcha("quiz_submit");
+      const captchaToken = await execute("quiz_submit");
       const captchaRes = await fetch("/api/verify-captcha", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
