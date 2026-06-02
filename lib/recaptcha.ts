@@ -1,10 +1,9 @@
 export async function verifyRecaptcha(token: string): Promise<boolean> {
-  // Local dev bypass: the reCAPTCHA key isn't registered for localhost, so
-  // siteverify returns "browser-error". Skip verification in development only.
-  // Vercel preview/prod run as production, so the real check is unaffected there.
-  if (process.env.NODE_ENV === "development") {
-    return true;
-  }
+  // Bypass Google verification outside production. Google's reCAPTCHA admin
+  // won't accept `localhost` as an allowed domain, so v3 tokens generated on
+  // localhost always fail siteverify with "browser-error". Production uses the
+  // real domain and validates normally.
+  if (process.env.NODE_ENV !== "production") return true;
 
   const response = await fetch(
     "https://www.google.com/recaptcha/api/siteverify",
