@@ -62,6 +62,7 @@ export async function GET(
           type: doc.type,
           name: doc.name,
           url: doc.url,
+          storagePath: doc.storage_path ?? undefined,
           uploadedAt: doc.uploaded_at,
           metadata: doc.gps_lat
             ? { gpsCoordinates: { lat: doc.gps_lat, lng: doc.gps_lng } }
