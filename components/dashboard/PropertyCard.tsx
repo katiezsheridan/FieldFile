@@ -38,7 +38,7 @@ export function PropertyCard({ property, onEdit }: PropertyCardProps) {
       <div className="flex flex-1 flex-col p-5">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <h3 className="text-lg font-semibold text-field-ink truncate">
+            <h3 className="text-lg font-semibold text-field-ink break-words">
               {property.name}
             </h3>
             <p className="text-sm text-field-earth mt-0.5">
