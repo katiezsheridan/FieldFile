@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
 import {
@@ -17,7 +17,7 @@ import { FileUploader } from "@/components/documents/FileUploader";
 import { EvidenceUploader } from "@/components/documents/EvidenceUploader";
 import { DocumentList } from "@/components/documents/DocumentList";
 import { PropertySelect } from "@/components/documents/PropertySelect";
-import { Document } from "@/lib/types";
+import { Document, PropertyWithDetails } from "@/lib/types";
 
 function inferType(file: File): Document["type"] {
   if (file.type.startsWith("image/")) return "photo";
@@ -27,22 +27,25 @@ function inferType(file: File): Document["type"] {
 export default function DocumentsPage() {
   const params = useParams();
   const urlId = params.id as string;
+  const router = useRouter();
 
   const { user } = useUser();
   const { properties, loading: propertiesLoading } = useProperties(user?.id);
 
-  // Which property the page is currently scoped to. Defaults to the property in
-  // the URL; switching it changes context in place (no navigation).
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  // The page is scoped to the property in the URL. Switching the selector
+  // navigates so the URL always matches the selected property.
   const activeProperty = useMemo(() => {
     if (properties.length === 0) return null;
-    if (selectedId) {
-      const chosen = properties.find((p) => p.id === selectedId);
-      if (chosen) return chosen;
-    }
     const fromUrl = properties.find((p) => p.id === urlId || p.slug === urlId);
     return fromUrl ?? properties[0];
-  }, [properties, selectedId, urlId]);
+  }, [properties, urlId]);
+
+  const handlePropertyChange = useCallback(
+    (property: PropertyWithDetails) => {
+      router.push(`/properties/${property.slug || property.id}/documents`);
+    },
+    [router]
+  );
 
   const propertyId = activeProperty?.id;
   const {
@@ -174,7 +177,7 @@ export default function DocumentsPage() {
           <PropertySelect
             properties={properties}
             value={activeProperty}
-            onChange={(p) => setSelectedId(p.id)}
+            onChange={handlePropertyChange}
           />
         </div>
 
