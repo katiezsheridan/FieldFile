@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { useProperties } from "@/lib/hooks";
+import { cn } from "@/lib/utils";
 
 const navIcons: Record<string, JSX.Element> = {
   Dashboard: (
@@ -32,6 +34,7 @@ export default function Sidebar() {
   const pathname = usePathname();
   const { user } = useUser();
   const { properties } = useProperties(user?.id);
+  const [expanded, setExpanded] = useState(false);
 
   // Extract property ID from path if on a property page, otherwise use first real property
   const propertyMatch = pathname.match(/\/properties\/([^/]+)/);
@@ -51,39 +54,88 @@ export default function Sidebar() {
   ];
 
   return (
-    <aside className="w-64 bg-white border-r border-field-wheat/50 flex flex-col h-screen">
-      <nav className="flex-1 px-3 py-6">
-        <ul className="space-y-0.5">
-          {navItems.map((item) => {
-            const isActive =
-              pathname === item.href ||
-              (item.label !== "Dashboard" && pathname.startsWith(item.href));
-            return (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                    isActive
-                      ? "bg-field-forest/10 text-field-forest"
-                      : "text-field-earth hover:bg-field-mist hover:text-field-ink"
-                  }`}
-                >
-                  <span className={isActive ? "text-field-forest" : "text-field-earth"}>
-                    {navIcons[item.label]}
-                  </span>
-                  {item.label}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
+    // The wrapper reserves the collapsed rail width in the flex row so the
+    // expanded panel overlays the content instead of pushing it.
+    <div className="relative w-16 shrink-0 h-screen">
+      <aside
+        onMouseEnter={() => setExpanded(true)}
+        onMouseLeave={() => setExpanded(false)}
+        className={cn(
+          "absolute inset-y-0 left-0 z-40 h-screen bg-white border-r border-field-wheat/50",
+          "flex flex-col overflow-hidden transition-all duration-300",
+          expanded ? "w-64 shadow-lg" : "w-16"
+        )}
+      >
+        <nav className="flex-1 px-3 py-6">
+          <ul className="space-y-0.5">
+            {navItems.map((item) => {
+              const isActive =
+                pathname === item.href ||
+                (item.label !== "Dashboard" && pathname.startsWith(item.href));
+              return (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    title={item.label}
+                    className={cn(
+                      "flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                      isActive
+                        ? "bg-field-forest/10 text-field-forest"
+                        : "text-field-earth hover:bg-field-mist hover:text-field-ink"
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "shrink-0",
+                        isActive ? "text-field-forest" : "text-field-earth"
+                      )}
+                    >
+                      {navIcons[item.label]}
+                    </span>
+                    <span
+                      className={cn(
+                        "whitespace-nowrap transition-opacity duration-200",
+                        expanded ? "opacity-100" : "opacity-0"
+                      )}
+                    >
+                      {item.label}
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
 
-      <div className="p-4 border-t border-field-wheat/50">
-        <button className="w-full px-4 py-2.5 bg-field-hero text-white rounded-lg text-sm font-medium hover:bg-field-hero/90 transition-colors">
-          Get Help
-        </button>
-      </div>
-    </aside>
+        <div className="p-4 border-t border-field-wheat/50">
+          <button
+            title="Get Help"
+            className="w-full flex items-center gap-3 px-4 py-2.5 bg-field-hero text-white rounded-lg text-sm font-medium hover:bg-field-hero/90 transition-colors"
+          >
+            <svg
+              className="w-5 h-5 shrink-0"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={1.5}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z"
+              />
+            </svg>
+            <span
+              className={cn(
+                "whitespace-nowrap transition-opacity duration-200",
+                expanded ? "opacity-100" : "opacity-0"
+              )}
+            >
+              Get Help
+            </span>
+          </button>
+        </div>
+      </aside>
+    </div>
   );
 }
