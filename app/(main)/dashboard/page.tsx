@@ -7,6 +7,7 @@ import { getDeadlineDays } from "@/lib/demo-data";
 import { ProgressBar } from "@/components/dashboard/ProgressBar";
 import { DeadlineCountdown } from "@/components/dashboard/DeadlineCountdown";
 import { QuickActions } from "@/components/dashboard/QuickActions";
+import { PropertyOverview } from "@/components/dashboard/PropertyOverview";
 
 export default function DashboardPage() {
   const { user, isLoaded } = useUser();
@@ -68,18 +69,10 @@ export default function DashboardPage() {
   return (
     <main className="min-h-screen bg-field-cream">
       <div className="max-w-4xl mx-auto px-6 py-10">
-        {/* Property header */}
-        <header className="mb-8">
-          <p className="text-sm text-field-earth mb-1">
-            {property.county} County &middot; {property.acreage} acres
-          </p>
-          <h1 className="text-2xl font-semibold text-field-ink">
-            {property.name}
-          </h1>
-          <p className="text-sm text-field-earth mt-1">
-            {property.address}
-          </p>
-        </header>
+        {/* Property overview snapshot */}
+        <div className="mb-8">
+          <PropertyOverview property={property} />
+        </div>
 
         {/* Dashboard cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
