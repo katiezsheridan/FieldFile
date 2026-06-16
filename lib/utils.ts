@@ -39,6 +39,34 @@ export function slugify(name: string): string {
   return slug || "property";
 }
 
+export function getExemptionTypeLabel(type: string): string {
+  const labels: Record<string, string> = {
+    wildlife: "Wildlife",
+    agriculture: "Agriculture",
+    none: "No exemption",
+  };
+  return labels[type] || type;
+}
+
+export function getExemptionStatusLabel(status: string): string {
+  const labels: Record<string, string> = {
+    active: "Active",
+    pending: "Pending",
+    at_risk: "At risk",
+  };
+  return labels[status] || status;
+}
+
+// Badge classes for an exemption status pill (bg + text), using field-* tokens.
+export function getExemptionStatusBadge(status: string): string {
+  const styles: Record<string, string> = {
+    active: "bg-field-forest/10 text-field-forest",
+    pending: "bg-field-gold/20 text-field-earth",
+    at_risk: "bg-field-terra/10 text-field-terra",
+  };
+  return styles[status] || "bg-field-mist text-field-earth";
+}
+
 export function getStatusLabel(status: string): string {
   const labels: Record<string, string> = {
     draft: "Draft",

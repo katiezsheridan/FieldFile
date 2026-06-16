@@ -1,12 +1,18 @@
+export type ExemptionType = "wildlife" | "agriculture" | "none";
+
+export type ExemptionStatus = "active" | "pending" | "at_risk";
+
 export type Property = {
   id: string;
   slug?: string;
   name: string;
-  address: string;
+  address?: string;
   county: string;
   state: string;
   acreage: number;
-  exemptionType: "wildlife" | "agriculture";
+  exemptionType: ExemptionType;
+  exemptionStatus?: ExemptionStatus;
+  photoUrl?: string;
   coordinates: { lat: number; lng: number };
 };
 
