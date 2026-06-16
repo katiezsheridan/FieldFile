@@ -17,6 +17,7 @@ import AddActivityForm from "@/components/activities/AddActivityForm";
 import { FileUploader } from "@/components/documents/FileUploader";
 import { DocumentList } from "@/components/documents/DocumentList";
 import PropertyMapSection from "@/components/map/PropertyMapSection";
+import { CollapsibleSection } from "@/components/ui/CollapsibleSection";
 import { Document } from "@/lib/types";
 
 function inferType(file: File): Document["type"] {
@@ -155,11 +156,11 @@ export default function PropertyPage() {
         </div>
 
         {/* Activities with inline evidence */}
-        <section>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-field-ink">
-              Wildlife Management Activities
-            </h2>
+        <CollapsibleSection
+          title="Wildlife Management Activities"
+          summary={`${completedCount}/${totalCount} complete`}
+        >
+          <div className="space-y-4">
             {!showAddForm && (
               <button
                 onClick={() => setShowAddForm(true)}
@@ -168,10 +169,8 @@ export default function PropertyPage() {
                 + Add Activity
               </button>
             )}
-          </div>
 
-          {showAddForm && (
-            <div className="mb-6">
+            {showAddForm && (
               <AddActivityForm
                 propertyId={id}
                 onSuccess={() => {
@@ -180,50 +179,51 @@ export default function PropertyPage() {
                 }}
                 onCancel={() => setShowAddForm(false)}
               />
-            </div>
-          )}
+            )}
 
-          {property.activities.length === 0 ? (
-            <div className="text-center py-12 bg-white border border-field-wheat rounded-lg">
-              <p className="text-field-ink/60">
-                No activities found for this property.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {property.activities.map((activity) => (
+            {property.activities.length === 0 ? (
+              <div className="text-center py-12 bg-white border border-field-wheat rounded-lg">
+                <p className="text-field-ink/60">
+                  No activities found for this property.
+                </p>
+              </div>
+            ) : (
+              property.activities.map((activity) => (
                 <ActivityEvidenceCard
                   key={activity.id}
                   activity={activity}
                   propertyId={id}
                   onChange={refetch}
                 />
-              ))}
-            </div>
-          )}
-        </section>
-
-        {/* Land documents (not tied to a specific activity) */}
-        <section className="space-y-4">
-          <div className="flex items-baseline justify-between">
-            <h2 className="text-xl font-semibold text-field-ink">
-              Land Documents
-            </h2>
-            {uploadingLand && (
-              <span className="text-sm text-field-ink/60">Uploading…</span>
+              ))
             )}
           </div>
-          <FileUploader onUpload={handleLandUpload} />
-          {docsLoading ? (
-            <div className="text-field-ink/60 text-sm">Loading…</div>
-          ) : (
-            <DocumentList
-              documents={landDocuments}
-              onRename={handleLandRename}
-              onDelete={handleLandDelete}
-            />
-          )}
-        </section>
+        </CollapsibleSection>
+
+        {/* Land documents (not tied to a specific activity) */}
+        <CollapsibleSection
+          title="Land Documents"
+          summary={
+            uploadingLand
+              ? "Uploading…"
+              : `${landDocuments.length} ${
+                  landDocuments.length === 1 ? "file" : "files"
+                }`
+          }
+        >
+          <div className="space-y-4">
+            <FileUploader onUpload={handleLandUpload} />
+            {docsLoading ? (
+              <div className="text-field-ink/60 text-sm">Loading…</div>
+            ) : (
+              <DocumentList
+                documents={landDocuments}
+                onRename={handleLandRename}
+                onDelete={handleLandDelete}
+              />
+            )}
+          </div>
+        </CollapsibleSection>
 
         {/* Property map */}
         <PropertyMapSection property={property} onChange={refetch} />
