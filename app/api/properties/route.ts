@@ -198,7 +198,7 @@ export async function POST(request: Request) {
       { status: 400 }
     );
   }
-  if (!["active", "pending", "at_risk"].includes(exemptionStatus)) {
+  if (!["active", "pending", "at_risk", "applying"].includes(exemptionStatus)) {
     return NextResponse.json(
       { error: "Invalid exemptionStatus" },
       { status: 400 }

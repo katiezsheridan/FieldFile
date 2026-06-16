@@ -1,60 +1,71 @@
 # Property Overview UI — QA
 
 Run signed in, on a preview deploy or local dev with real Clerk + Supabase keys.
-The Session 1 migration (`add_property_overview_fields.sql`) must be applied first, or
-create/edit/photo writes will fail. Use a test account that already has ≥1 property.
+Both Session 1 (`add_property_overview_fields.sql`) and the `applying`-status
+migration (`add_applying_exemption_status.sql`) must be applied first, or
+create/edit/photo/status writes will fail. Use a test account with ≥1 property.
 
 ### 1. Cards render real data
 Dashboard shows a "Your properties" section with one card per property the signed-in
-user owns. Each card shows name, `{county} County · {acreage} acres`, an exemption-type
-badge, and (if set) a status badge. Data matches the Supabase `properties` rows — no
-demo/placeholder values.
+user owns: photo, name, `{county} County · {acreage} acres`, an exemption-type badge,
+and (if set) a status badge. Data matches the Supabase `properties` rows.
 
 ### 2. Badges
-Exemption type badge reads Wildlife / Agriculture / No exemption (neutral styling).
-Status badge is color-coded: **active → green**, **pending → amber**, **at risk → red**.
-A property with no `exemption_status` shows the type badge only, no status badge.
+Type badge reads No exemption / Wildlife / Agriculture (neutral). Status badge is
+color-coded: **active → green**, **pending → amber**, **at risk → red**,
+**applying → slate blue**. No `exemption_status` → type badge only.
 
-### 3. Photo: placeholder + upload
-A property with no photo shows the landscape placeholder icon and an **Add photo**
-button. Click it, pick an image: button shows **Uploading…**, then the card re-renders
-with the photo (object-cover) and the button now reads **Change photo**. Reload — the
-photo persists. Confirm the file landed in Supabase Storage under
-`documents/properties/{propertyId}/…` and `properties.photo_url` is set.
-Re-uploading a *different* image replaces it. Selecting the *same* file twice still works.
+### 3. Default photo
+A property with no photo shows the default Hill Country placeholder
+(`/images/property-placeholder.jpg`), not a blank/icon. A property with a photo shows it.
 
 ### 4. Add property
-Click **Add property** (top-right of the section). Modal opens with an empty form;
-type defaults to Wildlife, status to Pending. Fill name + county + acreage, submit.
-Modal closes, a new card appears immediately (grid refetched). Confirm a new
-`properties` row exists, scoped to your `user_id`, with a generated slug.
+Click **Add property**. Modal opens with type defaulting to **No exemption** and status
+to **Applying** (the only status option while type is No exemption). Fill name + county +
+acreage, submit → modal closes, new card appears (grid refetched). A new `properties` row
+exists, scoped to your `user_id`, with a generated slug.
 
-### 5. Edit property
-Click **Edit** on a card. Modal opens prefilled with that property's values. Change
-name, acreage, type, and status; Save changes. Card reflects the edits immediately and
-the status badge color updates. Reload — changes persist. Address is optional and
-editable.
+### 5. Exemption type ↔ status coupling
+In the modal, switching type to **Wildlife** or **Agriculture** changes the status options
+to Pending / Active / At risk (defaulting to Pending). Switching back to **No exemption**
+forces status to **Applying**. The card badge reflects the saved status + color.
 
-### 6. Validation & errors
-In the add/edit modal: empty name or county → inline error, no save. Non-numeric or
-negative acreage → inline error. A failed save (e.g. network) surfaces an inline error
-and the modal stays open. A failed photo upload surfaces an error on the card and the
-button returns to its normal label.
+### 6. Photo upload (in the modal)
+Open Add or Edit. The modal shows a photo preview (placeholder if none). Click
+**Add a photo / Change photo**, pick an image → preview updates immediately. On save the
+file uploads to Supabase Storage (`documents/properties/{propertyId}/…`) and `photo_url`
+is written. Reload — the photo shows on the card and persists. For Add, the property is
+created first, then the photo attaches to it.
 
-### 7. Modal dismissal
-Esc, the X, **Cancel**, and clicking the dark backdrop all close the modal without
-saving. Clicking inside the modal does not close it.
+### 7. Edit property
+Click **Edit** on a card → modal prefilled with that property's values (incl. existing
+photo). Change name, acreage, type, status, and/or photo; Save changes. Card updates
+immediately and persists on reload. Address is optional.
 
-### 8. Responsive layout
-Cards stack 1-wide on mobile, 2-wide at `sm` (≥640px), 3-wide at `lg` (≥1024px). The
-section header and Add button stay aligned. Long property names truncate rather than
-overflow.
+### 8. Delete property
+In the Edit modal, click **Delete property** → confirm the dialog. Modal closes, the card
+disappears (grid refetched), and the `properties` row is gone. Its activities, documents,
+and filings cascade-delete too. Cancelling the confirm leaves everything intact.
 
-### 9. Ownership / auth
-You only ever see your own properties (API scopes by Clerk `userId`). A second test
-account sees only its own. Hitting `/api/properties` signed out returns 401.
+### 9. Validation & errors
+Empty name or county, or acreage that is blank, `0`, negative, or non-numeric →
+inline error **"Name, county, and acreage are required."**, no save. A failed save or
+photo upload surfaces an inline error and the modal stays open.
 
-### 10. Empty state (note)
-With **zero** properties the dashboard still shows the `/setup` welcome CTA, not the
-cards grid — so the Add-property button first appears once you have ≥1 property. Confirm
-this is the intended first-property flow (flagged as an open design choice).
+### 10. Modal dismissal
+Esc, the X, **Cancel**, and the dark backdrop all close without saving. Clicking inside
+the modal does not close it.
+
+### 11. Responsive layout
+Cards stack 1-wide on mobile, 2-wide at `sm` (≥640px), 3-wide at `lg` (≥1024px). Header +
+Add button stay aligned; long names truncate.
+
+### 12. Ownership / auth
+You only see your own properties (API scopes by Clerk `userId`). A second account sees
+only its own. `/api/properties` (GET) and `/api/properties/[id]` (PATCH/DELETE) signed
+out return 401.
+
+### 13. Empty state (note)
+With **zero** properties the dashboard still shows the `/setup` welcome CTA, not the cards
+grid — so the Add-property button first appears once you have ≥1 property. Confirm this is
+the intended first-property flow (flagged as an open design choice).

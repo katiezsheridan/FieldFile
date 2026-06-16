@@ -64,7 +64,6 @@ export function PropertyManager({
             key={property.id}
             property={property}
             onEdit={openEdit}
-            onPhotoChanged={onChanged}
           />
         ))}
       </div>

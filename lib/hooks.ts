@@ -280,6 +280,16 @@ export async function updateProperty(
   return res.json();
 }
 
+// Delete a property (and its cascading activities/documents/filings) via the
+// /api/properties/[id] handler. Ownership scoped to the signed-in user.
+export async function deleteProperty(idOrSlug: string): Promise<void> {
+  const res = await fetch(`/api/properties/${idOrSlug}`, { method: "DELETE" });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || "Failed to delete property");
+  }
+}
+
 // Update just the property photo. Thin wrapper over updateProperty.
 export async function updatePropertyPhoto(
   idOrSlug: string,

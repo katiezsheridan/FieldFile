@@ -158,7 +158,7 @@ export async function PATCH(
     updates.exemption_type = body.exemptionType;
   }
   if ("exemptionStatus" in body) {
-    if (!["active", "pending", "at_risk"].includes(body.exemptionStatus as string)) {
+    if (!["active", "pending", "at_risk", "applying"].includes(body.exemptionStatus as string)) {
       return NextResponse.json({ error: "Invalid exemptionStatus" }, { status: 400 });
     }
     updates.exemption_status = body.exemptionStatus;
@@ -201,4 +201,38 @@ export async function PATCH(
     state: data.state,
     coordinates: { lat: data.lat, lng: data.lng },
   });
+}
+
+// Delete a property. Activities, documents, filings, and census observations
+// cascade on the property_id FK, so removing the row removes its dependents.
+// Ownership is enforced by matching the Clerk userId on the row.
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { userId } = await auth();
+  if (!userId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { id } = await params;
+  const isUUID =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+
+  const { data, error } = await supabase
+    .from("properties")
+    .delete()
+    .eq(isUUID ? "id" : "slug", id)
+    .eq("user_id", userId)
+    .select("id")
+    .maybeSingle();
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 400 });
+  }
+  if (!data) {
+    return NextResponse.json({ error: "Property not found" }, { status: 404 });
+  }
+
+  return NextResponse.json({ success: true });
 }
