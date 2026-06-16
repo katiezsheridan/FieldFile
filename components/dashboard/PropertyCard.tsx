@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { PropertyWithDetails } from "@/lib/types";
 import {
   cn,
@@ -22,7 +23,10 @@ type PropertyCardProps = {
 // badges. Editing details and the photo both happen in the Edit modal.
 export function PropertyCard({ property, onEdit }: PropertyCardProps) {
   return (
-    <div className="flex flex-col bg-white rounded-xl border border-field-wheat overflow-hidden">
+    <Link
+      href={`/properties/${property.slug || property.id}`}
+      className="group flex flex-col bg-white rounded-xl border border-field-wheat overflow-hidden hover:shadow-md hover:border-field-sage transition-all"
+    >
       {/* Photo (or default placeholder) */}
       <div className="relative w-full h-40 bg-field-mist">
         <Image
@@ -47,7 +51,11 @@ export function PropertyCard({ property, onEdit }: PropertyCardProps) {
           </div>
           <button
             type="button"
-            onClick={() => onEdit(property)}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onEdit(property);
+            }}
             className="shrink-0 text-sm font-medium text-field-forest hover:text-field-forest/80 transition-colors"
           >
             Edit
@@ -71,6 +79,6 @@ export function PropertyCard({ property, onEdit }: PropertyCardProps) {
           )}
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
