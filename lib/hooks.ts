@@ -2,7 +2,15 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "./supabase";
-import { Property, Activity, Document, Filing, PropertyWithDetails } from "./types";
+import {
+  Property,
+  Activity,
+  Document,
+  Filing,
+  PropertyWithDetails,
+  ExemptionType,
+  ExemptionStatus,
+} from "./types";
 
 // Debounce hook for auto-save
 export function useDebounce<T>(value: T, delay: number): T {
@@ -224,29 +232,60 @@ export async function updateActivity(
   if (error) throw error;
 }
 
-// Create property
-export async function createProperty(
-  userId: string,
-  property: Omit<Property, "id">
-) {
-  const { data, error } = await supabase
-    .from("properties")
-    .insert({
-      user_id: userId,
-      name: property.name,
-      address: property.address,
-      county: property.county,
-      state: property.state,
-      acreage: property.acreage,
-      exemption_type: property.exemptionType,
-      lat: property.coordinates.lat,
-      lng: property.coordinates.lng,
-    })
-    .select()
-    .single();
+// Property write fields shared by create/update. The Clerk userId is derived
+// server-side from auth(), so callers never pass it.
+type PropertyWriteFields = {
+  name: string;
+  county: string;
+  acreage: number;
+  exemptionType: ExemptionType;
+  exemptionStatus: ExemptionStatus;
+  photoUrl?: string;
+  address?: string;
+  state?: string;
+  coordinates?: { lat: number; lng: number };
+};
 
-  if (error) throw error;
-  return data;
+// Create a property via the /api/properties handler (service-role + Clerk auth,
+// ownership scoped to the signed-in user).
+export async function createProperty(
+  property: PropertyWriteFields
+): Promise<Property> {
+  const res = await fetch("/api/properties", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(property),
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || "Failed to create property");
+  }
+  return res.json();
+}
+
+// Update editable fields on a property (by UUID or slug).
+export async function updateProperty(
+  idOrSlug: string,
+  updates: Partial<PropertyWriteFields>
+): Promise<Property> {
+  const res = await fetch(`/api/properties/${idOrSlug}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(updates),
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || "Failed to update property");
+  }
+  return res.json();
+}
+
+// Update just the property photo. Thin wrapper over updateProperty.
+export async function updatePropertyPhoto(
+  idOrSlug: string,
+  photoUrl: string
+): Promise<Property> {
+  return updateProperty(idOrSlug, { photoUrl });
 }
 
 // Create activity
