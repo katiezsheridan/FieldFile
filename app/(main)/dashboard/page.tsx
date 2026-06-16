@@ -7,11 +7,11 @@ import { getDeadlineDays } from "@/lib/demo-data";
 import { ProgressBar } from "@/components/dashboard/ProgressBar";
 import { DeadlineCountdown } from "@/components/dashboard/DeadlineCountdown";
 import { QuickActions } from "@/components/dashboard/QuickActions";
-import { PropertyOverview } from "@/components/dashboard/PropertyOverview";
+import { PropertyManager } from "@/components/dashboard/PropertyManager";
 
 export default function DashboardPage() {
   const { user, isLoaded } = useUser();
-  const { properties, loading } = useProperties(user?.id);
+  const { properties, loading, refetch } = useProperties(user?.id);
   const daysRemaining = getDeadlineDays();
 
   if (!isLoaded || loading) {
@@ -69,9 +69,9 @@ export default function DashboardPage() {
   return (
     <main className="min-h-screen bg-field-cream">
       <div className="max-w-4xl mx-auto px-6 py-10">
-        {/* Property overview snapshot */}
-        <div className="mb-8">
-          <PropertyOverview property={property} />
+        {/* Property cards: view, add, edit, and set a photo */}
+        <div className="mb-10">
+          <PropertyManager properties={properties} onChanged={refetch} />
         </div>
 
         {/* Dashboard cards */}

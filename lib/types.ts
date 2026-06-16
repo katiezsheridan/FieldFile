@@ -1,6 +1,6 @@
 export type ExemptionType = "wildlife" | "agriculture" | "none";
 
-export type ExemptionStatus = "active" | "pending" | "at_risk";
+export type ExemptionStatus = "active" | "pending" | "at_risk" | "applying";
 
 export type Property = {
   id: string;

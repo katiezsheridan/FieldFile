@@ -53,6 +53,7 @@ export function getExemptionStatusLabel(status: string): string {
     active: "Active",
     pending: "Pending",
     at_risk: "At risk",
+    applying: "Applying",
   };
   return labels[status] || status;
 }
@@ -63,6 +64,7 @@ export function getExemptionStatusBadge(status: string): string {
     active: "bg-field-forest/10 text-field-forest",
     pending: "bg-field-gold/20 text-field-earth",
     at_risk: "bg-field-terra/10 text-field-terra",
+    applying: "bg-field-hero/10 text-field-hero",
   };
   return styles[status] || "bg-field-mist text-field-earth";
 }
