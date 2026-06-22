@@ -16,7 +16,7 @@ export default function DashboardPage() {
 
   if (!isLoaded || loading) {
     return (
-      <main className="min-h-screen bg-field-cream">
+      <main className="min-h-full bg-field-cream">
         <div className="max-w-4xl mx-auto px-6 py-10">
           <div className="animate-pulse">
             <div className="h-8 bg-field-wheat rounded-lg w-48 mb-2"></div>
@@ -35,7 +35,7 @@ export default function DashboardPage() {
   // No properties yet — prompt user to set one up
   if (properties.length === 0) {
     return (
-      <main className="min-h-screen bg-field-cream">
+      <main className="min-h-full bg-field-cream">
         <div className="max-w-lg mx-auto px-6 py-20 text-center">
           <div className="w-16 h-16 bg-field-hero/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
             <svg className="w-8 h-8 text-field-hero" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -67,7 +67,7 @@ export default function DashboardPage() {
   const totalActivities = property.activities.length;
 
   return (
-    <main className="min-h-screen bg-field-cream">
+    <main className="min-h-full bg-field-cream">
       <div className="max-w-4xl mx-auto px-6 py-10">
         {/* Property cards: view, add, edit, and set a photo */}
         <div className="mb-10">

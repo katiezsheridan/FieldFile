@@ -53,7 +53,7 @@ export default function ActivityDetailPage() {
 
   if (propertyLoading || activityLoading) {
     return (
-      <div className="min-h-screen bg-field-cream">
+      <div className="min-h-full bg-field-cream">
         <div className="max-w-4xl mx-auto px-4 py-8">
           <div className="animate-pulse">
             <div className="h-4 bg-field-wheat rounded w-32 mb-6"></div>
@@ -78,7 +78,7 @@ export default function ActivityDetailPage() {
 
   if (!property) {
     return (
-      <div className="min-h-screen bg-field-cream flex items-center justify-center">
+      <div className="min-h-full bg-field-cream flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-field-ink mb-2">
             Property not found
@@ -93,7 +93,7 @@ export default function ActivityDetailPage() {
 
   if (!activity) {
     return (
-      <div className="min-h-screen bg-field-cream flex items-center justify-center">
+      <div className="min-h-full bg-field-cream flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-field-ink mb-2">
             Activity not found
@@ -110,7 +110,7 @@ export default function ActivityDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-field-cream">
+    <div className="min-h-full bg-field-cream">
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Back link */}
         <Link
