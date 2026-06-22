@@ -165,7 +165,7 @@ export default function NewCensusEntryPage() {
   }
 
   return (
-    <div className="min-h-screen bg-field-cream">
+    <div className="min-h-full bg-field-cream">
       <div className="max-w-3xl mx-auto px-4 py-8">
         <div className="mb-6">
           <Link

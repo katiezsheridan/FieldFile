@@ -83,7 +83,7 @@ export default function FilingPage() {
 
   if (!property) {
     return (
-      <div className="min-h-screen bg-field-cream p-8">
+      <div className="min-h-full bg-field-cream p-8">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-2xl font-semibold text-field-ink">
             Property not found
@@ -121,7 +121,7 @@ export default function FilingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-field-cream">
+    <div className="min-h-full bg-field-cream">
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Back link */}
         <Link

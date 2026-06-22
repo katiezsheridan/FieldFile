@@ -158,7 +158,7 @@ export default function SetupPage() {
   }
 
   return (
-    <main className="min-h-screen bg-field-cream">
+    <main className="min-h-full bg-field-cream">
       <div className="max-w-2xl mx-auto px-6 py-10">
         <div className="mb-10">
           <StepIndicator steps={STEPS} currentStep={step} />

@@ -230,7 +230,7 @@ export default function CensusObservationDetailPage() {
 
   if (!obs) {
     return (
-      <div className="min-h-screen bg-field-cream p-8">
+      <div className="min-h-full bg-field-cream p-8">
         <div className="max-w-3xl mx-auto">
           {error ? (
             <div className="bg-white border border-field-terra/30 text-field-terra rounded-lg p-4">{error}</div>
@@ -243,7 +243,7 @@ export default function CensusObservationDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-field-cream">
+    <div className="min-h-full bg-field-cream">
       <div className="max-w-3xl mx-auto px-4 py-8">
         <div className="mb-6 flex items-center justify-between">
           <Link href={`/properties/${id}/census`} className="text-sm text-field-forest hover:underline">
