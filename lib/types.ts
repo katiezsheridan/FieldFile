@@ -137,3 +137,35 @@ export type CensusObservation = {
   species: CensusSpeciesCount[];
   createdAt: string;
 };
+
+// ---------- Mobile Field Logging ----------
+
+export type FieldLogEntryType = "photo_evidence" | "pin_activity";
+
+export type GpsSource = "device_live" | "photo_exif" | "manual_pin";
+
+// TPWD's seven recognized wildlife-management practices.
+export type PracticeCategory =
+  | "habitat_control"
+  | "erosion_control"
+  | "predator_control"
+  | "supplemental_water"
+  | "supplemental_food"
+  | "supplemental_shelter"
+  | "census";
+
+export type FieldLogEntry = {
+  id: string;
+  userId: string;
+  propertyId: string;
+  entryType: FieldLogEntryType;
+  practiceCategory: PracticeCategory;
+  note?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  gpsAccuracyMeters?: number | null;
+  gpsSource?: GpsSource | null;
+  capturedAt?: string | null;   // ISO timestamp of the actual activity
+  createdAt: string;            // ISO timestamp of row insert
+  photoPath?: string | null;    // path in the private 'field-log' bucket
+};
