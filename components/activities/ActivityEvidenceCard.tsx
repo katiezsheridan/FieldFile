@@ -77,7 +77,7 @@ export default function ActivityEvidenceCard({
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
-        className="w-full flex items-start justify-between gap-3 text-left"
+        className="w-full flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-3 text-left"
       >
         <span className="flex items-start gap-2 min-w-0">
           <svg
@@ -107,7 +107,7 @@ export default function ActivityEvidenceCard({
             )}
           </span>
         </span>
-        <span className="flex items-center gap-3 shrink-0">
+        <span className="flex items-center gap-3 shrink-0 pl-7 sm:pl-0">
           <span className="text-xs text-field-ink/50 whitespace-nowrap">
             {activity.documents.length}{" "}
             {activity.documents.length === 1 ? "doc" : "docs"}
