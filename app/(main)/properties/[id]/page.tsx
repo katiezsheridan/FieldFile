@@ -155,6 +155,25 @@ export default function PropertyPage() {
           </div>
         </div>
 
+        {/* Field log — mobile capture of geotagged practice evidence */}
+        <Link
+          href={`/properties/${id}/field-log`}
+          className="flex items-center justify-between gap-4 bg-white border border-field-wheat rounded-lg p-5 hover:border-field-forest/50 transition group"
+        >
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xl">📷</span>
+              <h2 className="font-semibold text-field-ink">Field log</h2>
+            </div>
+            <p className="text-sm text-field-ink/60 mt-1">
+              Capture geotagged, timestamped photo evidence from the field.
+            </p>
+          </div>
+          <span className="text-field-forest font-medium text-sm whitespace-nowrap group-hover:underline">
+            Log evidence →
+          </span>
+        </Link>
+
         {/* Activities with inline evidence */}
         <CollapsibleSection
           title="Wildlife Management Activities"
