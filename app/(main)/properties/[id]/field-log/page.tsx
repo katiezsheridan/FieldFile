@@ -51,15 +51,12 @@ export default function FieldLogLandingPage() {
             📷 Log photo evidence
           </Link>
           {/* Session 3 — quick pin without a photo. */}
-          <button
-            type="button"
-            disabled
-            className="flex items-center justify-center gap-2 py-5 bg-field-mist text-field-earth/60 text-base font-semibold rounded-2xl cursor-not-allowed"
-            title="Coming soon"
+          <Link
+            href={`/properties/${id}/field-log/pin`}
+            className="flex items-center justify-center gap-2 py-5 bg-field-forest text-white text-base font-semibold rounded-2xl hover:bg-field-forest/90 active:scale-[0.99] transition shadow-sm"
           >
             📍 Drop a pin
-            <span className="text-[11px] font-normal">(soon)</span>
-          </button>
+          </Link>
         </div>
 
         <h2 className="text-sm font-semibold text-field-ink/70 uppercase tracking-wide mb-3">
