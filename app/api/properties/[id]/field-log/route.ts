@@ -1,63 +1,18 @@
-import { createClient } from "@supabase/supabase-js";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
+import { isPracticeCategory } from "@/lib/field-log";
+import {
+  fieldLogDb as supabase,
+  BUCKET,
+  SIGNED_URL_TTL,
+  resolvePropertyId,
+  mapEntry,
+  mapEntryWithSignedUrl,
+  fetchFieldLogEntries,
+} from "@/lib/field-log-server";
 
-// Service-role client. The 'field-log' bucket is PRIVATE with no anon storage
-// policies, so — unlike the census/documents flow — uploads and signed-URL
-// reads MUST go through the server here. This matches the Session 1 migration's
-// stated design (all field-log Storage access via the service-role key).
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
-const BUCKET = "field-log";
-const SIGNED_URL_TTL = 60 * 60; // 1 hour
-
-const PRACTICE_CATEGORIES = [
-  "habitat_control",
-  "erosion_control",
-  "predator_control",
-  "supplemental_water",
-  "supplemental_food",
-  "supplemental_shelter",
-  "census",
-] as const;
 const GPS_SOURCES = ["device_live", "photo_exif", "manual_pin"] as const;
 const ENTRY_TYPES = ["photo_evidence", "pin_activity"] as const;
-
-async function resolvePropertyId(idOrSlug: string, userId: string) {
-  const isUUID =
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
-      idOrSlug
-    );
-  const { data } = await supabase
-    .from("properties")
-    .select("id")
-    .eq(isUUID ? "id" : "slug", idOrSlug)
-    .eq("user_id", userId)
-    .single();
-  return data?.id as string | undefined;
-}
-
-function mapEntry(e: any, signedUrl: string | null = null) {
-  return {
-    id: e.id,
-    userId: e.user_id,
-    propertyId: e.property_id,
-    entryType: e.entry_type,
-    practiceCategory: e.practice_category,
-    note: e.note,
-    latitude: e.latitude,
-    longitude: e.longitude,
-    gpsAccuracyMeters: e.gps_accuracy_meters,
-    gpsSource: e.gps_source,
-    capturedAt: e.captured_at,
-    createdAt: e.created_at,
-    photoPath: e.photo_path,
-    photoUrl: signedUrl,
-  };
-}
 
 function toNum(v: unknown): number | null {
   if (v === null || v === undefined || v === "") return null;
@@ -66,10 +21,12 @@ function toNum(v: unknown): number | null {
 }
 
 // GET /api/properties/[id]/field-log — list a property's entries, newest first,
-// each with a short-lived signed thumbnail URL. (Minimal; the full log/map view
-// is Session 4.)
+// each with a short-lived signed thumbnail URL. Optional query params narrow the
+// set for the log view and (later) report generation:
+//   ?category=<practice>   one of the seven TPWD practices
+//   ?from=<ISO>&to=<ISO>   inclusive captured_at bounds (reporting windows)
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { userId } = await auth();
@@ -81,28 +38,17 @@ export async function GET(
   if (!propertyId)
     return NextResponse.json({ error: "Property not found" }, { status: 404 });
 
-  const { data, error } = await supabase
-    .from("field_log_entries")
-    .select("*")
-    .eq("property_id", propertyId)
-    .eq("user_id", userId)
-    .order("captured_at", { ascending: false, nullsFirst: false })
-    .order("created_at", { ascending: false });
+  const { searchParams } = new URL(req.url);
+  const categoryParam = searchParams.get("category");
+  const { data, error } = await fetchFieldLogEntries(propertyId, userId, {
+    from: searchParams.get("from"),
+    to: searchParams.get("to"),
+    category: isPracticeCategory(categoryParam) ? categoryParam : null,
+  });
   if (error)
     return NextResponse.json({ error: error.message }, { status: 400 });
 
-  const entries = await Promise.all(
-    (data || []).map(async (e) => {
-      let url: string | null = null;
-      if (e.photo_path) {
-        const { data: signed } = await supabase.storage
-          .from(BUCKET)
-          .createSignedUrl(e.photo_path, SIGNED_URL_TTL);
-        url = signed?.signedUrl ?? null;
-      }
-      return mapEntry(e, url);
-    })
-  );
+  const entries = await Promise.all((data || []).map(mapEntryWithSignedUrl));
   return NextResponse.json(entries);
 }
 
@@ -146,7 +92,7 @@ export async function POST(
   const entryType = ENTRY_TYPES.includes(payload.entryType)
     ? payload.entryType
     : "photo_evidence";
-  if (!PRACTICE_CATEGORIES.includes(payload.practiceCategory)) {
+  if (!isPracticeCategory(payload.practiceCategory)) {
     return NextResponse.json(
       { error: "A valid practice_category is required" },
       { status: 400 }
