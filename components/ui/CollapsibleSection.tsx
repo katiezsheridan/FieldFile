@@ -11,9 +11,10 @@ interface CollapsibleSectionProps {
   children: ReactNode;
 }
 
-// A section with a chevron header that toggles its body open/closed. Kept
-// visually light (no card background) so existing white content cards sit
-// inside it the same way they did before.
+// A collapsible section rendered as a white card with a chevron header, matching
+// PropertyMapSection so every section on the property page shares the same
+// chrome. The body has its own padding; child content cards keep their borders
+// so they stay legible inside the panel.
 export function CollapsibleSection({
   title,
   summary,
@@ -23,17 +24,20 @@ export function CollapsibleSection({
   const [open, setOpen] = useState(defaultOpen);
 
   return (
-    <section>
+    <section className="bg-white border border-field-wheat rounded-lg overflow-hidden">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
-        className="w-full flex items-center justify-between gap-3 mb-4 text-left"
+        className={cn(
+          "w-full flex items-center justify-between gap-3 px-5 py-4 text-left",
+          open && "border-b border-field-wheat/50"
+        )}
       >
-        <span className="flex items-center gap-2">
+        <span className="flex items-center gap-2 min-w-0">
           <svg
             className={cn(
-              "w-5 h-5 text-field-earth transition-transform duration-200",
+              "w-5 h-5 shrink-0 text-field-earth transition-transform duration-200",
               open && "rotate-90"
             )}
             fill="none"
@@ -50,10 +54,10 @@ export function CollapsibleSection({
           <span className="text-xl font-semibold text-field-ink">{title}</span>
         </span>
         {summary != null && (
-          <span className="text-sm text-field-ink/60">{summary}</span>
+          <span className="shrink-0 text-sm text-field-ink/60">{summary}</span>
         )}
       </button>
-      {open && <div>{children}</div>}
+      {open && <div className="p-5">{children}</div>}
     </section>
   );
 }
