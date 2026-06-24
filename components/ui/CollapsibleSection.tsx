@@ -30,7 +30,7 @@ export function CollapsibleSection({
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
         className={cn(
-          "w-full flex items-center justify-between gap-3 px-5 py-4 text-left",
+          "w-full flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-3 px-5 py-4 text-left",
           open && "border-b border-field-wheat/50"
         )}
       >
@@ -51,10 +51,14 @@ export function CollapsibleSection({
               d="M8.25 4.5l7.5 7.5-7.5 7.5"
             />
           </svg>
-          <span className="text-xl font-semibold text-field-ink">{title}</span>
+          <span className="min-w-0 text-xl font-semibold text-field-ink">
+            {title}
+          </span>
         </span>
         {summary != null && (
-          <span className="shrink-0 text-sm text-field-ink/60">{summary}</span>
+          <span className="shrink-0 pl-7 sm:pl-0 text-sm text-field-ink/60">
+            {summary}
+          </span>
         )}
       </button>
       {open && <div className="p-5">{children}</div>}
