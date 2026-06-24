@@ -22,9 +22,13 @@ const ObservationIcon = L.divIcon({
 });
 
 interface Props {
-  propertyCenter: { lat: number; lng: number };
+  propertyCenter: { lat: number; lng: number } | null;
   value: { lat: number; lng: number } | null;
   onChange: (coords: { lat: number; lng: number } | null) => void;
+  // Where to initially frame the map, when that differs from the property
+  // center (e.g. a live GPS pin). The house marker always sits at
+  // propertyCenter and never tracks `value`. Defaults to propertyCenter.
+  mapCenter?: { lat: number; lng: number } | null;
 }
 
 function ClickHandler({ onPick }: { onPick: (c: { lat: number; lng: number }) => void }) {
@@ -40,8 +44,14 @@ export default function CensusLocationPicker({
   propertyCenter,
   value,
   onChange,
+  mapCenter,
 }: Props) {
-  const center: LatLngExpression = [propertyCenter.lat, propertyCenter.lng];
+  // Initial view only (Leaflet ignores later center changes): prefer an
+  // explicit mapCenter, else the property, else an existing pin, else a
+  // Texas-wide fallback so the map never gets NaN coordinates.
+  const framed =
+    mapCenter ?? propertyCenter ?? value ?? { lat: 31.0, lng: -99.5 };
+  const center: LatLngExpression = [framed.lat, framed.lng];
 
   return (
     <MapContainer
@@ -60,7 +70,12 @@ export default function CensusLocationPicker({
         url="https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}"
       />
 
-      <Marker position={center} icon={PropertyIcon} />
+      {propertyCenter && (
+        <Marker
+          position={[propertyCenter.lat, propertyCenter.lng]}
+          icon={PropertyIcon}
+        />
+      )}
 
       <ClickHandler onPick={onChange} />
 
