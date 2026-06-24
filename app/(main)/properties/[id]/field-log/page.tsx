@@ -3,8 +3,14 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import FieldLogMap from "@/components/field-log/FieldLogMapWrapper";
+import { useOfflineSync } from "@/components/offline/OfflineSyncProvider";
+import {
+  getQueuedEntries,
+  QUEUE_CHANGED_EVENT,
+  type QueuedEntry,
+} from "@/lib/offline-queue";
 import {
   PRACTICE_CATEGORIES,
   practiceCategoryLabel,
@@ -21,10 +27,18 @@ type CategoryFilter = PracticeCategory | "all";
 
 export default function FieldLogLandingPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const id = params.id as string;
+  const { pending } = useOfflineSync();
 
   const [entries, setEntries] = useState<EntryWithUrl[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Locally-queued (not-yet-synced) captures for this property.
+  const [queued, setQueued] = useState<QueuedEntry[]>([]);
+  const [queuedUrls, setQueuedUrls] = useState<Record<string, string>>({});
+  const justQueued = searchParams.get("queued") === "1";
+  const [queuedBannerHidden, setQueuedBannerHidden] = useState(false);
 
   const [propertyCenter, setPropertyCenter] = useState<Coords | null>(null);
   const [propertyName, setPropertyName] = useState<string | undefined>();
@@ -72,7 +86,7 @@ export default function FieldLogLandingPage() {
         if (!cancelled) setEntries(Array.isArray(data) ? data : []);
       })
       .catch(() => {
-        if (!cancelled) setEntries([]);
+        /* offline or transient — keep whatever we already have on screen */
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -81,7 +95,35 @@ export default function FieldLogLandingPage() {
     return () => {
       cancelled = true;
     };
-  }, [id, category, dateFrom, dateTo]);
+    // `pending` is included so the list refetches once a background sync drains
+    // the queue and those entries become server-backed.
+  }, [id, category, dateFrom, dateTo, pending]);
+
+  // Keep the queued list in step with the offline queue (enqueue / flush).
+  useEffect(() => {
+    let cancelled = false;
+    const load = () =>
+      getQueuedEntries(id).then((q) => {
+        if (!cancelled) setQueued(q);
+      });
+    load();
+    const onChange = () => load();
+    window.addEventListener(QUEUE_CHANGED_EVENT, onChange);
+    return () => {
+      cancelled = true;
+      window.removeEventListener(QUEUE_CHANGED_EVENT, onChange);
+    };
+  }, [id]);
+
+  // Object URLs for queued-photo thumbnails; rebuilt and revoked with the queue.
+  useEffect(() => {
+    const map: Record<string, string> = {};
+    queued.forEach((q) => {
+      if (q.photo) map[q.localId] = URL.createObjectURL(q.photo);
+    });
+    setQueuedUrls(map);
+    return () => Object.values(map).forEach((u) => URL.revokeObjectURL(u));
+  }, [queued]);
 
   const locatedCount = useMemo(
     () => entries.filter((e) => e.latitude != null && e.longitude != null).length,
@@ -90,6 +132,16 @@ export default function FieldLogLandingPage() {
   const legend = useMemo(
     () => groupByPracticeCategory(entries).filter((g) => g.entries.length > 0),
     [entries]
+  );
+
+  // Queued entries honor the active category chip (they predate the date range,
+  // so date filters don't apply to them).
+  const visibleQueued = useMemo(
+    () =>
+      category === "all"
+        ? queued
+        : queued.filter((q) => q.payload.practiceCategory === category),
+    [queued, category]
   );
 
   const filtersActive = category !== "all" || !!dateFrom || !!dateTo;
@@ -242,11 +294,29 @@ export default function FieldLogLandingPage() {
           </div>
         </div>
 
+        {justQueued && !queuedBannerHidden && (
+          <div className="mb-4 flex items-start gap-2 bg-field-gold/10 border border-field-gold/40 text-field-earth rounded-xl p-3 text-sm">
+            <span aria-hidden>✓</span>
+            <p className="flex-1">
+              Saved on this device. It&apos;ll sync automatically when you&apos;re
+              back online.
+            </p>
+            <button
+              type="button"
+              onClick={() => setQueuedBannerHidden(true)}
+              className="text-field-earth/60 hover:text-field-earth"
+              aria-label="Dismiss"
+            >
+              ✕
+            </button>
+          </div>
+        )}
+
         {loading ? (
           <div className="py-10 flex justify-center">
             <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-field-forest" />
           </div>
-        ) : entries.length === 0 ? (
+        ) : entries.length === 0 && visibleQueued.length === 0 ? (
           <div className="bg-white border border-field-wheat rounded-xl p-6 text-center">
             <p className="text-field-ink/70 text-sm">
               {filtersActive ? (
@@ -265,7 +335,9 @@ export default function FieldLogLandingPage() {
             {locatedCount === 0 ? (
               <div className="bg-white border border-field-wheat rounded-xl p-6 text-center mb-3">
                 <p className="text-field-ink/70 text-sm">
-                  None of these {entries.length} entries has a location to map.
+                  {entries.length === 0
+                    ? "No synced entries to map yet."
+                    : `None of these ${entries.length} entries has a location to map.`}
                 </p>
               </div>
             ) : (
@@ -302,10 +374,71 @@ export default function FieldLogLandingPage() {
                 no location and aren&apos;t shown on the map.
               </p>
             )}
+            {visibleQueued.length > 0 && (
+              <p className="text-[11px] text-field-ink/50 mt-2">
+                {visibleQueued.length} pending{" "}
+                {visibleQueued.length === 1 ? "entry is" : "entries are"} waiting
+                to sync and not on the map yet.
+              </p>
+            )}
           </div>
         ) : (
-          <ul className="space-y-3">
-            {entries.map((e) => (
+          <div className="space-y-3">
+            {visibleQueued.length > 0 && (
+              <ul className="space-y-3">
+                {visibleQueued.map((q) => {
+                  const cat = q.payload.practiceCategory as PracticeCategory;
+                  const note = (q.payload.note as string | null) || null;
+                  return (
+                    <li
+                      key={q.localId}
+                      className="flex gap-3 bg-field-gold/5 border border-field-gold/40 rounded-xl p-3"
+                    >
+                      <div className="relative h-16 w-16 shrink-0 rounded-lg overflow-hidden bg-field-mist">
+                        {queuedUrls[q.localId] ? (
+                          <Image
+                            src={queuedUrls[q.localId]}
+                            alt={practiceCategoryLabel(cat)}
+                            fill
+                            unoptimized
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className="h-full w-full flex items-center justify-center text-field-earth/50 text-xl">
+                            📍
+                          </div>
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="flex items-center gap-1.5 text-sm font-semibold text-field-ink truncate">
+                          <span
+                            className="h-2.5 w-2.5 shrink-0 rounded-full"
+                            style={{
+                              backgroundColor: PRACTICE_CATEGORY_COLORS[cat],
+                            }}
+                          />
+                          {practiceCategoryLabel(cat)}
+                        </p>
+                        {note && (
+                          <p className="text-xs text-field-ink/70 truncate">
+                            {note}
+                          </p>
+                        )}
+                        <p className="mt-1">
+                          <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-field-gold/20 text-field-earth">
+                            <span className="h-1.5 w-1.5 rounded-full bg-field-gold" />
+                            Pending sync
+                          </span>
+                        </p>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+
+            <ul className="space-y-3">
+              {entries.map((e) => (
               <li key={e.id}>
                 <Link
                   href={`/properties/${id}/field-log/${e.id}`}
@@ -352,7 +485,8 @@ export default function FieldLogLandingPage() {
                 </Link>
               </li>
             ))}
-          </ul>
+            </ul>
+          </div>
         )}
       </div>
     </div>
