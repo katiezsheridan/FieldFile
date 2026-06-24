@@ -246,7 +246,8 @@ export default function NewFieldPhotoPage() {
 
               {mapCenter ? (
                 <CensusLocationPicker
-                  propertyCenter={mapCenter}
+                  propertyCenter={propertyCenter}
+                  mapCenter={mapCenter}
                   value={pin}
                   onChange={handlePinChange}
                 />

@@ -225,7 +225,8 @@ export default function DropPinPage() {
               </div>
             ) : mapCenter ? (
               <CensusLocationPicker
-                propertyCenter={mapCenter}
+                propertyCenter={propertyCenter}
+                mapCenter={mapCenter}
                 value={pin}
                 onChange={handlePinChange}
               />
