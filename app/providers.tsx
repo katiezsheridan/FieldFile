@@ -5,6 +5,9 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import posthog from "posthog-js";
 import { PostHogProvider } from "posthog-js/react";
+import { OfflineSyncProvider } from "@/components/offline/OfflineSyncProvider";
+import { OfflineIndicator } from "@/components/offline/OfflineIndicator";
+import { ServiceWorkerRegistration } from "@/components/offline/ServiceWorkerRegistration";
 
 if (typeof window !== "undefined") {
   const key = process.env.NEXT_PUBLIC_POSTHOG_KEY;
@@ -64,7 +67,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <PageviewTracker />
       </Suspense>
       <ClerkPostHogBridge />
-      {children}
+      <ServiceWorkerRegistration />
+      <OfflineSyncProvider>
+        {children}
+        <OfflineIndicator />
+      </OfflineSyncProvider>
     </PostHogProvider>
   );
 }

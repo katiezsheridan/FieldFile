@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import CensusLocationPicker from "@/components/census/CensusLocationPickerWrapper";
 import { PRACTICE_CATEGORIES } from "@/lib/field-log";
+import { submitFieldLogEntry } from "@/lib/field-log-submit";
 import type { GpsSource, PracticeCategory } from "@/lib/types";
 import {
   GPS_SOURCE_LABELS,
@@ -140,18 +141,12 @@ export default function NewFieldPhotoPage() {
         capturedAt,
       };
 
-      const form = new FormData();
-      form.append("payload", JSON.stringify(payload));
-      form.append("photo", photoFile, photoFile.name);
-
-      const r = await fetch(`/api/properties/${id}/field-log`, {
-        method: "POST",
-        body: form,
-      });
-      if (!r.ok) {
-        throw new Error((await r.json()).error || "Failed to save");
-      }
-      router.push(`/properties/${id}/field-log`);
+      const result = await submitFieldLogEntry(id, payload, photoFile);
+      router.push(
+        `/properties/${id}/field-log${
+          result.status === "queued" ? "?queued=1" : ""
+        }`
+      );
     } catch (err: any) {
       setError(err?.message || "Failed to save");
       setSubmitting(false);
