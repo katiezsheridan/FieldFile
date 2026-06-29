@@ -110,15 +110,19 @@ export default function HowItWorksPage() {
         </div>
       </div>
 
-      {/* Dashboard placeholder */}
+      {/* Dashboard preview */}
       <div className="max-w-4xl mx-auto mb-16">
-        <div className="bg-field-wheat/30 border-2 border-dashed border-field-wheat rounded-2xl p-12 text-center">
-          <p className="text-field-ink/40 text-sm uppercase tracking-wide mb-2">
-            Dashboard Preview
-          </p>
-          <p className="text-field-ink/60">
-            Screenshot of FieldFile dashboard coming soon
-          </p>
+        <p className="text-field-ink/40 text-sm uppercase tracking-wide text-center mb-4">
+          Dashboard Preview
+        </p>
+        <div className="relative aspect-[2910/1518] rounded-2xl overflow-hidden border border-field-wheat shadow-sm">
+          <Image
+            src="/images/dashboard-preview.png"
+            alt="FieldFile property dashboard showing field log, wildlife management activities, land documents, and a property map"
+            fill
+            className="object-cover object-top"
+            sizes="(max-width: 896px) 100vw, 896px"
+          />
         </div>
       </div>
 
