@@ -3,9 +3,21 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { usePlan, usePlanDraftAutoSave, updatePlan } from "@/lib/hooks";
+import {
+  usePlan,
+  usePlanDraftAutoSave,
+  usePlanPracticesAutoSave,
+  updatePlan,
+  updatePlanPractices,
+} from "@/lib/hooks";
 import { computePlanCompletion } from "@/lib/plan-completion";
 import { EMPTY_PLAN_FORM, PlanForm } from "@/components/plan/planForm";
+import {
+  buildPracticeForm,
+  toPracticeWrites,
+  PracticeFormState,
+} from "@/components/plan/practiceForm";
+import { PracticeType } from "@/lib/types";
 import PlanProgress from "@/components/plan/PlanProgress";
 import LandDescriptionStep from "@/components/plan/steps/LandDescriptionStep";
 import PracticesStep from "@/components/plan/steps/PracticesStep";
@@ -36,6 +48,7 @@ export default function PlanWizard({ planId }: { planId: string }) {
   const { plan, loading, error } = usePlan(planId);
 
   const [form, setForm] = useState<PlanForm>(EMPTY_PLAN_FORM);
+  const [practices, setPractices] = useState<PracticeFormState[]>([]);
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -55,6 +68,7 @@ export default function PlanWizard({ planId }: { planId: string }) {
         landHistory: plan.landHistory ?? "",
         targetSpecies: plan.targetSpecies,
       });
+      setPractices(buildPracticeForm(plan.practices));
       initialized.current = true;
     }
   }, [plan]);
@@ -65,13 +79,31 @@ export default function PlanWizard({ planId }: { planId: string }) {
     if (param >= 1 && param <= STEPS.length) setStep(param);
   }, []);
 
-  const { isSaving, lastSaved } = usePlanDraftAutoSave(
+  const practiceWrites = toPracticeWrites(practices);
+
+  const draftSave = usePlanDraftAutoSave(
     initialized.current ? planId : undefined,
     form
   );
+  const practiceSave = usePlanPracticesAutoSave(
+    initialized.current ? planId : undefined,
+    practiceWrites
+  );
+  const isSaving = draftSave.isSaving || practiceSave.isSaving;
+  const lastSaved = draftSave.lastSaved || practiceSave.lastSaved;
 
   const update = <K extends keyof PlanForm>(key: K, value: PlanForm[K]) =>
     setForm((f) => ({ ...f, [key]: value }));
+
+  const updatePractice = (
+    practiceType: PracticeType,
+    patch: Partial<PracticeFormState>
+  ) =>
+    setPractices((prev) =>
+      prev.map((p) =>
+        p.practiceType === practiceType ? { ...p, ...patch } : p
+      )
+    );
 
   const goToStep = (n: number) => {
     const clamped = Math.min(Math.max(n, 1), STEPS.length);
@@ -95,9 +127,12 @@ export default function PlanWizard({ planId }: { planId: string }) {
       currentLandUse: form.currentLandUse,
     },
     targetSpecies: form.targetSpecies,
-    practices: (plan?.practices ?? []).map((p) => ({
+    practices: practices.map((p) => ({
       selected: p.selected,
-      documentation: p.documentation,
+      documentation: {
+        description: p.description,
+        plannedActivities: p.plannedActivities,
+      },
     })),
   });
 
@@ -105,6 +140,10 @@ export default function PlanWizard({ planId }: { planId: string }) {
     setSubmitting(true);
     setSubmitError(null);
     try {
+      // Flush the latest edits first so the server's completion check (which
+      // gates the status change) sees them even if a debounce had not fired.
+      await updatePlan(planId, form);
+      await updatePlanPractices(planId, practiceWrites);
       await updatePlan(planId, { status: "ready" });
       const handle = plan?.property?.slug ?? plan?.property?.id;
       router.push(handle ? `/properties/${handle}` : "/dashboard");
@@ -123,7 +162,10 @@ export default function PlanWizard({ planId }: { planId: string }) {
   const handleSaveAndExit = async () => {
     setExiting(true);
     try {
-      if (initialized.current) await updatePlan(planId, form);
+      if (initialized.current) {
+        await updatePlan(planId, form);
+        await updatePlanPractices(planId, practiceWrites);
+      }
     } catch {
       // A failed flush still leaves the last auto-saved draft intact.
     }
@@ -222,7 +264,13 @@ export default function PlanWizard({ planId }: { planId: string }) {
       {/* Step content */}
       <div className="rounded-xl border border-field-wheat bg-white px-6 py-6">
         {step === 1 && <LandDescriptionStep form={form} update={update} />}
-        {step === 2 && <PracticesStep />}
+        {step === 2 && (
+          <PracticesStep
+            practices={practices}
+            habitatTypes={form.habitatTypes}
+            update={updatePractice}
+          />
+        )}
         {step === 3 && (
           <ReviewStep
             completion={completion}
