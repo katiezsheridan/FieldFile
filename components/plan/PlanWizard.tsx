@@ -39,6 +39,7 @@ export default function PlanWizard({ planId }: { planId: string }) {
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [exiting, setExiting] = useState(false);
   const initialized = useRef(false);
 
   // Seed the form from the saved plan once it loads. Guarded so a later refetch
@@ -116,6 +117,19 @@ export default function PlanWizard({ planId }: { planId: string }) {
     }
   };
 
+  // Flush the current draft, then leave for the dashboard. The plan already
+  // auto-saves, but saving here too guarantees the latest keystrokes are kept
+  // even if the debounce had not fired yet.
+  const handleSaveAndExit = async () => {
+    setExiting(true);
+    try {
+      if (initialized.current) await updatePlan(planId, form);
+    } catch {
+      // A failed flush still leaves the last auto-saved draft intact.
+    }
+    router.push("/dashboard");
+  };
+
   if (loading) {
     return (
       <div className="max-w-2xl mx-auto px-6 py-10 animate-pulse">
@@ -142,6 +156,19 @@ export default function PlanWizard({ planId }: { planId: string }) {
 
   return (
     <div className="max-w-2xl mx-auto px-6 py-10">
+      {/* Leave any time; the draft is saved. */}
+      <button
+        type="button"
+        onClick={handleSaveAndExit}
+        disabled={exiting}
+        className="inline-flex items-center gap-1.5 text-sm font-medium text-field-earth hover:text-field-ink transition-colors mb-6 disabled:opacity-60"
+      >
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+        </svg>
+        {exiting ? "Saving..." : "Save and finish later"}
+      </button>
+
       {/* Read-only property identity */}
       <div className="rounded-xl border border-field-wheat bg-white px-5 py-4 mb-8">
         <div className="flex items-start justify-between gap-4">
