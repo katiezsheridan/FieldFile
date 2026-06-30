@@ -6,8 +6,40 @@ import { useRouter } from "next/navigation";
 import StepIndicator from "@/components/onboarding/StepIndicator";
 import WizardStep from "@/components/onboarding/WizardStep";
 import { lookupLocation, type CountyResult } from "@/lib/quiz-data";
+import type { ExemptionType, ExemptionStatus } from "@/lib/types";
 
-const STEPS = ["Property", "Your Info"];
+const STEPS = ["Situation", "Property", "Your Info"];
+
+type Situation = "exploring" | "working" | "have";
+
+const SITUATION_OPTIONS: { value: Situation; title: string; desc: string }[] = [
+  {
+    value: "exploring",
+    title: "I'm exploring it",
+    desc: "Looking into whether wildlife fits my land.",
+  },
+  {
+    value: "working",
+    title: "I'm working toward it",
+    desc: "Applying now, or switching from an ag valuation.",
+  },
+  {
+    value: "have",
+    title: "I already have one",
+    desc: "I need to keep my wildlife valuation up to date.",
+  },
+];
+
+// Each situation sets the property's exemption type + status so the rest of the
+// app reflects where the landowner actually is, instead of assuming wildlife.
+const SITUATION_TO_EXEMPTION: Record<
+  Situation,
+  { type: ExemptionType; status: ExemptionStatus }
+> = {
+  exploring: { type: "none", status: "applying" },
+  working: { type: "wildlife", status: "pending" },
+  have: { type: "wildlife", status: "active" },
+};
 
 export default function SetupPage() {
   const { user } = useUser();
@@ -15,6 +47,9 @@ export default function SetupPage() {
   const [step, setStep] = useState(1);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+
+  // Step 1: Situation
+  const [situation, setSituation] = useState<Situation | null>(null);
 
   // Step 1: Property
   const [propertyName, setPropertyName] = useState("");
@@ -61,6 +96,8 @@ export default function SetupPage() {
     setSaving(true);
     setError("");
 
+    const exemption = SITUATION_TO_EXEMPTION[situation ?? "exploring"];
+
     try {
       const res = await fetch("/api/setup", {
         method: "POST",
@@ -74,7 +111,8 @@ export default function SetupPage() {
               : countyResult?.county || "",
             state: "TX",
             acreage: parseFloat(acreage) || 0,
-            exemptionType: "wildlife",
+            exemptionType: exemption.type,
+            exemptionStatus: exemption.status,
             legalDescription: legalDescription || undefined,
             appraisalAccount: appraisalAccount || undefined,
           },
@@ -104,12 +142,61 @@ export default function SetupPage() {
 
         {step === 1 && (
           <WizardStep
+            title="Where are you with a wildlife valuation?"
+            description="This helps us tailor your plan. There are no wrong answers, and you can change it later."
+            isFirst
+            onNext={() => setStep(2)}
+            nextDisabled={!situation}
+          >
+            <div className="space-y-3">
+              {SITUATION_OPTIONS.map((option) => {
+                const isSelected = situation === option.value;
+                return (
+                  <button
+                    key={option.value}
+                    onClick={() => setSituation(option.value)}
+                    className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
+                      isSelected
+                        ? "border-field-green bg-field-green/5"
+                        : "border-field-wheat/50 bg-white hover:border-field-green/40"
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div
+                        className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 transition-colors ${
+                          isSelected
+                            ? "bg-field-forest"
+                            : "border-2 border-field-wheat"
+                        }`}
+                      >
+                        {isSelected && (
+                          <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
+                        )}
+                      </div>
+                      <div>
+                        <p className="font-medium text-field-ink">{option.title}</p>
+                        <p className="text-sm text-field-ink/60 mt-0.5">
+                          {option.desc}
+                        </p>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </WizardStep>
+        )}
+
+        {step === 2 && (
+          <WizardStep
             title="Tell us about your property"
             description="We'll use this to set up your dashboard and tailor your filing requirements."
-            isFirst
+            onBack={() => setStep(1)}
             onNext={() => {
               initName();
-              setStep(2);
+              setStep(3);
             }}
             nextDisabled={!countyResult || !acreage}
           >
@@ -256,11 +343,11 @@ export default function SetupPage() {
           </WizardStep>
         )}
 
-        {step === 2 && (
+        {step === 3 && (
           <WizardStep
             title="Your information"
             description="We'll use this to personalize your experience and pre-fill your reports."
-            onBack={() => setStep(1)}
+            onBack={() => setStep(2)}
             onNext={handleComplete}
             isLast
             nextLabel={saving ? "Setting up..." : "Continue to your plan"}

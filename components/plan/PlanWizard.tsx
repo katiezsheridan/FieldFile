@@ -13,6 +13,24 @@ import ReviewStep from "@/components/plan/steps/ReviewStep";
 
 const STEPS = ["Land description", "Practices", "Review"];
 
+// A one-line framing based on where the landowner said they are, so the plan
+// does not read as if they are already managing for wildlife.
+function situationIntro(
+  exemptionType?: string,
+  exemptionStatus?: string
+): string {
+  if (exemptionType === "wildlife" && exemptionStatus === "active") {
+    return "Let's keep your wildlife valuation in good standing for this year.";
+  }
+  if (exemptionType === "wildlife") {
+    return "You're working toward a wildlife valuation. This plan is what you'll build it on.";
+  }
+  if (exemptionType === "none") {
+    return "You're exploring whether wildlife fits your land. This plan helps you see what it would take.";
+  }
+  return "Let's build your wildlife management plan, one step at a time.";
+}
+
 export default function PlanWizard({ planId }: { planId: string }) {
   const router = useRouter();
   const { plan, loading, error } = usePlan(planId);
@@ -137,6 +155,9 @@ export default function PlanWizard({ planId }: { planId: string }) {
             <p className="text-sm text-field-earth mt-0.5">
               {property?.county ? `${property.county} County` : ""}
               {property?.acreage ? ` · ${property.acreage} acres` : ""}
+            </p>
+            <p className="text-sm text-field-earth mt-2">
+              {situationIntro(property?.exemptionType, property?.exemptionStatus)}
             </p>
           </div>
           {editHandle && (

@@ -69,4 +69,8 @@ export type PlanPropertySummary = {
   acreage: number;
   legalDescription?: string;
   appraisalAccount?: string;
+  // Drives the wizard's situational intro (exploring / working toward it / has
+  // a valuation) so the plan does not assume the landowner is already managing.
+  exemptionType?: string;
+  exemptionStatus?: string;
 };

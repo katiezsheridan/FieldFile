@@ -28,7 +28,9 @@ async function loadPlanContext(planId: string, userId: string) {
 
   const { data: propRow } = await supabase
     .from("properties")
-    .select("id, slug, name, county, acreage, legal_description, appraisal_account")
+    .select(
+      "id, slug, name, county, acreage, legal_description, appraisal_account, exemption_type, exemption_status"
+    )
     .eq("id", planRow.property_id)
     .maybeSingle();
 
@@ -41,6 +43,8 @@ async function loadPlanContext(planId: string, userId: string) {
         acreage: propRow.acreage,
         legalDescription: propRow.legal_description ?? undefined,
         appraisalAccount: propRow.appraisal_account ?? undefined,
+        exemptionType: propRow.exemption_type ?? undefined,
+        exemptionStatus: propRow.exemption_status ?? undefined,
       }
     : null;
 

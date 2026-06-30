@@ -71,6 +71,7 @@ export async function POST(request: Request) {
       state: property.state,
       acreage: property.acreage,
       exemption_type: property.exemptionType,
+      exemption_status: property.exemptionStatus ?? null,
       legal_description: property.legalDescription ?? null,
       appraisal_account: property.appraisalAccount ?? null,
       lat,
