@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import TagInput from "@/components/plan/TagInput";
+import SpeciesPicker from "@/components/plan/SpeciesPicker";
 import {
   HABITAT_OPTIONS,
   WATER_OPTIONS,
@@ -111,11 +111,13 @@ export default function LandDescriptionStep({
         <span className={labelClass}>
           What wildlife do you see on the property?
         </span>
-        <TagInput
+        <p className="text-sm text-field-earth mb-3">
+          Tap the ones you see, and add anything else.
+        </p>
+        <SpeciesPicker
           value={form.wildlifeSpecies}
           onChange={(next) => update("wildlifeSpecies", next)}
           ariaLabel="Wildlife species"
-          placeholder="Type a species and press Enter (e.g. whitetail deer, bobwhite quail)"
         />
       </div>
 
@@ -156,14 +158,13 @@ export default function LandDescriptionStep({
         <span className={labelClass}>
           Which species are you managing the land for?
         </span>
-        <p className="text-sm text-field-earth mb-2">
+        <p className="text-sm text-field-earth mb-3">
           These are your target species. Pick the ones your plan is built around.
         </p>
-        <TagInput
+        <SpeciesPicker
           value={form.targetSpecies}
           onChange={(next) => update("targetSpecies", next)}
           ariaLabel="Target species"
-          placeholder="Type a target species and press Enter (e.g. whitetail deer)"
         />
       </div>
     </div>

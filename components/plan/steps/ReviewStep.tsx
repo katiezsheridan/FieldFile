@@ -30,26 +30,29 @@ export default function ReviewStep({
             key={block.key}
             className="rounded-lg border border-field-wheat/70 bg-white px-4 py-3"
           >
-            <div className="flex items-center gap-3">
-              <span
-                className={cn(
-                  "w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0",
-                  block.complete
-                    ? "bg-field-forest text-white"
-                    : "bg-field-wheat/60 text-field-earth"
-                )}
-              >
-                {block.complete ? (
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                ) : (
-                  <span className="text-xs font-semibold">
-                    {Math.round(block.fraction * 100)}%
-                  </span>
-                )}
-              </span>
-              <span className="font-medium text-field-ink">{block.label}</span>
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <span
+                  className={cn(
+                    "w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0",
+                    block.complete
+                      ? "bg-field-forest text-white"
+                      : "border-2 border-field-wheat"
+                  )}
+                >
+                  {block.complete && (
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
+                </span>
+                <span className="font-medium text-field-ink">{block.label}</span>
+              </div>
+              {!block.complete && (
+                <span className="text-sm font-semibold text-field-earth flex-shrink-0">
+                  {Math.round(block.fraction * 100)}%
+                </span>
+              )}
             </div>
             {block.missing.length > 0 && (
               <ul className="mt-2 ml-9 list-disc list-inside text-sm text-field-earth space-y-0.5">

@@ -62,12 +62,13 @@ function fractionOf(items: { ok: boolean; label: string }[]): {
 }
 
 function identityBlock(id: PlanCompletionInput["identity"]): PlanBlock {
+  // Legal description and appraisal account number are collected but optional:
+  // they do not gate plan completion. Only name, county, and acreage are
+  // required here.
   const { fraction, missing } = fractionOf([
     { ok: present(id.name), label: "Property name" },
     { ok: present(id.county), label: "County" },
     { ok: typeof id.acreage === "number" && id.acreage > 0, label: "Acreage" },
-    { ok: present(id.legalDescription), label: "Legal description" },
-    { ok: present(id.appraisalAccount), label: "Appraisal account number" },
   ]);
   return { key: "identity", label: "Property identity", fraction, complete: missing.length === 0, missing };
 }
