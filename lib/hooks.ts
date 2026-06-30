@@ -11,6 +11,9 @@ import {
   ExemptionType,
   ExemptionStatus,
   Plan,
+  PlanPractice,
+  PracticeType,
+  PracticeDocumentation,
 } from "./types";
 import type { PlanPropertySummary } from "./plan-serialize";
 
@@ -602,6 +605,80 @@ export function usePlanDraftAutoSave(
       setError(null);
       try {
         await updatePlan(planId, JSON.parse(debounced) as PlanDraftFields);
+        if (!cancelled) setLastSaved(new Date());
+      } catch (err) {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : "Could not save");
+        }
+      } finally {
+        if (!cancelled) setIsSaving(false);
+      }
+    };
+    save();
+    return () => {
+      cancelled = true;
+    };
+  }, [debounced, planId]);
+
+  return { isSaving, lastSaved, error };
+}
+
+// ---------- Wildlife Plan: practices ----------
+
+export type PlanPracticeWrite = {
+  practiceType: PracticeType;
+  selected: boolean;
+  documentation: PracticeDocumentation;
+};
+
+// Upsert the plan's practices (selection + documentation) in one call.
+export async function updatePlanPractices(
+  planId: string,
+  practices: PlanPracticeWrite[]
+): Promise<PlanPractice[]> {
+  const res = await fetch(`/api/plans/${planId}/practices`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ practices }),
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || "Failed to save practices");
+  }
+  return res.json();
+}
+
+// Debounced auto-save for the practices step, mirroring usePlanDraftAutoSave.
+// Compares by serialized value so it only saves on real changes, and skips the
+// first render so loading a plan does not immediately re-save it.
+export function usePlanPracticesAutoSave(
+  planId: string | undefined,
+  practices: PlanPracticeWrite[],
+  delay: number = 800
+) {
+  const serialized = JSON.stringify(practices);
+  const debounced = useDebounce(serialized, delay);
+  const [isSaving, setIsSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const isFirstRender = useRef(true);
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    if (!planId) return;
+
+    let cancelled = false;
+    const save = async () => {
+      setIsSaving(true);
+      setError(null);
+      try {
+        await updatePlanPractices(
+          planId,
+          JSON.parse(debounced) as PlanPracticeWrite[]
+        );
         if (!cancelled) setLastSaved(new Date());
       } catch (err) {
         if (!cancelled) {
