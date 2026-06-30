@@ -23,6 +23,7 @@ export default async function SignInPage() {
         <p className="text-sm text-field-earth mt-1">Sign in to your FieldFile account</p>
       </div>
       <SignIn
+        fallbackRedirectUrl="/dashboard"
         appearance={{
           elements: {
             rootBox: "w-full max-w-md",
