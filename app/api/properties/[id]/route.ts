@@ -97,6 +97,8 @@ export async function GET(
     exemptionStatus: prop.exemption_status ?? undefined,
     photoUrl: prop.photo_url ?? undefined,
     coordinates: { lat: prop.lat, lng: prop.lng },
+    legalDescription: prop.legal_description ?? undefined,
+    appraisalAccount: prop.appraisal_account ?? undefined,
     activities: activitiesWithDocs,
     filing: filing
       ? {
@@ -147,6 +149,8 @@ export async function PATCH(
   if ("address" in body) updates.address = body.address;
   if ("state" in body) updates.state = body.state;
   if ("photoUrl" in body) updates.photo_url = body.photoUrl;
+  if ("legalDescription" in body) updates.legal_description = body.legalDescription;
+  if ("appraisalAccount" in body) updates.appraisal_account = body.appraisalAccount;
   if ("coordinates" in body) {
     const coords = body.coordinates as { lat?: number; lng?: number } | null;
     updates.lat = coords?.lat ?? null;
@@ -201,6 +205,8 @@ export async function PATCH(
     address: data.address ?? undefined,
     state: data.state,
     coordinates: { lat: data.lat, lng: data.lng },
+    legalDescription: data.legal_description ?? undefined,
+    appraisalAccount: data.appraisal_account ?? undefined,
   });
 }
 

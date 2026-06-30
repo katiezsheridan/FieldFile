@@ -244,6 +244,8 @@ type PropertyWriteFields = {
   address?: string;
   state?: string;
   coordinates?: { lat: number; lng: number };
+  legalDescription?: string;
+  appraisalAccount?: string;
 };
 
 // Create a property via the /api/properties handler (service-role + Clerk auth,

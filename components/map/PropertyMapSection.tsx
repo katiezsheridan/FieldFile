@@ -369,6 +369,7 @@ export default function PropertyMapSection({
                           census: "#6C3483",
                           brush_management: "#27AE60",
                           native_planting: "#1E8449",
+                          erosion_control: "#A0522D",
                           predator_management: "#C0392B",
                         }[a.type] || "#495336",
                     }}

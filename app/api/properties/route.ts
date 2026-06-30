@@ -114,6 +114,8 @@ export async function GET() {
         exemptionStatus: prop.exemption_status ?? undefined,
         photoUrl: prop.photo_url ?? undefined,
         coordinates: { lat: prop.lat, lng: prop.lng },
+        legalDescription: prop.legal_description ?? undefined,
+        appraisalAccount: prop.appraisal_account ?? undefined,
         activities: activitiesWithDocs,
         filing: filing
           ? {
@@ -164,6 +166,8 @@ export async function POST(request: Request) {
     address,
     state,
     coordinates,
+    legalDescription,
+    appraisalAccount,
   } = body as {
     name?: string;
     county?: string;
@@ -174,6 +178,8 @@ export async function POST(request: Request) {
     address?: string;
     state?: string;
     coordinates?: { lat?: number; lng?: number };
+    legalDescription?: string;
+    appraisalAccount?: string;
   };
 
   if (
@@ -236,6 +242,8 @@ export async function POST(request: Request) {
       state: state ?? "TX",
       lat: coordinates?.lat ?? null,
       lng: coordinates?.lng ?? null,
+      legal_description: legalDescription ?? null,
+      appraisal_account: appraisalAccount ?? null,
       slug,
     })
     .select()
@@ -258,6 +266,8 @@ export async function POST(request: Request) {
       address: data.address ?? undefined,
       state: data.state,
       coordinates: { lat: data.lat, lng: data.lng },
+      legalDescription: data.legal_description ?? undefined,
+      appraisalAccount: data.appraisal_account ?? undefined,
     },
     { status: 201 }
   );
