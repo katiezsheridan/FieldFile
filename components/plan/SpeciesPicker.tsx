@@ -21,6 +21,9 @@ export default function SpeciesPicker({
   ariaLabel,
 }: SpeciesPickerProps) {
   const [draft, setDraft] = useState("");
+  // Slugs whose illustration failed to load. We fall back to the species name
+  // in a soft circle so a missing or in-progress art file never looks broken.
+  const [brokenArt, setBrokenArt] = useState<Set<string>>(new Set());
 
   const has = (label: string) =>
     value.some((v) => v.toLowerCase() === label.toLowerCase());
@@ -59,14 +62,23 @@ export default function SpeciesPicker({
                   : "border-field-wheat/60 bg-white hover:border-field-forest/40"
               )}
             >
-              <Image
-                src={`/images/species/${opt.slug}.svg`}
-                alt=""
-                width={40}
-                height={40}
-                unoptimized
-                className="h-10 w-10"
-              />
+              {brokenArt.has(opt.slug) ? (
+                <span className="h-10 w-10 rounded-full bg-field-mist flex items-center justify-center text-sm font-semibold text-field-earth">
+                  {opt.label.charAt(0)}
+                </span>
+              ) : (
+                <Image
+                  src={`/images/species/${opt.slug}.svg`}
+                  alt=""
+                  width={40}
+                  height={40}
+                  unoptimized
+                  onError={() =>
+                    setBrokenArt((prev) => new Set(prev).add(opt.slug))
+                  }
+                  className="h-10 w-10"
+                />
+              )}
               <span className="text-xs font-medium text-field-ink">
                 {opt.label}
               </span>
