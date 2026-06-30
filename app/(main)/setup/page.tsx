@@ -7,49 +7,7 @@ import StepIndicator from "@/components/onboarding/StepIndicator";
 import WizardStep from "@/components/onboarding/WizardStep";
 import { lookupLocation, type CountyResult } from "@/lib/quiz-data";
 
-const STEPS = ["Property", "Your Info", "Activities"];
-
-const ACTIVITY_OPTIONS: {
-  type: string;
-  name: string;
-  description: string;
-}[] = [
-  {
-    type: "feeders",
-    name: "Supplemental Feeding",
-    description: "Food plots, feeders, or wildlife-friendly vegetation",
-  },
-  {
-    type: "water_sources",
-    name: "Supplemental Water",
-    description: "Wildlife drinkers, modified stock tanks, or maintained springs",
-  },
-  {
-    type: "birdhouses",
-    name: "Providing Shelters",
-    description: "Nest boxes, brush piles, bat houses, or roosting structures",
-  },
-  {
-    type: "census",
-    name: "Census Counts",
-    description: "Trail cameras, spotlight counts, bird surveys, or track stations",
-  },
-  {
-    type: "brush_management",
-    name: "Habitat Control",
-    description: "Prescribed burns, brush management, mowing, or reseeding",
-  },
-  {
-    type: "native_planting",
-    name: "Erosion Control",
-    description: "Terraces, check dams, buffer strips, or bank stabilization",
-  },
-  {
-    type: "predator_management",
-    name: "Predator Management",
-    description: "Feral hog trapping, raccoon control, or fire ant management",
-  },
-];
+const STEPS = ["Property", "Your Info"];
 
 export default function SetupPage() {
   const { user } = useUser();
@@ -72,11 +30,6 @@ export default function SetupPage() {
   // Step 2: Info (pre-filled from Clerk)
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
-
-  // Step 3: Activities
-  const [selectedActivities, setSelectedActivities] = useState<Set<string>>(
-    new Set()
-  );
 
   // Pre-fill name from Clerk on first render of step 2
   const initName = () => {
@@ -102,18 +55,6 @@ export default function SetupPage() {
     }
   }
 
-  function toggleActivity(type: string) {
-    setSelectedActivities((prev) => {
-      const next = new Set(prev);
-      if (next.has(type)) {
-        next.delete(type);
-      } else {
-        next.add(type);
-      }
-      return next;
-    });
-  }
-
   async function handleComplete() {
     if (!user?.id) return;
 
@@ -137,21 +78,14 @@ export default function SetupPage() {
             legalDescription: legalDescription || undefined,
             appraisalAccount: appraisalAccount || undefined,
           },
-          activities: Array.from(selectedActivities).map((type) => {
-            const option = ACTIVITY_OPTIONS.find((a) => a.type === type)!;
-            return {
-              type,
-              name: option.name,
-              description: option.description,
-            };
-          }),
         }),
       });
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Setup failed");
 
-      router.push("/dashboard");
+      // Route straight into the plan wizard the setup just created.
+      router.push(data.planId ? `/plan/${data.planId}` : "/dashboard");
     } catch (err) {
       console.error("Setup error:", err);
       setError(
@@ -327,7 +261,10 @@ export default function SetupPage() {
             title="Your information"
             description="We'll use this to personalize your experience and pre-fill your reports."
             onBack={() => setStep(1)}
-            onNext={() => setStep(3)}
+            onNext={handleComplete}
+            isLast
+            nextLabel={saving ? "Setting up..." : "Continue to your plan"}
+            nextDisabled={saving}
           >
             <div className="space-y-6">
               <div>
@@ -371,74 +308,13 @@ export default function SetupPage() {
                   className="w-full px-4 py-3 rounded-lg border border-field-wheat bg-white text-field-ink placeholder:text-field-ink/40 focus:outline-none focus:ring-2 focus:ring-field-green/30 focus:border-field-green transition-colors"
                 />
               </div>
+
+              {error && (
+                <div className="mt-2 p-4 rounded-lg bg-field-terra/10 border border-field-terra/20">
+                  <p className="text-sm text-field-terra">{error}</p>
+                </div>
+              )}
             </div>
-          </WizardStep>
-        )}
-
-        {step === 3 && (
-          <WizardStep
-            title="What activities are you doing?"
-            description="Select at least 3 of the 7 qualifying wildlife management activities. You can always change these later."
-            onBack={() => setStep(2)}
-            onNext={handleComplete}
-            isLast
-            nextLabel={saving ? "Setting up..." : "Complete setup"}
-            nextDisabled={selectedActivities.size < 3 || saving}
-          >
-            <div className="space-y-3">
-              {ACTIVITY_OPTIONS.map((activity) => {
-                const isSelected = selectedActivities.has(activity.type);
-                return (
-                  <button
-                    key={activity.type}
-                    onClick={() => toggleActivity(activity.type)}
-                    className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
-                      isSelected
-                        ? "border-field-green bg-field-green/5"
-                        : "border-field-wheat/50 bg-white hover:border-field-green/40"
-                    }`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div
-                        className={`w-5 h-5 rounded flex items-center justify-center flex-shrink-0 mt-0.5 transition-colors ${
-                          isSelected
-                            ? "bg-field-forest"
-                            : "border-2 border-field-wheat"
-                        }`}
-                      >
-                        {isSelected && (
-                          <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                          </svg>
-                        )}
-                      </div>
-                      <div>
-                        <p className="font-medium text-field-ink">
-                          {activity.name}
-                        </p>
-                        <p className="text-sm text-field-ink/60 mt-0.5">
-                          {activity.description}
-                        </p>
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            {selectedActivities.size > 0 && selectedActivities.size < 3 && (
-              <p className="text-sm text-field-terra mt-4">
-                Select at least {3 - selectedActivities.size} more{" "}
-                {3 - selectedActivities.size === 1 ? "activity" : "activities"} to
-                continue.
-              </p>
-            )}
-
-            {error && (
-              <div className="mt-4 p-4 rounded-lg bg-field-terra/10 border border-field-terra/20">
-                <p className="text-sm text-field-terra">{error}</p>
-              </div>
-            )}
           </WizardStep>
         )}
       </div>
