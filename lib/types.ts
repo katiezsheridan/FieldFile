@@ -14,6 +14,10 @@ export type Property = {
   exemptionStatus?: ExemptionStatus;
   photoUrl?: string;
   coordinates: { lat: number; lng: number };
+  // Identity fields needed for a complete wildlife plan. Optional everywhere a
+  // property is created; required only for a plan to reach 100% completion.
+  legalDescription?: string;
+  appraisalAccount?: string;
 };
 
 export type ActivityType =
@@ -22,6 +26,8 @@ export type ActivityType =
   | "water_sources"
   | "brush_management"
   | "native_planting"
+  | "erosion_control"
+  | "predator_management"
   | "census";
 
 export type ActivityStatus =
@@ -168,4 +174,49 @@ export type FieldLogEntry = {
   capturedAt?: string | null;   // ISO timestamp of the actual activity
   createdAt: string;            // ISO timestamp of row insert
   photoPath?: string | null;    // path in the private 'field-log' bucket
+};
+
+// ---------- Wildlife Plan ----------
+
+export type PlanStatus = "draft" | "ready" | "submitted";
+
+// The plan's qualifying practices reuse the canonical TPWD seven defined above
+// as PracticeCategory, so a selected practice maps cleanly to a seeded activity.
+export type PracticeType = PracticeCategory;
+
+// Free-form documentation captured per practice. Stored as jsonb on the row;
+// every field is optional so a practice can be partially filled while drafting.
+export type PracticeDocumentation = {
+  description?: string;
+  plannedActivities?: string[];
+  dates?: string[];
+  locations?: { lat: number; lng: number; label?: string }[];
+  notes?: string;
+};
+
+export type PlanPractice = {
+  id: string;
+  planId: string;
+  practiceType: PracticeType;
+  selected: boolean;
+  documentation: PracticeDocumentation;
+};
+
+export type Plan = {
+  id: string;
+  propertyId: string;
+  userId: string;
+  year: number;
+  status: PlanStatus;
+  targetSpecies: string[];
+  // Land description block.
+  habitatTypes: string[];
+  propertyDescription?: string;
+  waterSources: string[];
+  wildlifeSpecies: string[];
+  currentLandUse?: string;
+  landHistory?: string;
+  practices: PlanPractice[];
+  createdAt: string;
+  updatedAt: string;
 };

@@ -33,6 +33,8 @@ type FormState = {
   exemptionType: ExemptionType;
   exemptionStatus: ExemptionStatus;
   address: string;
+  legalDescription: string;
+  appraisalAccount: string;
 };
 
 const EXEMPTION_TYPES: { value: ExemptionType; label: string }[] = [
@@ -86,6 +88,8 @@ export function PropertyFormModal({
     exemptionType: initialType,
     exemptionStatus: initialStatus,
     address: property?.address ?? "",
+    legalDescription: property?.legalDescription ?? "",
+    appraisalAccount: property?.appraisalAccount ?? "",
   });
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -159,6 +163,8 @@ export function PropertyFormModal({
       exemptionType: form.exemptionType,
       exemptionStatus: form.exemptionStatus,
       address: form.address.trim() || undefined,
+      legalDescription: form.legalDescription.trim() || undefined,
+      appraisalAccount: form.appraisalAccount.trim() || undefined,
     };
 
     setSaving(true);
@@ -340,6 +346,36 @@ export function PropertyFormModal({
               onChange={(e) => set("address", e.target.value)}
               className={inputClass}
               placeholder="Street address"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="prop-legal" className={labelClass}>
+              Legal description{" "}
+              <span className="text-field-earth font-normal">(optional)</span>
+            </label>
+            <input
+              id="prop-legal"
+              type="text"
+              value={form.legalDescription}
+              onChange={(e) => set("legalDescription", e.target.value)}
+              className={inputClass}
+              placeholder="How the deed describes the land, e.g. Abstract 123, Survey 45"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="prop-appraisal" className={labelClass}>
+              Appraisal account number{" "}
+              <span className="text-field-earth font-normal">(optional)</span>
+            </label>
+            <input
+              id="prop-appraisal"
+              type="text"
+              value={form.appraisalAccount}
+              onChange={(e) => set("appraisalAccount", e.target.value)}
+              className={inputClass}
+              placeholder="The account number on your appraisal district notice"
             />
           </div>
 

@@ -66,6 +66,8 @@ export default function SetupPage() {
   const [locationError, setLocationError] = useState("");
   const [acreage, setAcreage] = useState("");
   const [manualCounty, setManualCounty] = useState("");
+  const [legalDescription, setLegalDescription] = useState("");
+  const [appraisalAccount, setAppraisalAccount] = useState("");
 
   // Step 2: Info (pre-filled from Clerk)
   const [fullName, setFullName] = useState("");
@@ -132,6 +134,8 @@ export default function SetupPage() {
             state: "TX",
             acreage: parseFloat(acreage) || 0,
             exemptionType: "wildlife",
+            legalDescription: legalDescription || undefined,
+            appraisalAccount: appraisalAccount || undefined,
           },
           activities: Array.from(selectedActivities).map((type) => {
             const option = ACTIVITY_OPTIONS.find((a) => a.type === type)!;
@@ -278,6 +282,39 @@ export default function SetupPage() {
                   value={acreage}
                   onChange={(e) => setAcreage(e.target.value)}
                   placeholder="e.g. 150"
+                  className="w-full px-4 py-3 rounded-lg border border-field-wheat bg-white text-field-ink placeholder:text-field-ink/40 focus:outline-none focus:ring-2 focus:ring-field-green/30 focus:border-field-green transition-colors"
+                />
+              </div>
+
+              {/* Legal description */}
+              <div>
+                <label className="block text-sm font-medium text-field-ink mb-1.5">
+                  Legal description{" "}
+                  <span className="text-field-ink/40 font-normal">(optional)</span>
+                </label>
+                <input
+                  type="text"
+                  value={legalDescription}
+                  onChange={(e) => setLegalDescription(e.target.value)}
+                  placeholder="How the deed describes the land, e.g. Abstract 123, Survey 45"
+                  className="w-full px-4 py-3 rounded-lg border border-field-wheat bg-white text-field-ink placeholder:text-field-ink/40 focus:outline-none focus:ring-2 focus:ring-field-green/30 focus:border-field-green transition-colors"
+                />
+                <p className="text-xs text-field-ink/40 mt-1">
+                  You can add this later. We&apos;ll need it when you build your plan.
+                </p>
+              </div>
+
+              {/* Appraisal account number */}
+              <div>
+                <label className="block text-sm font-medium text-field-ink mb-1.5">
+                  Appraisal account number{" "}
+                  <span className="text-field-ink/40 font-normal">(optional)</span>
+                </label>
+                <input
+                  type="text"
+                  value={appraisalAccount}
+                  onChange={(e) => setAppraisalAccount(e.target.value)}
+                  placeholder="The account number on your appraisal district notice"
                   className="w-full px-4 py-3 rounded-lg border border-field-wheat bg-white text-field-ink placeholder:text-field-ink/40 focus:outline-none focus:ring-2 focus:ring-field-green/30 focus:border-field-green transition-colors"
                 />
               </div>
