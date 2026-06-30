@@ -10,7 +10,9 @@ import {
   PropertyWithDetails,
   ExemptionType,
   ExemptionStatus,
+  Plan,
 } from "./types";
+import type { PlanPropertySummary } from "./plan-serialize";
 
 // Debounce hook for auto-save
 export function useDebounce<T>(value: T, delay: number): T {
@@ -481,4 +483,139 @@ export async function createDocument(
 
   console.log("Document created:", data);
   return data;
+}
+
+// ---------- Wildlife Plan ----------
+
+// A loaded plan, with the property identity summary the wizard shows read-only.
+export type PlanWithProperty = Plan & { property: PlanPropertySummary | null };
+
+// The draft fields the wizard auto-saves. Status is advanced separately via the
+// review step (submitPlan), so it is intentionally not part of the draft shape.
+export type PlanDraftFields = {
+  habitatTypes?: string[];
+  propertyDescription?: string;
+  waterSources?: string[];
+  wildlifeSpecies?: string[];
+  currentLandUse?: string;
+  landHistory?: string;
+  targetSpecies?: string[];
+};
+
+// Get-or-create the draft plan for a property + year. Idempotent server-side.
+export async function createPlan(
+  propertyId: string,
+  year?: number
+): Promise<Plan> {
+  const res = await fetch("/api/plans", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ propertyId, year }),
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || "Failed to create plan");
+  }
+  return res.json();
+}
+
+// PATCH a plan. Used for both draft saves and status changes; the server gates
+// status advances on completion.
+export async function updatePlan(
+  planId: string,
+  updates: PlanDraftFields & { status?: Plan["status"] }
+): Promise<PlanWithProperty> {
+  const res = await fetch(`/api/plans/${planId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(updates),
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || "Failed to update plan");
+  }
+  return res.json();
+}
+
+// Load a plan (with its practices and property summary) for the wizard.
+export function usePlan(planId: string | undefined) {
+  const [plan, setPlan] = useState<PlanWithProperty | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchPlan = useCallback(async () => {
+    if (!planId) {
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/plans/${planId}`);
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Failed to load plan");
+      }
+      setPlan(await res.json());
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load plan");
+    } finally {
+      setLoading(false);
+    }
+  }, [planId]);
+
+  useEffect(() => {
+    fetchPlan();
+  }, [fetchPlan]);
+
+  return { plan, loading, error, refetch: fetchPlan };
+}
+
+// Debounced draft auto-save. Persists the plan's draft fields through the API
+// (Clerk-scoped) whenever they settle, so the user can leave and return to
+// exactly where they were. Skips the initial render so loading a plan does not
+// immediately re-save it.
+export function usePlanDraftAutoSave(
+  planId: string | undefined,
+  draft: PlanDraftFields,
+  delay: number = 800
+) {
+  // Serialize so we compare by value, not object identity (which changes every
+  // render and would otherwise trigger a save on every keystroke's re-render).
+  const serialized = JSON.stringify(draft);
+  const debounced = useDebounce(serialized, delay);
+  const [isSaving, setIsSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const isFirstRender = useRef(true);
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    if (!planId) return;
+
+    let cancelled = false;
+    const save = async () => {
+      setIsSaving(true);
+      setError(null);
+      try {
+        await updatePlan(planId, JSON.parse(debounced) as PlanDraftFields);
+        if (!cancelled) setLastSaved(new Date());
+      } catch (err) {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : "Could not save");
+        }
+      } finally {
+        if (!cancelled) setIsSaving(false);
+      }
+    };
+    save();
+    return () => {
+      cancelled = true;
+    };
+  }, [debounced, planId]);
+
+  return { isSaving, lastSaved, error };
 }
