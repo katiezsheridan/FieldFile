@@ -10,7 +10,7 @@
  */
 
 import { createClient } from "@supabase/supabase-js";
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { buildPayload } from "@/lib/forms/form50129/buildPayload";
 import { fill50129 } from "@/lib/forms/form50129/fill";
@@ -74,7 +74,19 @@ export async function POST(
 
   // Assemble and fill. The payload may still have Bucket-3 gaps; those render
   // blank for the owner to complete by hand — generation is never blocked.
-  const { payload } = await buildPayload(propertyId, year, { userId });
+  const u = await currentUser();
+  const fallbackOwner = u
+    ? {
+        name: [u.firstName, u.lastName].filter(Boolean).join(" ") || undefined,
+        email:
+          u.emailAddresses.find((e) => e.id === u.primaryEmailAddressId)
+            ?.emailAddress ?? u.emailAddresses[0]?.emailAddress,
+      }
+    : undefined;
+  const { payload } = await buildPayload(propertyId, year, {
+    userId,
+    fallbackOwner,
+  });
   let bytes: Uint8Array;
   try {
     bytes = await fill50129(payload);

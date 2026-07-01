@@ -120,11 +120,20 @@ function setText(
   form: PDFForm,
   fieldName: string,
   value: string | number | undefined | null,
+  /**
+   * Cap the font size instead of letting the field auto-size. pdf-lib
+   * auto-sizes a multiline box to fill its height, which blows short text up
+   * to a huge font (e.g. the legal-description box). A fixed size keeps it
+   * legible; text still wraps within the box.
+   */
+  maxFontSize?: number,
 ): void {
   if (value === undefined || value === null) return;
   const str = String(value);
   if (str.length === 0) return;
-  form.getTextField(fieldName).setText(str);
+  const field = form.getTextField(fieldName);
+  field.setText(str);
+  if (maxFontSize !== undefined) field.setFontSize(maxFontSize);
 }
 
 /** Set a yes/no radio from a boolean, skipping when undefined. */
@@ -194,7 +203,9 @@ export async function fill50129(
   // --- Section 3: Property Description and Information ---
   const { property } = payload;
   setText(form, TEXT_FIELDS.numberOfAcres, property.numberOfAcres);
-  setText(form, TEXT_FIELDS.legalDescription, property.legalDescription);
+  // Legal description sits in a large multiline box — cap the font so it
+  // doesn't auto-size to a huge point size for short descriptions.
+  setText(form, TEXT_FIELDS.legalDescription, property.legalDescription, 10);
   setText(
     form,
     TEXT_FIELDS.accountNumber,
