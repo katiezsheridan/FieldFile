@@ -29,15 +29,24 @@ function resolveYear(raw: string | number | null | undefined): number {
   return Number.isInteger(n) && n > 1900 ? n : new Date().getFullYear();
 }
 
-/** Verify the property belongs to this user; returns false if not. */
-async function ownsProperty(propertyId: string, userId: string): Promise<boolean> {
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * Resolve a route param (UUID or slug) to the property's real UUID, scoped to
+ * this user. Returns null if the property doesn't exist or isn't theirs.
+ */
+async function resolvePropertyId(
+  param: string,
+  userId: string,
+): Promise<string | null> {
   const { data } = await supabase
     .from("properties")
     .select("id")
-    .eq("id", propertyId)
+    .eq(UUID_RE.test(param) ? "id" : "slug", param)
     .eq("user_id", userId)
     .maybeSingle();
-  return !!data;
+  return data?.id ?? null;
 }
 
 /** Assemble + attach the filing's status and a signed URL to any current PDF. */
@@ -76,8 +85,9 @@ export async function GET(
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const { id: propertyId } = await params;
-  if (!(await ownsProperty(propertyId, userId))) {
+  const { id: param } = await params;
+  const propertyId = await resolvePropertyId(param, userId);
+  if (!propertyId) {
     return NextResponse.json({ error: "Property not found" }, { status: 404 });
   }
   const year = resolveYear(new URL(request.url).searchParams.get("year"));
@@ -92,8 +102,9 @@ export async function PATCH(
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const { id: propertyId } = await params;
-  if (!(await ownsProperty(propertyId, userId))) {
+  const { id: param } = await params;
+  const propertyId = await resolvePropertyId(param, userId);
+  if (!propertyId) {
     return NextResponse.json({ error: "Property not found" }, { status: 404 });
   }
 
