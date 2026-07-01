@@ -33,6 +33,23 @@ function resolveYear(raw: unknown): number {
   return Number.isInteger(n) && n > 1900 ? n : new Date().getFullYear();
 }
 
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Resolve a UUID-or-slug param to the property's real UUID for this user. */
+async function resolvePropertyId(
+  param: string,
+  userId: string,
+): Promise<string | null> {
+  const { data } = await supabase
+    .from("properties")
+    .select("id")
+    .eq(UUID_RE.test(param) ? "id" : "slug", param)
+    .eq("user_id", userId)
+    .maybeSingle();
+  return data?.id ?? null;
+}
+
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
@@ -41,15 +58,9 @@ export async function POST(
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const { id: propertyId } = await params;
-
-  const { data: property } = await supabase
-    .from("properties")
-    .select("id")
-    .eq("id", propertyId)
-    .eq("user_id", userId)
-    .maybeSingle();
-  if (!property) {
+  const { id: param } = await params;
+  const propertyId = await resolvePropertyId(param, userId);
+  if (!propertyId) {
     return NextResponse.json({ error: "Property not found" }, { status: 404 });
   }
 
