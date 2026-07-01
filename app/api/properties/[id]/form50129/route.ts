@@ -10,7 +10,7 @@
  */
 
 import { createClient } from "@supabase/supabase-js";
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { buildPayload, type FilingAnswers } from "@/lib/forms/form50129/buildPayload";
 import { ownerProfileToRow, type OwnerProfileInput } from "@/lib/forms/form50129/serialize";
@@ -49,13 +49,27 @@ async function resolvePropertyId(
   return data?.id ?? null;
 }
 
+/** Clerk account name/email, used to prefill Section 1 before a profile exists. */
+async function clerkFallbackOwner() {
+  const u = await currentUser();
+  if (!u) return undefined;
+  const name = [u.firstName, u.lastName].filter(Boolean).join(" ") || undefined;
+  const email =
+    u.emailAddresses.find((e) => e.id === u.primaryEmailAddressId)
+      ?.emailAddress ?? u.emailAddresses[0]?.emailAddress;
+  return { name, email };
+}
+
 /** Assemble + attach the filing's status and a signed URL to any current PDF. */
 async function assembleResponse(
   propertyId: string,
   userId: string,
   year: number,
 ) {
-  const { payload, missing } = await buildPayload(propertyId, year, { userId });
+  const { payload, missing } = await buildPayload(propertyId, year, {
+    userId,
+    fallbackOwner: await clerkFallbackOwner(),
+  });
   const { data: filing } = await supabase
     .from("form50129_filings")
     .select("status, generated_pdf_path")

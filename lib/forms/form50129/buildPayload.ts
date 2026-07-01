@@ -86,6 +86,12 @@ export type AssemblyContext = {
   plan: PlanRecord | null;
   filing: FilingRecord | null;
   priorFilings: FilingRecord[];
+  /**
+   * Identity to prefill Section 1 with on FIRST open (no owner_profile row yet)
+   * — e.g. the Clerk account name/email. Ignored once a profile exists, so it
+   * never overrides what the owner has saved.
+   */
+  fallbackOwner?: { name?: string; email?: string };
 };
 
 const REP_BASIS_MAP: Record<
@@ -117,16 +123,20 @@ export function assembleForm50129(ctx: AssemblyContext): BuildPayloadResult {
   const isWildlife = property.exemption_type === "wildlife";
 
   // --- Section 1: owner (Bucket 2) ---
+  // Prefill name/email from the fallback (Clerk account) only before any
+  // owner_profile row exists — never overriding a saved profile.
+  const noProfile = ownerProfile === null;
+  const fallback = noProfile ? ctx.fallbackOwner : undefined;
   const ownerType = (ownerProfile?.owner_type ?? "individual") as OwnerType;
   const owner: OwnerBlock = {
     type: ownerType,
     typeOther: nz(ownerProfile?.owner_type_other),
-    name: nz(ownerProfile?.owner_name) ?? "",
+    name: nz(ownerProfile?.owner_name) ?? nz(fallback?.name) ?? "",
     dateOfBirth: nz(ownerProfile?.date_of_birth),
     physicalAddress: nz(ownerProfile?.physical_address),
     mailingAddress: nz(ownerProfile?.mailing_address),
     phone: nz(ownerProfile?.phone),
-    email: nz(ownerProfile?.email),
+    email: nz(ownerProfile?.email) ?? nz(fallback?.email),
   };
   const isEntity = ownerType !== "individual";
 
@@ -292,7 +302,11 @@ function detectMissing(ctx: GapContext): MissingField[] {
 export async function buildPayload(
   propertyId: string,
   taxYear: number,
-  opts: { userId: string; dataSource?: Form50129DataSource },
+  opts: {
+    userId: string;
+    dataSource?: Form50129DataSource;
+    fallbackOwner?: { name?: string; email?: string };
+  },
 ): Promise<BuildPayloadResult> {
   const { userId } = opts;
   const dataSource = opts.dataSource ?? createSupabaseDataSource();
@@ -318,5 +332,6 @@ export async function buildPayload(
     plan,
     filing,
     priorFilings,
+    fallbackOwner: opts.fallbackOwner,
   });
 }

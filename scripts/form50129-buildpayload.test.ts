@@ -232,6 +232,28 @@ async function main() {
     !d.missing.some((m) => m.key === "section3.allowedLastYear"),
   );
 
+  // === Clerk fallback seeds Section 1 only before a profile exists ===
+  const e = await buildPayload("prop-1", 2025, {
+    userId: "user-1",
+    dataSource: makeDataSource({ ownerProfile: null, plan: completedPlan }),
+    fallbackOwner: { name: "Clerk Account", email: "clerk@example.com" },
+  });
+  check(
+    "E: no profile -> owner name/email seeded from fallback",
+    e.payload.owner.name === "Clerk Account" &&
+      e.payload.owner.email === "clerk@example.com",
+  );
+  const f = await buildPayload("prop-1", 2025, {
+    userId: "user-1",
+    dataSource: makeDataSource({ ownerProfile: individualProfile, plan: completedPlan }),
+    fallbackOwner: { name: "Clerk Account", email: "clerk@example.com" },
+  });
+  check(
+    "F: existing profile is NOT overridden by fallback",
+    f.payload.owner.name === "Jane Rancher" &&
+      f.payload.owner.email === "jane@example.com",
+  );
+
   // === Acceptance criterion 3: payload feeds straight into fill50129 ===
   const pdfBytes = await fill50129(a.payload); // zero manual glue
   const doc = await PDFDocument.load(pdfBytes);
