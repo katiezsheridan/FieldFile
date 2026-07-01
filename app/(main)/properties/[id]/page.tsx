@@ -201,6 +201,50 @@ export default function PropertyPage() {
           </svg>
         </Link>
 
+        {/* 1-d-1 application — assemble & generate the Form 50-129 to file */}
+        <Link
+          href={`/properties/${id}/1d1`}
+          className="group flex items-center gap-4 bg-white border border-field-wheat rounded-lg p-5 hover:border-field-forest/50 transition-colors"
+        >
+          <div className="shrink-0 w-11 h-11 rounded-lg bg-field-forest/10 flex items-center justify-center text-field-forest">
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={1.5}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
+              />
+            </svg>
+          </div>
+          <div className="min-w-0 flex-1">
+            <h2 className="text-xl font-semibold text-field-ink">
+              1-d-1 application
+            </h2>
+            <p className="text-sm text-field-earth mt-0.5">
+              Assemble and generate your Form 50-129 to review, sign, and file
+              with the county.
+            </p>
+          </div>
+          <svg
+            className="w-5 h-5 shrink-0 text-field-earth group-hover:text-field-forest transition-colors"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M8.25 4.5l7.5 7.5-7.5 7.5"
+            />
+          </svg>
+        </Link>
+
         {/* Activities with inline evidence */}
         <CollapsibleSection
           title="Wildlife Management Activities"

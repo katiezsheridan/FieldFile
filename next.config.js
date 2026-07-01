@@ -11,6 +11,14 @@ const nextConfig = {
       },
     ],
   },
+  experimental: {
+    // The Form 50-129 generate route reads templates/50-129.pdf from disk at
+    // runtime. It isn't statically imported, so the file tracer won't include
+    // it in the serverless bundle unless we say so explicitly.
+    outputFileTracingIncludes: {
+      "/api/properties/[id]/form50129/generate": ["./templates/**"],
+    },
+  },
 };
 
 module.exports = nextConfig;
