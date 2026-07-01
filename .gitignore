@@ -16,3 +16,6 @@ out/
 .DS_Store
 *.tsbuildinfo
 next-env.d.ts
+
+# throwaway form-fill outputs (demo PDFs, rasterized previews)
+scratch/
