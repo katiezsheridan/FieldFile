@@ -15,6 +15,9 @@ const isPublicRoute = createRouteMatcher([
   '/resources',
   '/request-availability',
   '/about',
+  '/blog(.*)',
+  '/sitemap.xml',
+  '/robots.txt',
   '/api/(.*)',
 ])
 

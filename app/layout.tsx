@@ -6,6 +6,7 @@ import { Providers } from "./providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.fieldfile.com"),
   title: "FieldFile - Wildlife Tax Exemption Filing",
   description:
     "Simplify your wildlife tax exemption filing for Texas landowners",
