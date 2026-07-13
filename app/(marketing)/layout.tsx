@@ -56,6 +56,11 @@ export default function MarketingLayout({
                   </Link>
                 </li>
                 <li>
+                  <Link href="/blog" className="hover:text-field-ink">
+                    Blog
+                  </Link>
+                </li>
+                <li>
                   <Link href="/about" className="hover:text-field-ink">
                     About
                   </Link>
