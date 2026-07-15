@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BLOG_POSTS, SITE_URL, formatPostDate } from "@/lib/blog";
+import { BlogSidebar } from "@/components/blog/BlogSidebar";
 
 export const metadata: Metadata = {
   title: "FieldFile Blog — Texas Wildlife Management & 1-d-1-w Guides",
@@ -25,7 +26,7 @@ const posts = [...BLOG_POSTS].sort((a, b) =>
 export default function BlogIndexPage() {
   return (
     <div className="bg-field-cream">
-      <div className="max-w-3xl mx-auto px-4 py-12 md:py-16">
+      <div className="max-w-5xl mx-auto px-4 py-12 md:py-16">
         <header className="mb-10">
           <h1 className="text-3xl md:text-4xl font-bold text-field-ink">
             FieldFile Blog
@@ -36,36 +37,42 @@ export default function BlogIndexPage() {
           </p>
         </header>
 
-        <ul className="space-y-6">
-          {posts.map((post) => (
-            <li key={post.slug}>
-              <article className="bg-white border border-field-wheat rounded-xl p-6 transition-colors hover:border-field-forest/50">
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-field-earth">
-                  <time dateTime={post.datePublished}>
-                    {formatPostDate(post.datePublished)}
-                  </time>
-                  <span aria-hidden="true">&middot;</span>
-                  <span>{post.readingTime}</span>
-                </div>
-                <h2 className="mt-2 text-xl font-semibold text-field-ink">
+        <div className="grid gap-10 lg:grid-cols-[1fr_16rem]">
+          <ul className="space-y-6">
+            {posts.map((post) => (
+              <li key={post.slug}>
+                <article className="bg-white border border-field-wheat rounded-xl p-6 transition-colors hover:border-field-forest/50">
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-field-earth">
+                    <time dateTime={post.datePublished}>
+                      {formatPostDate(post.datePublished)}
+                    </time>
+                    <span aria-hidden="true">&middot;</span>
+                    <span>{post.readingTime}</span>
+                  </div>
+                  <h2 className="mt-2 text-xl font-semibold text-field-ink">
+                    <Link
+                      href={`/blog/${post.slug}`}
+                      className="hover:text-field-forest"
+                    >
+                      {post.title}
+                    </Link>
+                  </h2>
+                  <p className="mt-2 text-field-ink/80">{post.excerpt}</p>
                   <Link
                     href={`/blog/${post.slug}`}
-                    className="hover:text-field-forest"
+                    className="mt-4 inline-block text-sm font-medium text-field-forest hover:underline"
                   >
-                    {post.title}
+                    Read more &rarr;
                   </Link>
-                </h2>
-                <p className="mt-2 text-field-ink/80">{post.excerpt}</p>
-                <Link
-                  href={`/blog/${post.slug}`}
-                  className="mt-4 inline-block text-sm font-medium text-field-forest hover:underline"
-                >
-                  Read more &rarr;
-                </Link>
-              </article>
-            </li>
-          ))}
-        </ul>
+                </article>
+              </li>
+            ))}
+          </ul>
+
+          <aside className="lg:sticky lg:top-24 lg:self-start">
+            <BlogSidebar />
+          </aside>
+        </div>
       </div>
     </div>
   );

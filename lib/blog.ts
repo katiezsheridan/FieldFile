@@ -23,6 +23,28 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "new-landowner-texas-ag-valuation-checklist",
+    title:
+      "The New Landowner's Texas Ag Valuation Checklist: Your First 90 Days",
+    description:
+      "Just bought Texas land with an ag or wildlife valuation? This new-landowner checklist walks your first 90 days: verify your status, learn your county deadlines, avoid the rollback tax, and document from day one.",
+    excerpt:
+      "You just bought rural Texas land with an ag or wildlife valuation, and the clock started the day you signed. Here's a first-90-days checklist to keep it: verify your status, learn your county's deadlines, understand rollback risk, and document from day one.",
+    primaryKeyword: "new landowner ag valuation checklist",
+    keywords: [
+      "new landowner ag valuation checklist",
+      "Texas ag valuation",
+      "ag exemption Texas",
+      "wildlife valuation Texas",
+      "rollback tax Texas",
+      "1-d-1 agricultural valuation",
+      "county appraisal district",
+    ],
+    datePublished: "2026-07-14",
+    dateModified: "2026-07-14",
+    readingTime: "5 min read",
+  },
+  {
     slug: "choosing-texas-wildlife-management-practices",
     title:
       "How to Choose Your Texas Wildlife Management Practices (1-d-1-w Guide)",
