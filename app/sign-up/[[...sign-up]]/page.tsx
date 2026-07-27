@@ -19,7 +19,11 @@ export default async function SignUpPage() {
         <p className="text-sm text-field-earth mt-1">Start managing your wildlife exemption</p>
       </div>
       <SignUp
-        fallbackRedirectUrl="/dashboard"
+        // Route completed signups through the /welcome interstitial so the
+        // account_created conversion fires exactly once (it forwards to
+        // /dashboard). forceRedirectUrl so it always runs, even when a
+        // redirect_url is present on the URL.
+        forceRedirectUrl="/welcome"
         appearance={{
           elements: {
             rootBox: "w-full max-w-md",
