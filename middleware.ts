@@ -15,6 +15,8 @@ const isPublicRoute = createRouteMatcher([
   '/resources',
   '/request-availability',
   '/about',
+  '/annual-report',
+  '/wildlife-exemption',
   '/blog(.*)',
   '/sitemap.xml',
   '/robots.txt',
