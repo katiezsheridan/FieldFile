@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 
 export const metadata: Metadata = {
@@ -12,14 +13,22 @@ export const metadata: Metadata = {
 export default function AnnualReportLandingPage() {
   return (
     <main className="min-h-screen bg-field-cream text-field-ink">
-      {/* Minimal brand mark only — no navigation links. */}
+      {/* Brand mark only — still no nav links, but the logo goes home so the
+          page isn't a dead end. Same asset and dimensions as MarketingHeader. */}
       <div className="px-6 pt-6">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-field-forest rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">FF</span>
-          </div>
-          <span className="font-semibold tracking-tight">FieldFile</span>
-        </div>
+        <Link
+          href="/"
+          aria-label="FieldFile home"
+          className="inline-flex flex-shrink-0 items-center"
+        >
+          <Image
+            src="/images/logo/fieldfile-logo.png"
+            alt="FieldFile"
+            width={140}
+            height={35}
+            priority
+          />
+        </Link>
       </div>
 
       <section className="mx-auto max-w-2xl px-6 pt-12 pb-16 sm:pt-16">
@@ -97,6 +106,14 @@ export default function AnnualReportLandingPage() {
             Start your account &rarr;
           </Link>
         </div>
+
+        {/* Way home from the bottom of the scroll — the logo is far offscreen
+            by this point. Still not nav: one link, no menu. */}
+        <p className="mt-10 text-center text-sm text-field-earth">
+          <Link href="/" className="underline hover:text-field-ink">
+            Back to FieldFile
+          </Link>
+        </p>
       </section>
     </main>
   );

@@ -16,6 +16,9 @@ const isPublicRoute = createRouteMatcher([
   '/request-availability',
   '/about',
   '/annual-report',
+  // The page is gone; next.config.js redirects this to the blog post. That
+  // redirect resolves before middleware runs, so this entry is belt-and-braces
+  // — it keeps the old path from ever hitting auth.protect() if that changes.
   '/wildlife-exemption',
   '/blog(.*)',
   '/sitemap.xml',
