@@ -15,7 +15,7 @@ const GOOGLE_ADS_CONVERSION_ID = process.env.NEXT_PUBLIC_GOOGLE_ADS_ID;
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.fieldfile.com"),
-  title: "FieldFile - Wildlife Tax Exemption Filing",
+  title: "FieldFile - Wildlife Exemption Records & Annual Reports",
   description:
     "Simplify your wildlife tax exemption filing for Texas landowners",
   manifest: "/manifest.webmanifest",
