@@ -1,12 +1,30 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Form50129Review from "@/components/filing/Form50129Review";
+import { useProperty } from "@/lib/hooks";
+import { canApplyFor1d1 } from "@/lib/forms/form50129/eligibility";
 
 export default function Form50129Page() {
   const params = useParams();
+  const router = useRouter();
   const id = params.id as string;
+  const { property, loading } = useProperty(id);
+
+  // The property page hides the entry card for landowners who already have a
+  // valuation; guard the route too, so a bookmark or a typed URL cannot reach
+  // an application flow that does not apply to them.
+  const eligible = canApplyFor1d1(property?.exemptionType);
+
+  useEffect(() => {
+    if (!loading && property && !eligible) {
+      router.replace(`/properties/${id}`);
+    }
+  }, [loading, property, eligible, router, id]);
+
+  if (loading || !property || !eligible) return null;
 
   return (
     <div className="min-h-full bg-field-cream">

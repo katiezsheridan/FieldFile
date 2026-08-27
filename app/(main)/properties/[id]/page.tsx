@@ -18,6 +18,7 @@ import { FileUploader } from "@/components/documents/FileUploader";
 import { DocumentList } from "@/components/documents/DocumentList";
 import PropertyMapSection from "@/components/map/PropertyMapSection";
 import { CollapsibleSection } from "@/components/ui/CollapsibleSection";
+import { canApplyFor1d1 } from "@/lib/forms/form50129/eligibility";
 import { Document } from "@/lib/types";
 
 function inferType(file: File): Document["type"] {
@@ -201,7 +202,10 @@ export default function PropertyPage() {
           </svg>
         </Link>
 
-        {/* 1-d-1 application — assemble & generate the Form 50-129 to file */}
+        {/* 1-d-1 application — assemble & generate the Form 50-129 to file.
+            Only offered to landowners who told us at setup that they do not
+            have a valuation yet; see canApplyFor1d1. */}
+        {canApplyFor1d1(property?.exemptionType) && (
         <Link
           href={`/properties/${id}/1d1`}
           className="group flex items-center gap-4 bg-white border border-field-wheat rounded-lg p-5 hover:border-field-forest/50 transition-colors"
@@ -244,6 +248,7 @@ export default function PropertyPage() {
             />
           </svg>
         </Link>
+        )}
 
         {/* Activities with inline evidence */}
         <CollapsibleSection
