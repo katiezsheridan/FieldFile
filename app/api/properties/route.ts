@@ -2,11 +2,72 @@ import { createClient } from "@supabase/supabase-js";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { slugify } from "@/lib/utils";
+import { mapPlanRow } from "@/lib/plan-serialize";
+import {
+  computePlanCompletion,
+  planCompletionInput,
+} from "@/lib/plan-completion";
+import { PlanSummary } from "@/lib/types";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
+
+// A property's most recent wildlife plan, reduced to a dashboard summary.
+// Runs the same calculator the wizard runs, so the percentage on the dashboard
+// is the percentage the landowner sees when they open the plan. Returns
+// undefined when the property has no plan yet.
+type PlanPropertyRow = {
+  id: string;
+  name: string;
+  county: string;
+  acreage: number;
+  legal_description: string | null;
+  appraisal_account: string | null;
+};
+
+async function planSummaryFor(
+  prop: PlanPropertyRow,
+  userId: string
+): Promise<PlanSummary | undefined> {
+  const { data: planRow } = await supabase
+    .from("plans")
+    .select("*")
+    .eq("property_id", prop.id)
+    .eq("user_id", userId)
+    .order("year", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (!planRow) return undefined;
+
+  const { data: practiceRows } = await supabase
+    .from("plan_practices")
+    .select("*")
+    .eq("plan_id", planRow.id);
+
+  const plan = mapPlanRow(planRow, practiceRows ?? []);
+  const completion = computePlanCompletion(
+    planCompletionInput(plan, {
+      name: prop.name,
+      county: prop.county,
+      acreage: prop.acreage,
+      legalDescription: prop.legal_description,
+      appraisalAccount: prop.appraisal_account,
+    })
+  );
+
+  return {
+    id: plan.id,
+    year: plan.year,
+    status: plan.status,
+    completionPct: completion.overallPct,
+    canSubmit: completion.canSubmit,
+    remainingBlocks: completion.blocks
+      .filter((b) => !b.complete)
+      .map((b) => b.label),
+  };
+}
 
 export async function GET() {
   const { userId } = await auth();
@@ -102,6 +163,8 @@ export async function GET() {
         .limit(1)
         .maybeSingle();
 
+      const plan = await planSummaryFor(prop, userId);
+
       return {
         id: prop.id,
         name: prop.name,
@@ -117,6 +180,7 @@ export async function GET() {
         legalDescription: prop.legal_description ?? undefined,
         appraisalAccount: prop.appraisal_account ?? undefined,
         activities: activitiesWithDocs,
+        plan,
         filing: filing
           ? {
               id: filing.id,

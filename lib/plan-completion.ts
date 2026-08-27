@@ -121,6 +121,59 @@ function targetSpeciesBlock(targetSpecies: string[]): PlanBlock {
   };
 }
 
+// The identity fields the calculator reads off the property. Loose enough to
+// accept a PlanPropertySummary or a freshly-mapped property row.
+export type PlanCompletionProperty = {
+  name?: string | null;
+  county?: string | null;
+  acreage?: number | null;
+  legalDescription?: string | null;
+  appraisalAccount?: string | null;
+};
+
+// The plan side of the input. A persisted Plan satisfies this structurally, and
+// so does the wizard's in-progress form state — which is the point: both build
+// the same input rather than each assembling its own.
+export type PlanCompletionPlan = {
+  habitatTypes: string[];
+  propertyDescription?: string | null;
+  waterSources: string[];
+  wildlifeSpecies: string[];
+  currentLandUse?: string | null;
+  targetSpecies: string[];
+  practices: { selected: boolean; documentation: PracticeDocumentation }[];
+};
+
+// Build the calculator's input from a plan + its property. Shared by every
+// caller (wizard, plan status guard, dashboard summary) so no surface
+// reassembles this shape — and drifts — on its own.
+export function planCompletionInput(
+  plan: PlanCompletionPlan,
+  property: PlanCompletionProperty | null
+): PlanCompletionInput {
+  return {
+    identity: {
+      name: property?.name,
+      county: property?.county,
+      acreage: property?.acreage,
+      legalDescription: property?.legalDescription,
+      appraisalAccount: property?.appraisalAccount,
+    },
+    landDescription: {
+      habitatTypes: plan.habitatTypes,
+      propertyDescription: plan.propertyDescription,
+      waterSources: plan.waterSources,
+      wildlifeSpecies: plan.wildlifeSpecies,
+      currentLandUse: plan.currentLandUse,
+    },
+    targetSpecies: plan.targetSpecies,
+    practices: plan.practices.map((p) => ({
+      selected: p.selected,
+      documentation: p.documentation,
+    })),
+  };
+}
+
 export function computePlanCompletion(input: PlanCompletionInput): PlanCompletion {
   const blocks = [
     identityBlock(input.identity),

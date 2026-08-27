@@ -3,16 +3,14 @@
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
 import { useProperties } from "@/lib/hooks";
-import { getDeadlineDays } from "@/lib/demo-data";
 import { ProgressBar } from "@/components/dashboard/ProgressBar";
-import { DeadlineCountdown } from "@/components/dashboard/DeadlineCountdown";
+import { PlanProgressCard } from "@/components/dashboard/PlanProgressCard";
 import { QuickActions } from "@/components/dashboard/QuickActions";
 import { PropertyManager } from "@/components/dashboard/PropertyManager";
 
 export default function DashboardPage() {
   const { user, isLoaded } = useUser();
   const { properties, loading, refetch } = useProperties(user?.id);
-  const daysRemaining = getDeadlineDays();
 
   if (!isLoaded || loading) {
     return (
@@ -74,13 +72,18 @@ export default function DashboardPage() {
           <PropertyManager properties={properties} onChanged={refetch} />
         </div>
 
-        {/* Dashboard cards */}
+        {/* Dashboard cards. A property with a wildlife plan is measured by plan
+            completion; activity counts only make sense for properties that
+            predate the plan feature (or never started one). */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <ProgressBar
-            completed={completedActivities}
-            total={totalActivities}
-          />
-          <DeadlineCountdown daysRemaining={daysRemaining} />
+          {property.plan ? (
+            <PlanProgressCard plan={property.plan} />
+          ) : (
+            <ProgressBar
+              completed={completedActivities}
+              total={totalActivities}
+            />
+          )}
           <QuickActions />
         </div>
       </div>

@@ -2,8 +2,8 @@ import { createClient } from "@supabase/supabase-js";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { mapPlanRow, PlanPropertySummary } from "@/lib/plan-serialize";
-import { computePlanCompletion } from "@/lib/plan-completion";
-import { Plan, PlanStatus } from "@/lib/types";
+import { computePlanCompletion, planCompletionInput } from "@/lib/plan-completion";
+import { PlanStatus } from "@/lib/types";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -49,31 +49,6 @@ async function loadPlanContext(planId: string, userId: string) {
     : null;
 
   return { plan: mapPlanRow(planRow, practiceRows ?? []), property };
-}
-
-// Build the completion calculator's input from a plan + its property summary.
-function completionInput(plan: Plan, property: PlanPropertySummary | null) {
-  return {
-    identity: {
-      name: property?.name,
-      county: property?.county,
-      acreage: property?.acreage,
-      legalDescription: property?.legalDescription,
-      appraisalAccount: property?.appraisalAccount,
-    },
-    landDescription: {
-      habitatTypes: plan.habitatTypes,
-      propertyDescription: plan.propertyDescription,
-      waterSources: plan.waterSources,
-      wildlifeSpecies: plan.wildlifeSpecies,
-      currentLandUse: plan.currentLandUse,
-    },
-    targetSpecies: plan.targetSpecies,
-    practices: plan.practices.map((p) => ({
-      selected: p.selected,
-      documentation: p.documentation,
-    })),
-  };
 }
 
 export async function GET(
@@ -161,7 +136,7 @@ export async function PATCH(
     // Gate the forward transitions on completion. Returning to draft is allowed.
     if (status === "ready" || status === "submitted") {
       const { canSubmit } = computePlanCompletion(
-        completionInput(next, ctx.property)
+        planCompletionInput(next, ctx.property)
       );
       if (!canSubmit) {
         return NextResponse.json(
