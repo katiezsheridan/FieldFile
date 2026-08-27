@@ -85,9 +85,25 @@ export type Filing = {
   confirmationNumber?: string;
 };
 
+// A property's wildlife plan reduced to what a list view needs: how far along
+// it is and where to resume. Computed server-side with computePlanCompletion so
+// the dashboard and the wizard never disagree about the percentage.
+// PlanStatus is declared further down with the rest of the plan types.
+export type PlanSummary = {
+  id: string;
+  year: number;
+  status: PlanStatus;
+  completionPct: number; // 0..100
+  canSubmit: boolean;
+  // Labels of the blocks still incomplete, in wizard order.
+  remainingBlocks: string[];
+};
+
 export type PropertyWithDetails = Property & {
   activities: Activity[];
   filing: Filing;
+  // Absent when the property has no plan yet (or predates the plan feature).
+  plan?: PlanSummary;
 };
 
 // ---------- Wildlife Census Monitoring ----------

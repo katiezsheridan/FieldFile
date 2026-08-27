@@ -10,7 +10,7 @@ import {
   updatePlan,
   updatePlanPractices,
 } from "@/lib/hooks";
-import { computePlanCompletion } from "@/lib/plan-completion";
+import { computePlanCompletion, planCompletionInput } from "@/lib/plan-completion";
 import { EMPTY_PLAN_FORM, PlanForm } from "@/components/plan/planForm";
 import {
   buildPracticeForm,
@@ -111,30 +111,26 @@ export default function PlanWizard({ planId }: { planId: string }) {
     window.history.replaceState(null, "", `?step=${clamped}`);
   };
 
-  const completion = computePlanCompletion({
-    identity: {
-      name: plan?.property?.name,
-      county: plan?.property?.county,
-      acreage: plan?.property?.acreage,
-      legalDescription: plan?.property?.legalDescription,
-      appraisalAccount: plan?.property?.appraisalAccount,
-    },
-    landDescription: {
-      habitatTypes: form.habitatTypes,
-      propertyDescription: form.propertyDescription,
-      waterSources: form.waterSources,
-      wildlifeSpecies: form.wildlifeSpecies,
-      currentLandUse: form.currentLandUse,
-    },
-    targetSpecies: form.targetSpecies,
-    practices: practices.map((p) => ({
-      selected: p.selected,
-      documentation: {
-        description: p.description,
-        plannedActivities: p.plannedActivities,
+  const completion = computePlanCompletion(
+    planCompletionInput(
+      {
+        habitatTypes: form.habitatTypes,
+        propertyDescription: form.propertyDescription,
+        waterSources: form.waterSources,
+        wildlifeSpecies: form.wildlifeSpecies,
+        currentLandUse: form.currentLandUse,
+        targetSpecies: form.targetSpecies,
+        practices: practices.map((p) => ({
+          selected: p.selected,
+          documentation: {
+            description: p.description,
+            plannedActivities: p.plannedActivities,
+          },
+        })),
       },
-    })),
-  });
+      plan?.property ?? null
+    )
+  );
 
   const handleSubmit = async () => {
     setSubmitting(true);

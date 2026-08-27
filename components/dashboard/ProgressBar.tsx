@@ -7,6 +7,19 @@ type ProgressBarProps = {
 
 export function ProgressBar({ completed, total }: ProgressBarProps) {
   const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+  const remaining = Math.max(total - completed, 0);
+  const plural = remaining === 1 ? "activity" : "activities";
+
+  let statusLine: string;
+  if (total === 0) {
+    statusLine = "No activities logged yet";
+  } else if (remaining === 0) {
+    statusLine = "All activities complete!";
+  } else if (completed === 0) {
+    statusLine = `Not started — ${remaining} ${plural} to log`;
+  } else {
+    statusLine = `${remaining} ${plural} remaining`;
+  }
 
   return (
     <div className="bg-white rounded-xl border border-field-wheat p-6">
@@ -16,11 +29,7 @@ export function ProgressBar({ completed, total }: ProgressBarProps) {
           {completed}/{total}
         </span>
       </div>
-      <p className="text-xs text-field-earth mb-3">
-        {total - completed > 0
-          ? `${total - completed} activities remaining`
-          : "All activities complete!"}
-      </p>
+      <p className="text-xs text-field-earth mb-3">{statusLine}</p>
       <div className="w-full h-2.5 bg-field-mist rounded-full overflow-hidden">
         <div
           className="h-full bg-field-gold rounded-full transition-all duration-500 ease-out"
