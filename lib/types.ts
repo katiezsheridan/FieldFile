@@ -56,11 +56,52 @@ export type Document = {
     gpsCoordinates?: { lat: number; lng: number };
     timestamp?: string;
   };
+
+  // ---- Annual Report model (migrations/add_annual_report_domain.sql) ----
+  // All optional: existing rows predate the model, and the backfill leaves
+  // anything it cannot establish as null rather than guessing.
+
+  /** Denormalized from the parent activity. Kept in sync by a DB trigger. */
+  reportPeriodId?: string;
+  contentHash?: string;
+  /**
+   * When the evidence was captured. Supersedes the legacy `taken_at` /
+   * `gps_lat` / `gps_lng` columns, which still exist and are still written by
+   * the census document routes — keep both in sync until those are migrated.
+   */
+  capturedAt?: string;
+  capturedLat?: number;
+  capturedLng?: number;
+  exifRaw?: Record<string, unknown>;
+  phase?: EvidencePhase;
+  phaseSource?: ProposalSource;
+  caption?: string;
+  captionSource?: ProposalSource;
+  /** 0..1. PROPOSAL ONLY — never a value on a rendered form. */
+  aiConfidence?: number;
+  aiObservations?: Record<string, unknown>;
+  aiModelVersion?: string;
+  usabilityFlags?: string[];
+  /** The recorded human confirmation event for this document's AI output. */
+  confirmedBy?: string;
+  confirmedAt?: string;
+  exhibitNumber?: string;
+  // Receipt extraction. Money is numeric(12,2) in the DB — never do arithmetic
+  // on these in floating point; format and total server-side.
+  vendor?: string;
+  purchaseDate?: string;
+  subtotal?: number;
+  tax?: number;
+  total?: number;
+  lineItems?: ReceiptLineItem[];
+  extractionConfidence?: number;
+  extractionRaw?: Record<string, unknown>;
 };
 
 export type Activity = {
   id: string;
   propertyId: string;
+  /** Legacy flat taxonomy. Superseded by practiceCode + subActivityId. */
   type: ActivityType;
   name: string;
   description: string;
@@ -71,6 +112,29 @@ export type Activity = {
   dueDate: string;
   completedDate?: string;
   locations?: { lat: number; lng: number; label?: string }[];
+
+  // ---- Annual Report model: THE ACTIVITY IS THE CONTAINER ----
+  // practiceCode and subActivityId are chosen by the landowner when the
+  // container is created. Evidence inherits its classification from here and
+  // is never classified after the fact.
+
+  practiceCode?: PracticeCode;
+  subActivityId?: string;
+  reportPeriodId?: string;
+  /** When the work happened — NOT when the row was created. */
+  performedOn?: string;
+  /** Set only for work spanning days; null means a single-day activity. */
+  performedThrough?: string;
+  locationLabel?: string;
+  locationLat?: number;
+  locationLng?: number;
+  performedBy?: string;
+  /** Answers keyed by `FieldRequirement.fieldKey` for this sub-activity. */
+  fieldValues?: Record<string, FieldValue>;
+  narrative?: string;
+  narrativeSource?: ProposalSource;
+  /** e.g. "Exhibits 4-9". Assigned at render time. */
+  exhibitRange?: string;
 };
 
 export type FilingStatus = "draft" | "ready_to_file" | "filed" | "accepted" | "needs_followup";
@@ -235,4 +299,207 @@ export type Plan = {
   practices: PlanPractice[];
   createdAt: string;
   updatedAt: string;
+};
+
+// ---------- Annual Report (PWD-888) ----------
+//
+// See CLAUDE.md > "Annual Report Domain Model" for the rules these types encode.
+// Schema: migrations/add_annual_report_domain.sql.
+//
+// There is no Supabase type codegen in this repo (no `supabase/` directory, no
+// `gen types` script) — every table is hand-typed here, matching the existing
+// convention of camelCase in TS and snake_case in the DB.
+
+/**
+ * The seven qualifying practices under Tax Code 23.51(7)(A)(i)-(vii).
+ *
+ * This is the stable WIRE format — report payloads, AI proposals, URL params,
+ * analytics. `PracticeCategory` above stays the STORAGE format (it is a check
+ * constraint on field_log_entries and plan_practices). Convert with
+ * PRACTICE_CODE_BY_CATEGORY in lib/practices.ts; never introduce a third
+ * spelling of the seven.
+ */
+export type PracticeCode = "HC" | "EC" | "PC" | "SW" | "SF" | "SH" | "CE";
+
+export type Practice = {
+  code: PracticeCode;
+  name: string;
+  description?: string;
+  /** Section number in PWD-888 Part IV (1-7). Matches the statutory order. */
+  formSectionNumber: number;
+};
+
+/** A PWD-888 Part IV line item, e.g. HC-02 "Prescribed burning". */
+export type SubActivity = {
+  id: string;
+  practiceCode: PracticeCode;
+  /** Stable `{PRACTICE}-{NN}` code. Never renumbered, never reused. */
+  code: string;
+  name: string;
+  slug: string;
+  /** Minimum-intensity guidance, or a note on how the form prints this item. */
+  helpText?: string;
+  sortOrder: number;
+};
+
+export type FieldInputType =
+  | "number"
+  | "integer"
+  | "text"
+  | "longtext"
+  | "date"
+  | "date_range"
+  | "choice"
+  | "multi_choice"
+  | "boolean";
+
+/** A value stored in `Activity.fieldValues`, shaped by its `FieldInputType`. */
+export type FieldValue =
+  | number
+  | string
+  | boolean
+  | string[]
+  | { from?: string; to?: string }
+  | null;
+
+/**
+ * The load-bearing table: one row per piece of detail a sub-activity needs to
+ * be reportable. Drives the adaptive questionnaire, gap analysis
+ * (`requiredForForm`), and what an AI pass is permitted to propose
+ * (`aiExtractable`).
+ */
+export type FieldRequirement = {
+  id: string;
+  subActivityId: string;
+  /** Key used inside `Activity.fieldValues`. Unique per sub-activity. */
+  fieldKey: string;
+  label: string;
+  /**
+   * Includes the TPWD minimum-intensity threshold where one exists. Thresholds
+   * seeded today are the Edwards Plateau / Cross Timbers standard and say so —
+   * intensity is ecoregion-specific.
+   */
+  helpText?: string;
+  inputType: FieldInputType;
+  unit?: string;
+  /** Present only for choice / multi_choice. The string is value AND label. */
+  choices?: string[];
+  /** A missing required field is a gap that blocks the render. */
+  requiredForForm: boolean;
+  aiExtractable: boolean;
+  sortOrder: number;
+};
+
+export type ReportPeriodStatus =
+  | "draft"
+  | "in_review"
+  | "finalized"
+  | "submitted";
+
+/** One annual report, for one property, for one tax year. */
+export type ReportPeriod = {
+  id: string;
+  propertyId: string;
+  taxYear: number;
+  status: ReportPeriodStatus;
+  finalizedAt?: string;
+  submittedAt?: string;
+  /** The CAD the landowner told us they submitted to. FieldFile never submits. */
+  submittedTo?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+/**
+ * blocking      — the report cannot render without it
+ * compliance    — it renders, but the answer risks the three-of-seven rule
+ * strengthening — optional; makes the evidence more persuasive
+ */
+export type QuestionPriority = "blocking" | "compliance" | "strengthening";
+
+/** Whether a value came from a model or from a human confirming one. */
+export type ProposalSource = "ai_proposed" | "user_confirmed";
+
+export type EvidencePhase =
+  | "before"
+  | "during"
+  | "after"
+  | "standalone"
+  | "unknown";
+
+/**
+ * One question in the adaptive questionnaire. Questions are GENERATED by gap
+ * analysis — a question exists because something is missing.
+ *
+ * PROPOSE, DO NOT ASSERT: `proposedAnswer` may be pre-filled by AI, last year's
+ * filing, or a heuristic, and is rendered as an answer the user taps to
+ * confirm. `answer` is only ever written by a human action, and `answeredAt` +
+ * `answeredBy` ARE the recorded confirmation event. A row with a
+ * `proposedAnswer` and no `answer` has NOT been confirmed and must not reach a
+ * rendered form.
+ */
+export type ReportQuestion = {
+  id: string;
+  reportPeriodId: string;
+  /** Null for period-level questions (Part I owner info, Part III association). */
+  activityId?: string;
+  /** The `FieldRequirement.fieldKey` this answers, when it maps to one. */
+  fieldKey?: string;
+  questionText: string;
+  inputType: FieldInputType;
+  unit?: string;
+  choices?: string[];
+  priority: QuestionPriority;
+  proposedAnswer?: FieldValue;
+  /** e.g. "ai:receipt-extraction", "prior-year:2025", "heuristic:acreage". */
+  proposedSource?: string;
+  answer?: FieldValue;
+  answeredAt?: string;
+  answeredBy?: string;
+  skipped: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ReceiptLineItem = {
+  description?: string;
+  quantity?: number;
+  unitPrice?: number;
+  amount?: number;
+};
+
+/**
+ * Splitting one receipt across practices — a $900 feed-store receipt might be
+ * $600 supplemental food and $300 shelter. Allocation is per practice, not per
+ * sub-activity. A DB trigger enforces that allocations never exceed the
+ * document total.
+ */
+export type ReceiptAllocation = {
+  id: string;
+  documentId: string;
+  practiceCode: PracticeCode;
+  /** numeric(12,2) in the DB. Do not do float arithmetic on it. */
+  amount: number;
+  note?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+/**
+ * Append-only. Enforced by RLS (no update/delete policy) AND by a trigger,
+ * because this app uses the service-role key, which bypasses RLS.
+ *
+ * The audit trail is the product: if a CAD asks how a value reached the form,
+ * the answer must be "the owner confirmed it on this date".
+ */
+export type AuditEvent = {
+  id: string;
+  reportPeriodId: string;
+  entityType: string;
+  entityId?: string;
+  eventType: string;
+  /** Clerk user id, or a system identifier like "system:gap-analysis". */
+  actor: string;
+  payload: Record<string, unknown>;
+  createdAt: string;
 };
