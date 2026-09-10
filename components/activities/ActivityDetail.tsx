@@ -7,6 +7,7 @@ import { formatDate, getStatusColor, getStatusLabel } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
 import { updateDocumentName, deleteDocumentRecord } from "@/lib/hooks";
 import ActivityChecklist from "./ActivityChecklist";
+import ActivityReportDetails from "./ActivityReportDetails";
 
 interface ActivityDetailProps {
   activity: Activity;
@@ -272,6 +273,9 @@ export default function ActivityDetail({
           )}
         </div>
       </div>
+
+      {/* What this activity puts on PWD-888 Part IV */}
+      <ActivityReportDetails activity={activity} />
 
       {/* Evidence Checklist */}
       <div className="bg-white border border-field-wheat rounded-lg p-6">
