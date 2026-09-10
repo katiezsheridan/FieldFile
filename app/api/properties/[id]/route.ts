@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
+import { uniquePropertySlug } from "@/lib/property-slug";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -144,6 +145,28 @@ export async function PATCH(
 
   const updates: Record<string, unknown> = {};
   if ("name" in body) updates.name = body.name;
+
+  // The slug follows the name. This changes the property's URL, so anything
+  // already linking to the old slug stops resolving — the accepted trade for a
+  // slug that always matches what the owner calls the place. The client should
+  // navigate to the returned slug after a rename.
+  if ("name" in body && typeof body.name === "string" && body.name.trim()) {
+    // Resolve to the row's uuid first: a property must not collide with its
+    // own current slug, or every rename would walk the -2, -3 suffix upward.
+    const { data: target } = await supabase
+      .from("properties")
+      .select("id")
+      .eq(isUUID ? "id" : "slug", id)
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    updates.slug = await uniquePropertySlug(
+      supabase,
+      userId,
+      body.name,
+      target?.id
+    );
+  }
   if ("county" in body) updates.county = body.county;
   if ("acreage" in body) updates.acreage = body.acreage;
   if ("address" in body) updates.address = body.address;
