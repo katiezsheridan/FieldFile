@@ -266,8 +266,11 @@ export default function PropertyPage() {
             )}
 
             {showAddForm && (
+              // property.id, NOT the route param: `id` is the slug
+              // (/properties/promised-land-ranch) and activities.property_id is
+              // a uuid. Passing the slug fails with 22P02 invalid input syntax.
               <AddActivityForm
-                propertyId={id}
+                propertyId={property.id}
                 onSuccess={() => {
                   setShowAddForm(false);
                   refetch();
