@@ -1,18 +1,21 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { createActivity, createDocument, fetchSubActivityIdMap } from "@/lib/hooks";
 import { uploadDocument } from "@/lib/supabase";
 import {
-  PRACTICE_DEFS,
+  PRACTICE_DEF_BY_CODE,
   SUB_ACTIVITY_BY_CODE,
   legacyActivityType,
-  subActivitiesFor,
-  visibleFields,
 } from "@/lib/sub-activities";
-import { FieldValue, PracticeCode } from "@/lib/types";
+import { MIGRATION_HINT, describeError, isMissingSchemaError } from "@/lib/errors";
 import { EvidenceUploader } from "@/components/documents/EvidenceUploader";
-import SubActivityFields from "./SubActivityFields";
+import FormError from "@/components/ui/FormError";
+import ActivityContainerFields, {
+  ContainerDraft,
+  answersToSave,
+  emptyDraft,
+} from "./ActivityContainerFields";
 
 type PendingDoc = { file: File; type: "photo" | "receipt" | "note"; date?: string };
 
@@ -22,28 +25,17 @@ interface AddActivityFormProps {
   onCancel: () => void;
 }
 
-function today(): string {
-  return new Date().toISOString().split("T")[0];
-}
-
 export default function AddActivityForm({
   propertyId,
   onSuccess,
   onCancel,
 }: AddActivityFormProps) {
-  const [practiceCode, setPracticeCode] = useState<PracticeCode>("HC");
-  const [subActivityCode, setSubActivityCode] = useState<string>("HC-01");
-  const [fieldValues, setFieldValues] = useState<Record<string, FieldValue>>({});
-  const [performedOn, setPerformedOn] = useState(today());
-  const [performedThrough, setPerformedThrough] = useState("");
-  const [multiDay, setMultiDay] = useState(false);
-  const [locationLabel, setLocationLabel] = useState("");
+  const [draft, setDraft] = useState<ContainerDraft>(emptyDraft);
   const [name, setName] = useState("");
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pendingDocs, setPendingDocs] = useState<PendingDoc[]>([]);
-  // null while loading; {} means the reference tables aren't there yet.
   const [subActivityIds, setSubActivityIds] = useState<Record<
     string,
     string
@@ -62,30 +54,6 @@ export default function AddActivityForm({
     };
   }, []);
 
-  const subActivities = useMemo(
-    () => subActivitiesFor(practiceCode),
-    [practiceCode]
-  );
-  const subActivity = SUB_ACTIVITY_BY_CODE[subActivityCode];
-  const practice = PRACTICE_DEFS.find((p) => p.code === practiceCode);
-
-  // Changing practice resets the sub-activity and the answers that belonged to it.
-  const handlePracticeChange = (code: PracticeCode) => {
-    setPracticeCode(code);
-    const first = subActivitiesFor(code)[0];
-    setSubActivityCode(first.code);
-    setFieldValues({});
-  };
-
-  const handleSubActivityChange = (code: string) => {
-    setSubActivityCode(code);
-    setFieldValues({});
-  };
-
-  const handleFieldChange = (key: string, value: FieldValue) => {
-    setFieldValues((prev) => ({ ...prev, [key]: value }));
-  };
-
   const handleStage = (
     file: File,
     docType: "photo" | "receipt" | "note",
@@ -98,52 +66,36 @@ export default function AddActivityForm({
     setPendingDocs((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // Answers belonging to fields the user has since hidden must not be saved —
-  // a stale "strip width" on a block design would print on the report.
-  const answersToSave = useMemo(() => {
-    if (!subActivity) return {};
-    const visible = new Set(
-      visibleFields(subActivity, fieldValues).map((f) => f.key)
-    );
-    return Object.fromEntries(
-      Object.entries(fieldValues).filter(
-        ([key, value]) =>
-          visible.has(key) &&
-          value !== null &&
-          value !== "" &&
-          !(Array.isArray(value) && value.length === 0)
-      )
-    );
-  }, [subActivity, fieldValues]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     setError(null);
 
     try {
-      const subActivityId = subActivityIds?.[subActivityCode];
-      if (!subActivityId) {
-        throw new Error(
-          "The activity catalog isn't in the database yet. Apply migrations/add_annual_report_domain.sql to Supabase, then try again."
-        );
-      }
+      const subActivityId = subActivityIds?.[draft.subActivityCode];
+      if (!subActivityId) throw new Error(MIGRATION_HINT);
+
+      const sub = SUB_ACTIVITY_BY_CODE[draft.subActivityCode];
+      const practice = PRACTICE_DEF_BY_CODE[draft.practiceCode];
 
       const created = await createActivity(propertyId, {
-        type: legacyActivityType(subActivityCode),
-        name: name || subActivity.name,
-        description: practice ? `${practice.name} — ${subActivity.name}` : subActivity.name,
+        type: legacyActivityType(draft.subActivityCode),
+        name: name || sub.name,
+        description: `${practice.name} — ${sub.name}`,
         status: "in_progress",
         requiredEvidence: [],
         notes,
-        dueDate: performedOn,
-        completedDate: performedOn,
-        practiceCode,
+        dueDate: draft.performedOn,
+        completedDate: draft.performedOn,
+        practiceCode: draft.practiceCode,
         subActivityId,
-        performedOn,
-        performedThrough: multiDay && performedThrough ? performedThrough : undefined,
-        locationLabel: locationLabel || undefined,
-        fieldValues: answersToSave,
+        performedOn: draft.performedOn,
+        performedThrough:
+          draft.multiDay && draft.performedThrough
+            ? draft.performedThrough
+            : undefined,
+        locationLabel: draft.locationLabel || undefined,
+        fieldValues: answersToSave(draft),
       });
 
       if (created?.id && pendingDocs.length > 0) {
@@ -161,15 +113,20 @@ export default function AddActivityForm({
       }
       onSuccess();
     } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : "Failed to create activity";
-      setError(message);
+      // The raw object is the only place a PostgrestError's code/details/hint
+      // survive intact — keep it in the console for diagnosis.
+      console.error("createActivity failed:", err);
+      setError(
+        isMissingSchemaError(err)
+          ? MIGRATION_HINT
+          : describeError(err, "Failed to create activity")
+      );
     } finally {
       setSaving(false);
     }
   };
 
-  const selectClass =
+  const inputClass =
     "w-full p-2 border border-field-wheat rounded-lg focus:outline-none focus:ring-2 focus:ring-field-forest/20";
 
   return (
@@ -184,122 +141,16 @@ export default function AddActivityForm({
         onto the report.
       </p>
 
-      {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
-          {error}
-        </div>
-      )}
-
       {catalogMissing && (
         <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded text-amber-900 text-sm">
-          The annual-report tables aren&rsquo;t in this database yet. Apply{" "}
-          <code>migrations/add_annual_report_domain.sql</code> to Supabase before
-          saving — the form below works, but there is nowhere to store the
-          answers.
+          {MIGRATION_HINT} The form below works, but there is nowhere to store
+          the answers.
         </div>
       )}
 
-      <div className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-field-ink mb-1">
-            Practice (PWD-888 Part IV)
-          </label>
-          <select
-            value={practiceCode}
-            onChange={(e) => handlePracticeChange(e.target.value as PracticeCode)}
-            className={selectClass}
-          >
-            {PRACTICE_DEFS.map((p) => (
-              <option key={p.code} value={p.code}>
-                {p.formSectionNumber}. {p.name}
-              </option>
-            ))}
-          </select>
-          {practice && (
-            <p className="mt-1 text-xs text-field-earth">{practice.description}</p>
-          )}
-        </div>
+      <ActivityContainerFields draft={draft} onChange={setDraft} />
 
-        <div>
-          <label className="block text-sm font-medium text-field-ink mb-1">
-            Activity
-          </label>
-          <select
-            value={subActivityCode}
-            onChange={(e) => handleSubActivityChange(e.target.value)}
-            className={selectClass}
-          >
-            {subActivities.map((s) => (
-              <option key={s.code} value={s.code}>
-                {s.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-field-ink mb-1">
-              Date performed
-            </label>
-            <input
-              type="date"
-              value={performedOn}
-              onChange={(e) => setPerformedOn(e.target.value)}
-              required
-              className={selectClass}
-            />
-            <p className="mt-1 text-xs text-field-earth">
-              The date the work happened — this is the year it counts toward.
-            </p>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-field-ink mb-1">
-              Location on the property (optional)
-            </label>
-            <input
-              type="text"
-              value={locationLabel}
-              onChange={(e) => setLocationLabel(e.target.value)}
-              placeholder="North pasture, tank 2…"
-              className={selectClass}
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className="flex items-center gap-2 text-sm text-field-ink">
-            <input
-              type="checkbox"
-              checked={multiDay}
-              onChange={(e) => setMultiDay(e.target.checked)}
-            />
-            <span>This work spanned more than one day</span>
-          </label>
-          {multiDay && (
-            <input
-              type="date"
-              value={performedThrough}
-              onChange={(e) => setPerformedThrough(e.target.value)}
-              min={performedOn}
-              className={`${selectClass} mt-2`}
-            />
-          )}
-        </div>
-
-        {subActivity && (
-          <div className="border-t border-field-wheat pt-4">
-            <h4 className="text-sm font-semibold text-field-ink mb-3">
-              What the report asks for
-            </h4>
-            <SubActivityFields
-              subActivity={subActivity}
-              values={fieldValues}
-              onChange={handleFieldChange}
-            />
-          </div>
-        )}
-
+      <div className="space-y-4 mt-4">
         <div className="border-t border-field-wheat pt-4">
           <label className="block text-sm font-medium text-field-ink mb-1">
             Name (optional)
@@ -308,8 +159,8 @@ export default function AddActivityForm({
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder={subActivity?.name}
-            className={selectClass}
+            placeholder={SUB_ACTIVITY_BY_CODE[draft.subActivityCode]?.name}
+            className={inputClass}
           />
         </div>
 
@@ -322,7 +173,7 @@ export default function AddActivityForm({
             onChange={(e) => setNotes(e.target.value)}
             rows={2}
             placeholder="Anything else worth remembering about this work"
-            className={selectClass}
+            className={inputClass}
           />
         </div>
       </div>
@@ -360,7 +211,11 @@ export default function AddActivityForm({
         <EvidenceUploader onUpload={handleStage} />
       </div>
 
-      <div className="flex gap-3 mt-6">
+      <div className="mt-6">
+        <FormError message={error} />
+      </div>
+
+      <div className="flex gap-3 mt-4">
         <button
           type="submit"
           disabled={saving || (!subActivityIds && !catalogMissing)}

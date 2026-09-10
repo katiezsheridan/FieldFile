@@ -8,6 +8,7 @@ import { supabase } from "@/lib/supabase";
 import { updateDocumentName, deleteDocumentRecord } from "@/lib/hooks";
 import ActivityChecklist from "./ActivityChecklist";
 import ActivityReportDetails from "./ActivityReportDetails";
+import EditActivityForm from "./EditActivityForm";
 
 interface ActivityDetailProps {
   activity: Activity;
@@ -22,6 +23,7 @@ export default function ActivityDetail({
   onUpdate,
   onDocsChange,
 }: ActivityDetailProps) {
+  const [editingContainer, setEditingContainer] = useState(false);
   const [editingDocId, setEditingDocId] = useState<string | null>(null);
   const [docDraftName, setDocDraftName] = useState("");
   const [docBusyId, setDocBusyId] = useState<string | null>(null);
@@ -275,7 +277,22 @@ export default function ActivityDetail({
       </div>
 
       {/* What this activity puts on PWD-888 Part IV */}
-      <ActivityReportDetails activity={activity} />
+      {editingContainer ? (
+        <EditActivityForm
+          activity={activity}
+          propertyId={propertyId}
+          onSaved={() => {
+            setEditingContainer(false);
+            onDocsChange?.();
+          }}
+          onCancel={() => setEditingContainer(false)}
+        />
+      ) : (
+        <ActivityReportDetails
+          activity={activity}
+          onEdit={() => setEditingContainer(true)}
+        />
+      )}
 
       {/* Evidence Checklist */}
       <div className="bg-white border border-field-wheat rounded-lg p-6">

@@ -16,8 +16,10 @@ import { Activity, FieldValue } from "@/lib/types";
  */
 export default function ActivityReportDetails({
   activity,
+  onEdit,
 }: {
   activity: Activity;
+  onEdit?: () => void;
 }) {
   const [code, setCode] = useState<string | null>(null);
 
@@ -36,9 +38,9 @@ export default function ActivityReportDetails({
     };
   }, [activity.subActivityId]);
 
-  if (!activity.practiceCode) return null;
-
-  const practice = PRACTICE_DEF_BY_CODE[activity.practiceCode];
+  const practice = activity.practiceCode
+    ? PRACTICE_DEF_BY_CODE[activity.practiceCode]
+    : undefined;
   const sub = code ? SUB_ACTIVITY_BY_CODE[code] : undefined;
   const values = activity.fieldValues ?? {};
   const answered = sub
@@ -47,14 +49,43 @@ export default function ActivityReportDetails({
 
   return (
     <div className="bg-white border border-field-wheat rounded-lg p-6">
-      <h2 className="text-lg font-semibold text-field-ink mb-1">
-        On the annual report
-      </h2>
-      <p className="text-sm text-field-earth mb-4">
-        PWD-888 Part IV, section {practice.formSectionNumber} —{" "}
-        {practice.name}
-        {sub && <> &rsaquo; {sub.name}</>}
-      </p>
+      <div className="flex items-start justify-between gap-4 mb-1">
+        <h2 className="text-lg font-semibold text-field-ink">
+          On the annual report
+        </h2>
+        {onEdit && (
+          <button
+            type="button"
+            onClick={onEdit}
+            className="text-sm font-medium text-field-forest hover:underline shrink-0"
+          >
+            Edit
+          </button>
+        )}
+      </div>
+
+      {practice ? (
+        <p className="text-sm text-field-earth mb-4">
+          PWD-888 Part IV, section {practice.formSectionNumber} — {practice.name}
+          {sub ? (
+            <> &rsaquo; {sub.name}</>
+          ) : (
+            <>
+              {" "}
+              &rsaquo;{" "}
+              <span className="text-field-terra">
+                no activity chosen yet
+              </span>
+            </>
+          )}
+        </p>
+      ) : (
+        <p className="text-sm text-field-terra mb-4">
+          Not classified for the annual report yet. Edit to pick its practice
+          and activity — the report counts practices, so an unclassified
+          activity counts toward nothing.
+        </p>
+      )}
 
       {activity.performedOn && (
         <p className="text-sm text-field-ink mb-4">
