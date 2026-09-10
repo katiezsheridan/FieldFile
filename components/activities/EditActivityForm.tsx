@@ -23,12 +23,10 @@ import ActivityContainerFields, {
  */
 export default function EditActivityForm({
   activity,
-  propertyId,
   onSaved,
   onCancel,
 }: {
   activity: Activity;
-  propertyId: string;
   onSaved: () => void;
   onCancel: () => void;
 }) {
@@ -78,7 +76,10 @@ export default function EditActivityForm({
       const sub = SUB_ACTIVITY_BY_CODE[draft.subActivityCode];
       const practice = PRACTICE_DEF_BY_CODE[draft.practiceCode];
 
-      await updateActivityContainer(activity.id, propertyId, {
+      // activity.propertyId is mapped from activities.property_id — a real
+      // uuid. Route params in this app are slugs; never write one to a uuid
+      // column.
+      await updateActivityContainer(activity.id, activity.propertyId, {
         practiceCode: draft.practiceCode,
         subActivityId,
         performedOn: draft.performedOn,
@@ -142,7 +143,11 @@ export default function EditActivityForm({
       <ActivityContainerFields draft={draft} onChange={setDraft} />
 
       <div className="mt-6">
-        <FormError message={error} />
+        <FormError
+          message={error}
+          title="Couldn't save your changes"
+          action="Edit activity"
+        />
       </div>
 
       <div className="flex gap-3 mt-4">

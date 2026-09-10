@@ -212,7 +212,11 @@ export default function AddActivityForm({
       </div>
 
       <div className="mt-6">
-        <FormError message={error} />
+        <FormError
+          message={error}
+          title="Couldn't save this activity"
+          action="Add activity"
+        />
       </div>
 
       <div className="flex gap-3 mt-4">
