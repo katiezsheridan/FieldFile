@@ -14,6 +14,9 @@ import {
   PlanPractice,
   PracticeType,
   PracticeDocumentation,
+  PracticeCode,
+  ActivityType,
+  FieldValue,
 } from "./types";
 import type { PlanPropertySummary } from "./plan-serialize";
 
@@ -341,6 +344,48 @@ export async function fetchSubActivityIdMap(): Promise<
   return subActivityIdMap;
 }
 
+/** The tax year a piece of work counts toward: the year it was performed. */
+export function taxYearOf(performedOn: string): number {
+  return Number(performedOn.slice(0, 4));
+}
+
+/**
+ * The report period for (property, tax year), creating it if this is the first
+ * activity that year. Every container must carry one — the three-of-seven count
+ * is over containers in a period, so a null period makes the work invisible to
+ * the report.
+ *
+ * Returns null when `report_periods` isn't in the database yet.
+ */
+export async function ensureReportPeriod(
+  propertyId: string,
+  taxYear: number
+): Promise<string | null> {
+  const find = async () => {
+    const { data } = await supabase
+      .from("report_periods")
+      .select("id")
+      .eq("property_id", propertyId)
+      .eq("tax_year", taxYear)
+      .maybeSingle();
+    return data?.id ?? null;
+  };
+
+  const existing = await find();
+  if (existing) return existing;
+
+  const { data, error } = await supabase
+    .from("report_periods")
+    .insert({ property_id: propertyId, tax_year: taxYear, status: "draft" })
+    .select("id")
+    .single();
+
+  // A concurrent insert wins the (property_id, tax_year) unique constraint —
+  // that row is just as good as ours.
+  if (error) return find();
+  return data?.id ?? null;
+}
+
 // Create activity
 //
 // THE ACTIVITY IS THE CONTAINER: practiceCode, subActivityId and fieldValues
@@ -350,6 +395,10 @@ export async function createActivity(
   propertyId: string,
   activity: Omit<Activity, "id" | "propertyId" | "documents">
 ) {
+  const reportPeriodId = activity.performedOn
+    ? await ensureReportPeriod(propertyId, taxYearOf(activity.performedOn))
+    : null;
+
   const { data, error } = await supabase
     .from("activities")
     .insert({
@@ -377,12 +426,61 @@ export async function createActivity(
         ? { location_label: activity.locationLabel }
         : {}),
       ...(activity.fieldValues ? { field_values: activity.fieldValues } : {}),
+      ...(reportPeriodId ? { report_period_id: reportPeriodId } : {}),
     })
     .select()
     .single();
 
   if (error) throw error;
   return data;
+}
+
+/**
+ * Reclassify a container: practice, sub-activity, when, where and the PWD-888
+ * detail answers. This is the ONLY reclassification path — evidence carries no
+ * practice of its own, so correcting the activity moves every photo and receipt
+ * in it. Re-dating into another tax year moves the container to that year's
+ * report period, and a DB trigger drags its documents along.
+ */
+export async function updateActivityContainer(
+  activityId: string,
+  propertyId: string,
+  patch: {
+    practiceCode: PracticeCode;
+    subActivityId: string;
+    performedOn: string;
+    performedThrough?: string;
+    locationLabel?: string;
+    fieldValues: Record<string, FieldValue>;
+    type: ActivityType;
+    name: string;
+    description: string;
+  }
+) {
+  const reportPeriodId = await ensureReportPeriod(
+    propertyId,
+    taxYearOf(patch.performedOn)
+  );
+
+  const { error } = await supabase
+    .from("activities")
+    .update({
+      practice_code: patch.practiceCode,
+      sub_activity_id: patch.subActivityId,
+      performed_on: patch.performedOn,
+      performed_through: patch.performedThrough ?? null,
+      location_label: patch.locationLabel ?? null,
+      field_values: patch.fieldValues,
+      type: patch.type,
+      name: patch.name,
+      description: patch.description,
+      completed_date: patch.performedOn,
+      updated_at: new Date().toISOString(),
+      ...(reportPeriodId ? { report_period_id: reportPeriodId } : {}),
+    })
+    .eq("id", activityId);
+
+  if (error) throw error;
 }
 
 // Rename an existing document
