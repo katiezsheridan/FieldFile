@@ -1,0 +1,63 @@
+PWD 888 - W7000 (03/02) — Part IV, verbatim
+===========================================
+
+Source: https://tpwd.texas.gov/publications/pwdforms/media/
+        pwd_888_w7000_open_space_agric_valuation_wildlife_mgmt_annual_rpt.pdf
+A copy of that PDF is kept at templates/pwd_888.pdf.
+
+Extracted from the PDF's content streams (the form has no AcroForm fields),
+then stripped of binary runs. Intra-word spacing is a kerning artefact, not a
+typo in the form. Checkbox glyphs do not survive extraction — every bare item
+in a list below is a printed checkbox, and every run of underscores is a blank.
+
+This is the source lib/sub-activities.ts was transcribed from. Diff against it
+before changing the catalog, and re-extract when TPWD revises the form.
+
+----------------------------------------------------------------------------
+
+Part IV. Wildlife Management Activities Check the activities you have implemented during the year to support each of the wildlife management activities listed in Part II.
+
+1. HABITAT CONTROL
+Grazing management. Check grazing system being utilized. 1 herd/3pasture 1 herd/4 pasture 1 herd/multiple pasture High intensity/low frequency (HILF) Short duration system Other type of grazing system (describe) ____________________________________ _________________________________________________________________\ ___ Prescribed Burning Acres burned: ______________ Date burned: ________________ Range Enhancement (Range Reseeding) Acres seeded: _______________ Date seeded: _________________ Seeding Method: Broadcast Drilled Native Hay Seeding mixture used: ________________________________________ Fertilized: Yes No Weed control needed for establishment? Yes No Brush Management. Acres treated: __________ Check method of brush management used. Mechanical grubber chain roller chopper/aerator rhome disc brush hog (shredder) dozer hand-cutting (chainsaw) hydraulic shears other (describe) ______________________________ Chemical: Kind _____________________ Rate _________________________ Brush management design: block mosaic strips: width: ___________ length: _________ Fence Modification Target species: pronghorn antelope bighorn sheep Technique: fold up bottom of net-wire Gap width: _______________ replace sections of net-wire with barbed wire Gap width: ____________ Miles of fencing that will be modified: __________________
+
+[PWD 888 - W7000 (03/02) 2]
+
+replace entire net-wire fence with barbed wire. Miles replaced: _______ Riparian management and enhancement Fencing of riparian area Complete fencing partial fencing Deferment from livestock grazing Complete deferment partial deferment Season deferred ________ Establish vegetation trees (list species) ______________________________________________\ _ Shrubs (list species) ______________________________________________\ herbaceous species (list) ___________________________________________ Wetland enhancement provide seasonal water provide permanent water moist soil management Other (describe) ___________________________________________________\ ____ Habitat Protection for species of concern fencing firebreaks prescribed burning control of nest parasites habitat manipulation (thinning, etc.) native/exotic ungulate control other (describe) ___________________________________________________\ _____ Prescribed Control of Native, Exotic and Feral Species Prescribed control of vegetation Prescribed control of animal species Species being controlled: __________________________________________ Method of control: _______________________________________________ Wildlife Restoration Habitat restoration Wildlife restoration Target species: __________________________________________________ Method of restoration: ____________________________________________
+
+2. EROSION CONTROL
+Pond construction and repair Surface area (acres): ___________ Number of cubic yards of soil displaced: __________ Length of dam (feet): __________ Planned date of construction: __________________
+
+[PWD 888 - W7000 (03/02) 3]
+
+
+
+[PWD 888 - W7000 (03/02) 4]
+
+Gully shaping Total acres to be treated: _________ Acres treated annually: _______________ Seeding mix used for reestablishment of vegetation: _____________________________ Planned date of construction: __________________________ Streamside, pond, and wetland revegetation. Techniques used: native hay bales fencing filter strips seeding upland buffer rip-rap, etc. stream crossings Other: ___________________________ Planned date of construction: _________________________________ Herbaceous and/or woody plant establishment on critical areas (erodible) Establish windbreak establish shrub mottes improve plant diversity improve wildlife habitat conservation/no-till practices manage CRP cover Dike/Levee Construction/Management reshaping/repairing erosion damage revegtating/stabilize levee areas install water control structure fencing Establish water diversion Type: channel ridge Slope: level graded Length (feet) _________________________ Vegetated: No YES If YES: Native: ___________________ Crop: ______________________
+
+3. PREDATOR CONTROL
+Imported red fire ants control of cowbirds grackle/starling/house sparrow control Method of control: trapping shooting scare tactics: ________________ Coyotes feral hogs raccoon skunk bobcat mountain lion rat snakes feral cats/dogs Method of control: trapping shooting M-44 (licensed applicators) poison collars (1080 certified, licensed, applicator Other: _____________
+
+4. PROVIDING SUPPLEMENTAL WATER
+Marsh/Wetland Restoration or Development greentree reservoirs shallow roost pond development seasonally flooded crops
+
+[PWD 888 - W7000 (03/02) 5]
+
+artificially created wetlands marsh restoration/development/protection prairie pothole restoration/development/protection moist soil management units Planned date of construction: __________________________________________\ ______ Well/trough/windmill overflow/other wildlife watering facilities drill new well depth: ______________ gallons per minute: ____________ windmill pump pipeline: size ___________ length ________ modification(s) of existing water source fencing overflow trough modification pipeline Distance between water sources (waterers): ______________________________ Type of wildlife watering facility PVC pipe facility \226 number _____ drum with faucet or float \226 number ______ small game guzzler \226 number _____ windmill supply pipe dripper \226 number ___ plastic container \226 number _____ in-ground bowl trough \226 number _____ big game guzzler \226 number _____ inverted umbrella guzzler \226 number _____ flying saucer guzzler \226 number _____ Ranch Specialties guzzler \226 Number _____ Other: _______________________________________________________________\ Spring development and/or enhancement fencing water diversion/pipeline brush removal spring clean out Other: ______________________________________________________
+
+5. PROVIDING SUPPLEMENTAL FOOD
+grazing management prescribed burning range enhancement food plots Size: _____________ Fenced: Yes No Irrigated: Yes No Plantings: cool season annual crops: ____________________________________ warm season annual crops: __________________________________ annual mix of native plants: __________________________________ perennial mix of native plants: ________________________________ Feeders and mineral supplementation Purpose: supplementation harvesting of wildlife Targeted wildlife species: ____________________________________________\ ______
+
+[PWD 888 - W7000 (03/02) 6]
+
+Feed type: _______________________ Mineral type: ________________________ Feeder type: ______________________ Number of feeders: ___________________ Method of mineral dispensing: ______________________________________________ Number of mineral locations: ______________ Year round: Yes No. If not, state when: ________________________________ Managing tame pasture, old fields and croplands overseeding cool and/or warm season legumes and/or small grains periodic disturbance (discing) conservation/no-till Transition management of tame grass monocultures overseed 25% of tame grass pastures with locally adapted legumes Species planted: clover peas vetch other: ______________________
+
+6. PROVIDING SUPPLEMENTAL SHELTER
+Nest boxes Target Species: _______________________________________________ Cavity type. Number: ____ Bat boxes. Number ___ Raptor pole. Number ___ Brush piles and slash retention Type: slash brush piles number per acre: _____________ Fence line management Length: _______ Initial establishment: Yes No Plant type established: trees shrubs forbs grases Hay meadow, pasture and cropland management for wildlife Acres treated: ___________ Shelter establishment: roadside management terrace/wind breaks field borders shelterbelts Conservation Reserve Program lands management Type of vegetation: annual perennial Species and percent of mixture: ______________________________________________ Deferred mowing Period of deferment: ______________________________ Mowing Acres mowed annually: ____________________________ No till/minimum till Half-cutting trees or shrubs Acreage to be treated annually: ________ Number of half-cuts annually: ___________ Woody plant/shrub establishment Pattern: block mosaic strips: width: ___________ length: _________ Acreage or length established annually: _______________ Spacing: ______________ Shrub/tree species used: _______________________________________________\ ___ Natural cavity/snag development Species of snag: _______________ Size of snags: __________ Number/acre: _______
+
+7. CENSUS
+Spotlight counts Targeted species: _____________________________________________ Length of route: ______________ Visibility of route: __________________________ Dates (3 required) A. _______________ B. _______________ C. _____\ ___________ Standardized incidental observations Targeted species: ___________________________ Observations from: feeders food plots blinds vehicle other Dates: __________________________________________________________________ Stand counts of deer (5 one hour counts per stand required). Number of stands: __________ Dates: __________________________________________________________________ Aerial Counts Species counted: ______________________________________________ Type of survey: helicopter fixed-wing Percent of area surveyed: total 50% Other: _______________ Track counts: predators furbearers deer other: ________________ Daylight deer herd/wildlife composition counts Species: deer turkey dove quail other __________ Harvest data collection/record keeping deer game birds age weight sex antler data harvest date Browse utilization surveys (thirty 12 foot circular plots required) Census of endangered, threatened, or protected wildlife. Species: ______________________ Method and dates: ______________________________________________________\ __ Census and monitoring of nongame wildlife species. Species: ________________________ Method and dates: ______________________________________________________\ __
+
+[PWD 888 - W7000 (03/02) 7]
+
+Miscellaneous counts. Species being counted: ___________________________________ remote detection (i.e. cameras) Hahn (walking) line roost counts booming ground counts time/area counts songbird transects and counts quail call and covey counts point counts small mammal traps drift fences and pitfall traps bat departures dove call counts chachalaca counts turkey hen/poult counts waterfowl/water bird counts alligator nest/census counts Other: _________________________________ Part V. Attach copies of supporting documentation such as receipts, maps, photos, etc. Use additional pages if necessary. I certify that the above information provided by me is to the best of my knowledge and belief true and complete. Signature Date Texas Parks and Wildlife does not maintain the information collected through this form. This completed form is only provided to the County Tax Appraiser. Please inquire with your County Central Appraisal District on any local laws concerning any information collected through this form.

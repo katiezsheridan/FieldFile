@@ -207,6 +207,14 @@ export function useActivity(activityId: string | undefined) {
       dueDate: act.due_date || "",
       completedDate: act.completed_date,
       locations: act.locations || [],
+      // Annual-report container columns. Undefined against a database without
+      // the annual-report migration, and null on rows that predate it.
+      practiceCode: act.practice_code ?? undefined,
+      subActivityId: act.sub_activity_id ?? undefined,
+      performedOn: act.performed_on ?? undefined,
+      performedThrough: act.performed_through ?? undefined,
+      locationLabel: act.location_label ?? undefined,
+      fieldValues: act.field_values ?? undefined,
     });
     setLoading(false);
   }, [activityId]);
@@ -305,7 +313,39 @@ export async function updatePropertyPhoto(
   return updateProperty(idOrSlug, { photoUrl });
 }
 
+/**
+ * `sub_activities.code` -> uuid. The PWD-888 catalog lives in
+ * lib/sub-activities.ts (48 rows, fixed), so this is fetched once per page load
+ * and cached; `activities.sub_activity_id` is a uuid FK and needs the real id.
+ *
+ * Returns null when the annual-report reference tables are not in the database
+ * yet (migrations/add_annual_report_domain.sql has not been applied). Callers
+ * should tell the user rather than silently dropping their answers.
+ */
+let subActivityIdMap: Record<string, string> | null = null;
+
+export async function fetchSubActivityIdMap(): Promise<
+  Record<string, string> | null
+> {
+  if (subActivityIdMap) return subActivityIdMap;
+
+  const { data, error } = await supabase
+    .from("sub_activities")
+    .select("code, id");
+
+  if (error || !data) return null;
+
+  subActivityIdMap = Object.fromEntries(
+    data.map((row: { code: string; id: string }) => [row.code, row.id])
+  );
+  return subActivityIdMap;
+}
+
 // Create activity
+//
+// THE ACTIVITY IS THE CONTAINER: practiceCode, subActivityId and fieldValues
+// are chosen by the landowner up front, and evidence inherits its
+// classification from here. See CLAUDE.md > "Annual Report Domain Model".
 export async function createActivity(
   propertyId: string,
   activity: Omit<Activity, "id" | "propertyId" | "documents">
@@ -323,6 +363,20 @@ export async function createActivity(
       completed_date: activity.completedDate,
       locations: activity.locations,
       required_evidence: activity.requiredEvidence,
+      // Annual-report container columns. Omitted entirely when absent so this
+      // still works against a database without the annual-report migration.
+      ...(activity.practiceCode ? { practice_code: activity.practiceCode } : {}),
+      ...(activity.subActivityId
+        ? { sub_activity_id: activity.subActivityId }
+        : {}),
+      ...(activity.performedOn ? { performed_on: activity.performedOn } : {}),
+      ...(activity.performedThrough
+        ? { performed_through: activity.performedThrough }
+        : {}),
+      ...(activity.locationLabel
+        ? { location_label: activity.locationLabel }
+        : {}),
+      ...(activity.fieldValues ? { field_values: activity.fieldValues } : {}),
     })
     .select()
     .single();
