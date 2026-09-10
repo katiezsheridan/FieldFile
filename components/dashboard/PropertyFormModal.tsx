@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { usePathname, useRouter } from "next/navigation";
 import {
   ExemptionStatus,
   ExemptionType,
@@ -91,6 +92,8 @@ export function PropertyFormModal({
     legalDescription: property?.legalDescription ?? "",
     appraisalAccount: property?.appraisalAccount ?? "",
   });
+  const router = useRouter();
+  const pathname = usePathname();
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -177,10 +180,27 @@ export function PropertyFormModal({
           if (!uploaded) throw new Error("Photo upload failed.");
           photoUrl = uploaded.url;
         }
-        await updateProperty(property.slug ?? property.id, {
+        const previousSlug = property.slug;
+        const updated = await updateProperty(property.slug ?? property.id, {
           ...fields,
           ...(photoUrl ? { photoUrl } : {}),
         });
+
+        // Renaming regenerates the slug, which changes the property's URL. If
+        // we are standing on a page addressed by the old slug, that page is a
+        // 404 the moment the rename lands — carry the user across to the new
+        // one instead. `replace`, not `push`: the old URL no longer resolves,
+        // so leaving it in history is a trap.
+        if (previousSlug && updated.slug && updated.slug !== previousSlug) {
+          // Compare the path SEGMENT, not a substring: "/properties/test-2"
+          // contains "/properties/test", and a rename of "test" must not
+          // rewrite an unrelated property's URL.
+          const segments = (pathname ?? "").split("/");
+          if (segments[1] === "properties" && segments[2] === previousSlug) {
+            segments[2] = updated.slug;
+            router.replace(segments.join("/"));
+          }
+        }
       } else {
         // Create first to get an id, then upload the photo against it.
         const created = await createProperty(fields);
