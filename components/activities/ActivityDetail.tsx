@@ -280,7 +280,6 @@ export default function ActivityDetail({
       {editingContainer ? (
         <EditActivityForm
           activity={activity}
-          propertyId={propertyId}
           onSaved={() => {
             setEditingContainer(false);
             onDocsChange?.();
