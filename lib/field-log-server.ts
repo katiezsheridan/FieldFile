@@ -37,6 +37,10 @@ export function mapEntry(e: any, signedUrl: string | null = null) {
     propertyId: e.property_id,
     entryType: e.entry_type,
     practiceCategory: e.practice_category,
+    // The finer classification and the container it lands in. Null on entries
+    // captured before sub-activity capture shipped — a human picks those.
+    subActivityCode: e.sub_activity_code ?? null,
+    activityId: e.activity_id ?? null,
     note: e.note,
     latitude: e.latitude,
     longitude: e.longitude,
@@ -109,4 +113,98 @@ export function fetchFieldLogEntry(
     .eq("property_id", propertyId)
     .eq("user_id", userId)
     .maybeSingle();
+}
+
+// ---------------------------------------------------------------------------
+// The container a field-log entry belongs to
+// ---------------------------------------------------------------------------
+
+/**
+ * Find or create the activity container for one captured entry, and return its
+ * id. THE ACTIVITY IS THE CONTAINER — an entry is evidence inside one, never a
+ * container of its own.
+ *
+ * The grouping key is (property_id, sub_activity_id, performed_on): a fence
+ * line photographed in six spots on one afternoon lands in one activity with
+ * six photos, not six activities the report has to re-group by heuristic.
+ *
+ * Keyed on the CAPTURE date, not now(), so an entry that sat in the offline
+ * queue for three days still joins the container for the day the work happened.
+ *
+ * Returns null when the annual-report tables aren't present, or when the entry
+ * has no sub-activity — an unclassified capture gets no container rather than a
+ * guessed one.
+ */
+export async function findOrCreateContainer(opts: {
+  propertyId: string;
+  subActivityCode: string;
+  practiceCode: string;
+  performedOn: string; // YYYY-MM-DD, the capture date
+  name: string;
+  legacyType: string;
+}): Promise<string | null> {
+  const { data: sub } = await fieldLogDb
+    .from("sub_activities")
+    .select("id")
+    .eq("code", opts.subActivityCode)
+    .maybeSingle();
+  if (!sub?.id) return null;
+
+  const { data: existing } = await fieldLogDb
+    .from("activities")
+    .select("id")
+    .eq("property_id", opts.propertyId)
+    .eq("sub_activity_id", sub.id)
+    .eq("performed_on", opts.performedOn)
+    .order("created_at", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+  if (existing?.id) return existing.id;
+
+  const taxYear = Number(opts.performedOn.slice(0, 4));
+  const { data: period } = await fieldLogDb
+    .from("report_periods")
+    .upsert(
+      { property_id: opts.propertyId, tax_year: taxYear, status: "draft" },
+      { onConflict: "property_id,tax_year", ignoreDuplicates: false }
+    )
+    .select("id")
+    .maybeSingle();
+
+  const { data: created, error } = await fieldLogDb
+    .from("activities")
+    .insert({
+      property_id: opts.propertyId,
+      type: opts.legacyType,
+      name: opts.name,
+      description: "Captured in the field.",
+      status: "in_progress",
+      practice_code: opts.practiceCode,
+      sub_activity_id: sub.id,
+      performed_on: opts.performedOn,
+      completed_date: opts.performedOn,
+      due_date: opts.performedOn,
+      field_values: {},
+      required_evidence: [],
+      locations: [],
+      ...(period?.id ? { report_period_id: period.id } : {}),
+    })
+    .select("id")
+    .single();
+
+  if (error) {
+    // A second capture racing us to the same (property, sub-activity, day)
+    // will have created it; that container is just as good as ours.
+    const { data: raced } = await fieldLogDb
+      .from("activities")
+      .select("id")
+      .eq("property_id", opts.propertyId)
+      .eq("sub_activity_id", sub.id)
+      .eq("performed_on", opts.performedOn)
+      .limit(1)
+      .maybeSingle();
+    return raced?.id ?? null;
+  }
+
+  return created?.id ?? null;
 }

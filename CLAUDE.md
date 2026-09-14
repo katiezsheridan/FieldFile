@@ -193,14 +193,16 @@ should look like the artifact it produces.
 *spirit* — the user names the practice at capture time, and nothing is ever
 inferred — but neither is a full container yet:
 
-- `field_log_entries` carries `practice_category` chosen in the capture UI,
-  before the photo is committed. Good. But there is **no** sub-activity, and no
-  activity FK: an entry is effectively a single-evidence container, so a fence
-  line photographed in six spots on one day becomes six unrelated rows the report
-  has to re-group by heuristic. Reconciling this — folding field log entries into
-  the `activities` container, or adding an `activity_id` — is required before
-  report generation is built, and is a data-model decision worth a design pass,
-  not a drive-by migration.
+- `field_log_entries` now carries `sub_activity_code` (what the landowner tapped)
+  and `activity_id` (the container). **The client never picks the container** —
+  `findOrCreateContainer()` in `lib/field-log-server.ts` resolves it server-side
+  by find-or-create on `(property_id, sub_activity_id, performed_on)`. Two
+  consequences worth preserving: capture works offline, because the sub-activity
+  catalog is static TypeScript and no lookup is needed; and the key is the
+  CAPTURE date, not `now()`, so an entry flushed from the offline queue three
+  days later still joins the day the work happened. The table stays separate from
+  `documents` on purpose — field photos carry GPS and live in the PRIVATE
+  `field-log` bucket behind signed URLs, while `documents` is public.
 - `census_observations` + `census_species_counts` is already a proper container
   for `CE`: a dated, located session with structured counts and documents hanging
   off it via `documents.observation_id`. It is the closest thing in the repo to
@@ -300,7 +302,7 @@ exists to prevent.
 | 48 sub-activity codes + their 169 form fields | **Built** — `lib/sub-activities.ts`, generating the SQL seed. Plans still capture free-text `documentation.plannedActivities` |
 | Three-of-seven, plan side | **Built** — `MIN_PRACTICES` in `lib/plan-completion.ts` |
 | Three-of-seven, evidence-backed annual side | **Target** |
-| Activity as container | **Partial** — `AddActivityForm` now creates one (practice + sub-activity + `field_values` chosen up front, evidence attached in the same step); `documents.activity_id` and `census_observations` follow it; `field_log_entries` does not (no sub-activity, no container FK) |
+| Activity as container | **Built** — `AddActivityForm` creates one and `EditActivityForm` reclassifies it; `documents.activity_id`, `census_observations` and now `field_log_entries` (`sub_activity_code` + `activity_id`) all hang off one. Field captures are grouped server-side by (property, sub-activity, capture date), so a fence line photographed six times in a day is one container, not six |
 | Practice chosen at capture time, never inferred | **Built** — field log capture and pin flows both require it up front |
 | Evidence query layer for the report | **Built** — `lib/field-log-server.ts`, `groupByPracticeCategory()` |
 | Gap analysis + bucket model | **Built for 50-129** (`buildPayload.ts`), **target for PWD-888** |

@@ -246,6 +246,10 @@ export type FieldLogEntry = {
   propertyId: string;
   entryType: FieldLogEntryType;
   practiceCategory: PracticeCategory;
+  /** `{PRACTICE}-{NN}` — what the landowner tapped in the field. */
+  subActivityCode?: string | null;
+  /** The activity container this evidence belongs to. Assigned server-side. */
+  activityId?: string | null;
   note?: string | null;
   latitude?: number | null;
   longitude?: number | null;
