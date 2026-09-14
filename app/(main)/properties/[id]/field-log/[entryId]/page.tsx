@@ -10,6 +10,7 @@ import {
   PRACTICE_CATEGORY_COLORS,
 } from "@/lib/field-log";
 import { GPS_SOURCE_LABELS } from "@/lib/field-capture";
+import { SUB_ACTIVITY_BY_CODE } from "@/lib/sub-activities";
 import type { FieldLogEntry, GpsSource } from "@/lib/types";
 
 type EntryWithUrl = FieldLogEntry & { photoUrl?: string | null };
@@ -81,9 +82,35 @@ export default function FieldLogEntryPage() {
                 }}
               />
               <h1 className="text-2xl font-bold text-field-ink">
-                {practiceCategoryLabel(entry.practiceCategory)}
+                {entry.subActivityCode
+                  ? SUB_ACTIVITY_BY_CODE[entry.subActivityCode]?.name ??
+                    practiceCategoryLabel(entry.practiceCategory)
+                  : practiceCategoryLabel(entry.practiceCategory)}
               </h1>
             </div>
+
+            {/* Where this evidence actually lives: the container it was filed
+                into. Same-day work on the same activity shares one. */}
+            {entry.activityId ? (
+              <p className="text-sm text-field-earth">
+                Filed under{" "}
+                <Link
+                  href={`/properties/${id}/activities/${entry.activityId}`}
+                  className="text-field-forest font-medium hover:underline"
+                >
+                  {practiceCategoryLabel(entry.practiceCategory)}
+                  {entry.subActivityCode &&
+                    ` › ${SUB_ACTIVITY_BY_CODE[entry.subActivityCode]?.name ?? entry.subActivityCode}`}
+                </Link>{" "}
+                — alongside anything else logged for it that day.
+              </p>
+            ) : (
+              <p className="text-sm text-field-terra">
+                Not yet filed under an activity, so it counts toward nothing on
+                the annual report. Captured before we started asking which
+                activity it was — open it from the property page to classify it.
+              </p>
+            )}
 
             {/* Full photo, or a clear note that this was a pin-only activity. */}
             {entry.photoUrl ? (

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import CensusLocationPicker from "@/components/census/CensusLocationPickerWrapper";
 import { PRACTICE_CATEGORIES } from "@/lib/field-log";
+import SubActivitySelect from "@/components/field-log/SubActivitySelect";
 import { submitFieldLogEntry } from "@/lib/field-log-submit";
 import type { GpsSource, PracticeCategory } from "@/lib/types";
 import {
@@ -45,6 +46,7 @@ export default function DropPinPage() {
 
   // Form fields.
   const [category, setCategory] = useState<PracticeCategory | "">("");
+  const [subActivityCode, setSubActivityCode] = useState("");
   const [note, setNote] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -134,6 +136,10 @@ export default function DropPinPage() {
       setError("Pick a management practice so this maps to an auditor-recognized category.");
       return;
     }
+    if (!subActivityCode) {
+      setError("Pick what you did — it's the line item this lands on in the annual report.");
+      return;
+    }
     setError(null);
     setSubmitting(true);
 
@@ -141,6 +147,7 @@ export default function DropPinPage() {
       const payload = {
         entryType: "pin_activity",
         practiceCategory: category,
+        subActivityCode: subActivityCode || null,
         note: note || null,
         latitude: pin?.lat ?? null,
         longitude: pin?.lng ?? null,
@@ -258,9 +265,10 @@ export default function DropPinPage() {
               </span>
               <select
                 value={category}
-                onChange={(e) =>
-                  setCategory(e.target.value as PracticeCategory | "")
-                }
+                onChange={(e) => {
+                  setCategory(e.target.value as PracticeCategory | "");
+                  setSubActivityCode("");
+                }}
                 className={inputCls}
               >
                 <option value="">— Select a practice —</option>
@@ -271,6 +279,13 @@ export default function DropPinPage() {
                 ))}
               </select>
             </label>
+
+            <SubActivitySelect
+              category={category}
+              value={subActivityCode}
+              onChange={setSubActivityCode}
+              className={inputCls}
+            />
 
             <label className="block">
               <span className="block text-xs font-medium text-field-ink/70 mb-1">

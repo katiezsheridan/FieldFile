@@ -1,6 +1,12 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { isPracticeCategory } from "@/lib/field-log";
+import { PRACTICE_CODE_BY_CATEGORY } from "@/lib/practices";
+import {
+  SUB_ACTIVITY_BY_CODE,
+  legacyActivityType,
+} from "@/lib/sub-activities";
+import type { PracticeCategory } from "@/lib/types";
 import {
   fieldLogDb as supabase,
   BUCKET,
@@ -9,9 +15,14 @@ import {
   mapEntry,
   mapEntryWithSignedUrl,
   fetchFieldLogEntries,
+  findOrCreateContainer,
 } from "@/lib/field-log-server";
 
 const GPS_SOURCES = ["device_live", "photo_exif", "manual_pin"] as const;
+
+const practiceCodeOf = (category: PracticeCategory) =>
+  PRACTICE_CODE_BY_CATEGORY[category];
+
 const ENTRY_TYPES = ["photo_evidence", "pin_activity"] as const;
 
 function toNum(v: unknown): number | null {
@@ -98,6 +109,20 @@ export async function POST(
       { status: 400 }
     );
   }
+  // The sub-activity the landowner tapped. Optional so an older client (or a
+  // queued entry captured before this shipped) still posts successfully — it
+  // just lands without a container for a human to classify.
+  const subActivity =
+    typeof payload.subActivityCode === "string"
+      ? SUB_ACTIVITY_BY_CODE[payload.subActivityCode]
+      : undefined;
+  if (subActivity && subActivity.practiceCode !== practiceCodeOf(payload.practiceCategory)) {
+    return NextResponse.json(
+      { error: "sub_activity does not belong to the given practice" },
+      { status: 400 }
+    );
+  }
+
   const gpsSource =
     payload.gpsSource && GPS_SOURCES.includes(payload.gpsSource)
       ? payload.gpsSource
@@ -112,6 +137,23 @@ export async function POST(
     );
   }
 
+  // The container this evidence belongs to, resolved server-side. Keyed on the
+  // CAPTURE date so an entry flushed from the offline queue days later still
+  // joins the day the work actually happened.
+  const capturedAt = payload.capturedAt || new Date().toISOString();
+  const performedOn = String(capturedAt).slice(0, 10);
+
+  const activityId = subActivity
+    ? await findOrCreateContainer({
+        propertyId,
+        subActivityCode: subActivity.code,
+        practiceCode: subActivity.practiceCode,
+        performedOn,
+        name: subActivity.name,
+        legacyType: legacyActivityType(subActivity.code),
+      })
+    : null;
+
   // Insert the row first so we can name the object after its id.
   const { data: inserted, error: insertErr } = await supabase
     .from("field_log_entries")
@@ -120,12 +162,14 @@ export async function POST(
       property_id: propertyId,
       entry_type: entryType,
       practice_category: payload.practiceCategory,
+      sub_activity_code: subActivity?.code ?? null,
+      activity_id: activityId,
       note: payload.note || null,
       latitude: toNum(payload.latitude),
       longitude: toNum(payload.longitude),
       gps_accuracy_meters: toNum(payload.gpsAccuracyMeters),
       gps_source: gpsSource,
-      captured_at: payload.capturedAt || new Date().toISOString(),
+      captured_at: capturedAt,
     })
     .select()
     .single();
