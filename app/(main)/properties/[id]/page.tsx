@@ -14,6 +14,7 @@ import { uploadLandDocument } from "@/lib/supabase";
 import { getProperty } from "@/lib/demo-data";
 import ActivityEvidenceCard from "@/components/activities/ActivityEvidenceCard";
 import AddActivityForm from "@/components/activities/AddActivityForm";
+import ReportReadinessCard from "@/components/annual-report/ReportReadinessCard";
 import { FileUploader } from "@/components/documents/FileUploader";
 import { DocumentList } from "@/components/documents/DocumentList";
 import PropertyMapSection from "@/components/map/PropertyMapSection";
@@ -249,6 +250,16 @@ export default function PropertyPage() {
           </svg>
         </Link>
         )}
+
+        {/* Where this property stands against the annual report. Above the
+            activity list on purpose: the count is the thing that matters, and
+            a list of activities does not tell you whether you qualify. */}
+        <div className="mb-6">
+          <ReportReadinessCard
+            propertyId={property.id}
+            taxYear={new Date().getFullYear()}
+          />
+        </div>
 
         {/* Activities with inline evidence */}
         <CollapsibleSection
