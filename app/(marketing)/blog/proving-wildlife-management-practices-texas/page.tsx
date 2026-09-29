@@ -96,22 +96,23 @@ const jsonLd = {
   ],
 };
 
-// Before/during/after of a supplemental water bowl cleaning.
+// Before / mid-clean / after of a supplemental water bowl. Same bowl, same
+// angle each time — that consistency is what makes the sequence read as proof.
 const WATER_BOWL_PHOTOS = [
   {
     src: "/images/blog/proving-wildlife-management-practices/water-bowl-before.jpg",
-    alt: "A supplemental water bowl coated in green algae before cleaning",
-    caption: "Before: algae built up in the bowl.",
+    alt: "A galvanized supplemental water bowl and its center stone covered in thick bright green algae",
+    caption: "Before: algae over the stone and across the water.",
   },
   {
     src: "/images/blog/proving-wildlife-management-practices/water-bowl-cleaning.jpg",
-    alt: "Scrubbing algae out of the supplemental water bowl",
-    caption: "The work itself: scrubbing the bowl out.",
+    alt: "The same water bowl mid-clean, its stone scrubbed back to bare rock with loosened algae still floating in the water",
+    caption: "Mid-clean: stone scrubbed, algae still to be flushed.",
   },
   {
     src: "/images/blog/proving-wildlife-management-practices/water-bowl-after.jpg",
-    alt: "The same supplemental water bowl, clean and refilled with water",
-    caption: "After: clean and full.",
+    alt: "The same water bowl after cleaning, holding clear water with a clean stone in the center",
+    caption: "After: clear water, clean stone.",
   },
 ];
 
@@ -227,14 +228,16 @@ export default function ProvingPracticesPost() {
             <div className="grid gap-4 sm:grid-cols-3">
               {WATER_BOWL_PHOTOS.map((photo) => (
                 <div key={photo.src}>
-                  <Image
-                    src={photo.src}
-                    alt={photo.alt}
-                    width={600}
-                    height={800}
-                    className="w-full h-auto rounded-xl border border-field-wheat object-cover"
-                    sizes="(min-width: 640px) 33vw, 100vw"
-                  />
+                  {/* Fixed 3:4 box so the mixed source aspect ratios align. */}
+                  <div className="relative aspect-[3/4] overflow-hidden rounded-xl border border-field-wheat">
+                    <Image
+                      src={photo.src}
+                      alt={photo.alt}
+                      fill
+                      className="object-cover"
+                      sizes="(min-width: 640px) 33vw, 100vw"
+                    />
+                  </div>
                   <figcaption className="mt-2 text-sm text-field-earth">
                     {photo.caption}
                   </figcaption>
