@@ -23,13 +23,13 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
-    slug: "proving-wildlife-management-practices-texas",
+    slug: "wildlife-management-documentation",
     title:
-      "What a Wildlife Biologist Taught Me About Getting Credit for Your Wildlife Management Work",
+      "How to Document Wildlife Management Practices for Texas Appraisal Districts",
     description:
-      "A Texas Parks and Wildlife biologist on what appraisal districts actually check: a finished practice beats a good-faith effort, three from three categories with a buffer, and a logbook that holds up.",
+      "A Texas Parks and Wildlife biologist explains what appraisal districts check: completed practices, three from three categories with a buffer, and a logbook that holds up.",
     excerpt:
-      "Writing the management plan is the easy part. Proving every year that you did what it says is the hard part. Here is what a TPWD wildlife biologist told me appraisal districts actually look for — and how to document practices so they count.",
+      "Keeping a wildlife tax valuation takes more than a management plan. Each year you have to show you carried out the practices it describes. Here is what a Texas Parks and Wildlife biologist says appraisal districts look for, and how to document practices so they count.",
     primaryKeyword: "proving wildlife management practices",
     keywords: [
       "proving wildlife management practices",
