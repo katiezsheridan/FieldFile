@@ -3,13 +3,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { SITE_URL, getPost, postUrl, formatPostDate } from "@/lib/blog";
 
-const SLUG = "proving-wildlife-management-practices-texas";
+const SLUG = "wildlife-management-documentation";
 const post = getPost(SLUG)!;
 const url = postUrl(SLUG);
 
-// External authority sources (open in a new tab, nofollow-safe for outbound refs).
-const TPWD_URL =
-  "https://tpwd.texas.gov/landwater/land/private/agricultural_land/wildlife_management/";
+// External authority source (opens in a new tab, nofollow-safe for outbound refs).
+const TPWD_BIOLOGIST_URL =
+  "https://tpwd.texas.gov/landwater/habitat-management/find-a-wildlife-biologist/";
 
 export const metadata: Metadata = {
   title: post.title,
@@ -77,10 +77,10 @@ const jsonLd = {
       mainEntity: [
         {
           "@type": "Question",
-          name: "How do you prove you completed a wildlife management practice in Texas?",
+          name: "How do you document wildlife management practices in Texas?",
           acceptedAnswer: {
             "@type": "Answer",
-            text: "Appraisal districts check whether the practice exists and meets the standard, not how much time or money went into it. Keep a logbook by calendar year recording the date, time or labor spent, what you spent, and any census data for each activity, along with photos and a note about where on the property it happened.",
+            text: "Keep a logbook by calendar year. For each activity, record the date, the time or labor spent, the cost, and any census data, and add photos and a note on where it took place. Appraisal districts check whether the practice exists and meets the standard, not how much time or money went into it.",
           },
         },
         {
@@ -88,7 +88,7 @@ const jsonLd = {
           name: "How many wildlife management practices do you need each year?",
           acceptedAnswer: {
             "@type": "Answer",
-            text: "You need at least three practices from three different categories each year, and you can pick and choose from the practices in your management plan. Planning for four or five gives you a buffer if one falls through or gets rejected.",
+            text: "You need at least three practices from three different categories each year, chosen from your management plan. Planning for four or five covers you if one fails or is rejected.",
           },
         },
       ],
@@ -96,8 +96,8 @@ const jsonLd = {
   ],
 };
 
-// Before / mid-clean / after of a supplemental water bowl. Same bowl, same
-// angle each time — that consistency is what makes the sequence read as proof.
+// Before, during and after of a supplemental water bowl cleaning. Same bowl
+// each time, which is what makes the sequence read as proof.
 const WATER_BOWL_PHOTOS = [
   {
     src: "/images/blog/proving-wildlife-management-practices/water-bowl-before.jpg",
@@ -106,8 +106,8 @@ const WATER_BOWL_PHOTOS = [
   },
   {
     src: "/images/blog/proving-wildlife-management-practices/water-bowl-cleaning.jpg",
-    alt: "The same water bowl mid-clean, its stone scrubbed back to bare rock with loosened algae still floating in the water",
-    caption: "Mid-clean: stone scrubbed, algae still to be flushed.",
+    alt: "A landowner crouched in a field of dry grass, scrubbing algae out of the supplemental water bowl with a brush",
+    caption: "The work itself: scrubbing the bowl out.",
   },
   {
     src: "/images/blog/proving-wildlife-management-practices/water-bowl-after.jpg",
@@ -116,7 +116,7 @@ const WATER_BOWL_PHOTOS = [
   },
 ];
 
-export default function ProvingPracticesPost() {
+export default function WildlifeManagementDocumentationPost() {
   return (
     <article className="bg-field-cream">
       <script
@@ -160,68 +160,65 @@ export default function ProvingPracticesPost() {
 
         <div className="space-y-6 text-lg leading-relaxed text-field-ink/90">
           <p>
-            When I bought my 14.3 acres in Hays County, I assumed the hard part
-            of keeping my wildlife tax valuation was writing the{" "}
-            <Link
-              href="/how-it-works"
-              className="text-field-forest font-medium underline underline-offset-2 hover:text-field-forest/80"
-            >
-              management plan
-            </Link>
-            . It wasn&apos;t. The hard part is proving, every year, that you did
-            what your plan says. I recently sat down with a wildlife biologist
-            from the{" "}
+            Keeping a wildlife tax valuation takes more than a management plan.
+            Each year, you have to show that you carried out the practices it
+            describes. I own 14.3 acres in Hays County, and that was the harder
+            part for me. I spoke with a biologist from the{" "}
             <a
-              href={TPWD_URL}
+              href={TPWD_BIOLOGIST_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="text-field-forest underline underline-offset-2 hover:text-field-forest/80"
             >
               Texas Parks and Wildlife Department
             </a>{" "}
-            to find out what appraisal districts actually look for. Here&apos;s
-            what I learned.
+            about what appraisal districts look for. This is what he told me.
           </p>
 
           <h2 className="text-2xl font-semibold text-field-ink pt-6">
-            Effort isn&apos;t the standard. Results are.
+            Completed practices count; effort does not
           </h2>
           <p>
-            The biggest mistake he sees is landowners who put in real work but
-            end up with nothing to show for it, then assume it counted.
-            Wildflower seeds that never sprouted are a classic example. An
-            elaborate water structure that&apos;s still under construction, with
-            no water in it, is another. Districts check whether the practice
-            exists and meets the standard, not how much time or money went in.
+            The most common problem he sees is landowners who do real work but
+            have nothing to show for it. Wildflower seeds that never sprouted are
+            one example. A water structure still under construction, with no
+            water in it, is another. Districts check whether the practice exists
+            and meets the standard, not how much time or money went into it.
           </p>
 
           <h2 className="text-2xl font-semibold text-field-ink pt-6">
-            You need less than you think, plus a buffer
+            Plan for more than the minimum
           </h2>
           <p>
             Each year you need at least three practices from three different
-            categories, and you can pick and choose from your plan. Plan for four
-            or five, so you&apos;re covered if one falls through or gets
+            categories, chosen from your{" "}
+            <Link
+              href="/how-it-works"
+              className="text-field-forest font-medium underline underline-offset-2 hover:text-field-forest/80"
+            >
+              management plan
+            </Link>
+            . Plan for four or five so you are covered if one fails or is
             rejected.
           </p>
 
           <h2 className="text-2xl font-semibold text-field-ink pt-6">
-            Visual practices are the safest
+            Favor practices that are easy to verify
           </h2>
           <p>
-            Supplemental water and nest boxes are the easiest to document because
-            anyone can see and verify them. Practices that depend on plantings
-            growing or hitting acreage thresholds are harder to prove.
+            Supplemental water and nest boxes are the simplest to document
+            because anyone can see and confirm them. Practices that depend on
+            plantings establishing or meeting acreage thresholds are harder to
+            prove.
           </p>
 
           <h2 className="text-2xl font-semibold text-field-ink pt-6">
-            A practice in action: cleaning a water source
+            Example: cleaning a water source
           </h2>
           <p>
-            Here&apos;s my supplemental water bowl before I cleaned it. Cleaning
-            it is a maintenance task, and it counts as an activity worth logging.
-            And here it is afterward, clean and full. Before and after photos
-            like these are exactly the kind of proof that holds up.
+            Cleaning a water source is a maintenance task, and it counts as an
+            activity worth logging. Before and after photos are the kind of proof
+            that holds up.
           </p>
 
           <figure className="not-prose my-8">
@@ -250,38 +247,38 @@ export default function ProvingPracticesPost() {
             Keep a logbook by calendar year
           </h2>
           <p>
-            For every activity, record the date, time or labor spent, what you
-            spent, and any census data. Add photos and a note about where it
-            happened. The standard is roughly what a reasonable person would
-            consider enough documentation.
+            For each activity, record the date, the time or labor spent, the
+            cost, and any census data. Add photos and a note on where it took
+            place. The standard is roughly the documentation a reasonable person
+            would consider sufficient.
           </p>
 
           <h2 className="text-2xl font-semibold text-field-ink pt-6">
-            Know your county&apos;s process
+            Confirm your county&apos;s process
           </h2>
           <p>
-            Counties handle this differently. Some want an annual submission,
-            others review records another way. It&apos;s worth calling your
-            appraisal district to ask what they expect.
+            Counties handle this differently. Some require an annual submission
+            and others review records another way. Call your appraisal district
+            to ask what they expect.
           </p>
 
           <p>
-            I built FieldFile because I got tired of piecing this together at the
-            end of the year. It sends reminders so activities happen on time,
-            adds GPS coordinates to every entry, and turns your log into a
-            report.
+            I built FieldFile because assembling this documentation at the end of
+            the year was inefficient. It sends reminders so activities happen on
+            time, adds GPS coordinates to every entry, and compiles your log into
+            a report.
           </p>
         </div>
 
         {/* CTA */}
         <aside className="mt-12 rounded-2xl border border-field-wheat bg-field-mist p-6 md:p-8">
           <h2 className="text-xl font-semibold text-field-ink">
-            Stop piecing it together in December
+            Document your practices year-round
           </h2>
           <p className="mt-2 text-field-ink/80">
             FieldFile helps Texas landowners manage wildlife tax valuation
             (1-d-1-w) compliance, from activity documentation to audit-ready
-            annual reports. Built by a landowner, for landowners.
+            annual reports.
           </p>
           <div className="mt-5 flex flex-wrap gap-3">
             <Link

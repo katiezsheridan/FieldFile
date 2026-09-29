@@ -14,6 +14,14 @@ const nextConfig = {
   async redirects() {
     return [
       {
+        // This post was first published under a longer slug and was live and in
+        // the sitemap before the rename. Permanent (308) so search engines and
+        // any existing links follow it to the current URL.
+        source: "/blog/proving-wildlife-management-practices-texas",
+        destination: "/blog/wildlife-management-documentation",
+        permanent: true,
+      },
+      {
         // The /wildlife-exemption lead-capture landing page was retired. Its
         // subject is now covered by the blog post, which is the destination for
         // any ad, bookmark, or inbound link still pointing at the old path.
