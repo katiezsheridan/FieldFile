@@ -30,9 +30,9 @@ export const BLOG_POSTS: BlogPost[] = [
       "A Texas Parks and Wildlife biologist explains what appraisal districts check: completed practices, three from three categories with a buffer, and a logbook that holds up.",
     excerpt:
       "Keeping a wildlife tax valuation takes more than a management plan. Each year you have to show you carried out the practices it describes. Here is what a Texas Parks and Wildlife biologist says appraisal districts look for, and how to document practices so they count.",
-    primaryKeyword: "proving wildlife management practices",
+    primaryKeyword: "wildlife management documentation",
     keywords: [
-      "proving wildlife management practices",
+      "wildlife management documentation",
       "wildlife management documentation Texas",
       "wildlife management logbook",
       "1-d-1-w documentation",
