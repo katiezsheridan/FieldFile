@@ -106,13 +106,13 @@ const WATER_BOWL_PHOTOS = [
   },
   {
     src: "/images/blog/proving-wildlife-management-practices/water-bowl-cleaning.jpg",
-    alt: "The same water bowl drained, with the mat of algae pulled loose and a scrub brush lying in the grass beside it",
-    caption: "The work itself: draining the bowl and scrubbing the algae loose.",
+    alt: "The same water bowl mid-cleaning, with the algae scrubbed loose and still floating in the water before the bowl is dumped",
+    caption: "During: scrubbing the algae loose before dumping the water.",
   },
   {
     src: "/images/blog/proving-wildlife-management-practices/water-bowl-after.jpg",
-    alt: "The same water bowl after cleaning, refilled with fresh water and the algae gone",
-    caption: "After: refilled, with the algae cleared out.",
+    alt: "The same water bowl after cleaning, the rock that weighs it down in high wind scrubbed clean of algae and fresh water starting to refill it, a scrub brush in the grass beside it",
+    caption: "After: algae gone and the bowl refilling. The rock stays in to weigh it down in high wind.",
   },
 ];
 
