@@ -24,7 +24,7 @@ Three related documents, don't confuse them:
 | Form | What it is | Where it lives here |
 |---|---|---|
 | **PWD-885** | The wildlife management **plan** (forward-looking, TPWD form) | Wildlife Plan feature: `plans` / `plan_practices`, `components/plan/` |
-| **PWD-888** | The **annual report** (backward-looking: what you actually did) | This section. Not built yet. |
+| **PWD-888** | The **annual report** (backward-looking: what you actually did) | This section. Assembler built (`lib/annual-report/pwd888/`); questionnaire and render not yet |
 | **Comptroller 50-129** | The 1-d-1 **application** to the CAD; Section 5 references the plan | `lib/forms/form50129/`, `components/filing/Form50129Review.tsx` |
 
 ### 1. The seven qualifying practices
@@ -89,8 +89,9 @@ onto `CE-*` as: `spotlight`→`CE-01`, `direct_observation`→`CE-02`, `aerial`�
 `browse_utilization`→`CE-08`, `endangered_species`→`CE-09`, `nongame`→`CE-10`, and
 `photo_station` / `game_camera` / `time_area_count` / `roost_count` /
 `songbird_transect` / `quail_call_covey` / `point_count` / `other`→`CE-11`.
-`CE-03` (stand counts) has **no** `CensusMethod` equivalent — add one when census
-observations are wired into the report.
+`CE-03` (stand counts) has **no** `CensusMethod` equivalent. Census observations
+are wired into the report through `CENSUS_METHOD_SUB_ACTIVITY` in
+`lib/annual-report/pwd888/census.ts` — keep it in step with this table.
 
 **Verification discipline.** The catalog was transcribed from the real form, not
 from memory — the same rule `lib/forms/form50129/fieldMap.ts` follows. Re-extract
@@ -306,7 +307,8 @@ exists to prevent.
 | Practice chosen at capture time, never inferred | **Built** — field log capture and pin flows both require it up front |
 | Evidence query layer for the report | **Built** — `lib/field-log-server.ts`, `groupByPracticeCategory()` |
 | Gap analysis + bucket model | **Built** for both — `buildPayload.ts` (50-129) and `lib/annual-report/gap-analysis.ts` (PWD-888), sharing the `{ key, section, label, bucket }` shape. The PWD-888 side adds `severity`: blocking stops an honest render, warning only weakens it |
-| Adaptive questionnaire | **Target** |
+| PWD-888 assembler | **Built** — `lib/annual-report/pwd888/`. `assemblePwd888()` (pure) turns containers + answers into the Part I–V payload; `buildPwd888()` fetches. Part II and Part IV take the count from `qualifies()`, never recount. Several containers of one sub-activity fold into the form's one set of blanks by each field's `CombineRule` (`combine` on `FieldDef`; defaults by input type — inventories `max`, work quantities `sum`, disagreements are a blocking conflict, never a pick). Census observations become CE containers (`pwd888/census.ts`). Checks: `scripts/pwd888-assemble-check.ts` (fixtures), `scripts/pwd888-smoke.ts` (real data, read-only) |
+| Adaptive questionnaire | **Target** — reads confirmed `report_questions.answer` only; period-level keys used so far: `identity.additionalCounties`, `association.member`, `association.name` |
 | PWD-888 render | **Target** — the blank form is at `templates/pwd_888.pdf`; nothing fills it yet. It has no AcroForm fields, so this will be a draw-onto-the-page fill, not the `getForm()` approach `fill50129` uses |
 | Propose-don't-assert plumbing | **Target** — there is no AI-generated content in the app today |
 

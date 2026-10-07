@@ -108,7 +108,7 @@ const has = (v: unknown): boolean =>
  * to close, and the report must not claim a practice on the strength of any of
  * them.
  */
-function qualifies(c: ContainerInput): boolean {
+export function qualifies(c: ContainerInput): boolean {
   return (
     Boolean(c.performedOn) && Boolean(c.subActivityCode) && c.evidenceCount > 0
   );
