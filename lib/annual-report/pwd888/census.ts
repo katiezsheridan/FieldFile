@@ -21,8 +21,10 @@ export type CensusObservationInput = {
   method: CensusMethod;
   methodLabel: string;
   milesSurveyed: number | null;
-  /** Display labels of every species counted, e.g. "White-tailed deer". */
+  /** Display labels of every species recorded, e.g. "White-tailed deer". */
   species: string[];
+  /** Per-species totals. Only counts above zero make the record evidence. */
+  counts: { species: string; count: number }[];
   photos: ReportEvidence[];
 };
 
@@ -114,7 +116,29 @@ function fieldValuesFor(o: CensusObservationInput): Record<string, FieldValue> {
   }
 }
 
+/**
+ * The observation's own counts as a Part V exhibit — the census data sheet.
+ * Null when nothing was counted: a census entry with no counts is a date and a
+ * method, which documents that someone went out, not what they found.
+ */
+function censusRecord(o: CensusObservationInput): ReportEvidence | null {
+  const counted = o.counts.filter((c) => c.count > 0);
+  if (counted.length === 0) return null;
+  return {
+    id: `census-record:${o.id}`,
+    kind: "census_record",
+    docType: "note",
+    capturedAt: o.observedOn,
+    caption: `${o.methodLabel} — census data sheet`,
+    lat: null,
+    lng: null,
+    storagePath: null,
+    censusCounts: counted,
+  };
+}
+
 export function censusToContainer(o: CensusObservationInput): ReportContainer {
+  const record = censusRecord(o);
   return {
     id: `census:${o.id}`,
     source: "census",
@@ -123,6 +147,6 @@ export function censusToContainer(o: CensusObservationInput): ReportContainer {
     subActivityCode: CENSUS_METHOD_SUB_ACTIVITY[o.method],
     performedOn: o.observedOn,
     fieldValues: fieldValuesFor(o),
-    evidence: o.photos,
+    evidence: record ? [record, ...o.photos] : o.photos,
   };
 }

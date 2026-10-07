@@ -28,6 +28,7 @@ const nz = (s: string | null | undefined) => (s && s.trim() ? s.trim() : null);
 export function toContainerInput(c: ReportContainer): ContainerInput {
   return {
     id: c.id,
+    source: c.source,
     practiceCode: c.practiceCode,
     subActivityCode: c.subActivityCode,
     performedOn: c.performedOn,

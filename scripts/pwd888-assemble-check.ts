@@ -102,7 +102,7 @@ const cases: [string, () => void][] = [
   ["spotlight: three census nights fill slots A-C in date order; a fourth overflows", () => {
     const night = (id: string, d: string) => censusToContainer({
       id, observedOn: d, method: "spotlight", methodLabel: "Spotlight Survey", milesSurveyed: 5,
-      species: ["White-tailed deer"], photos: [photo(`ph-${id}`, `${d}T21:00:00Z`)],
+      species: ["White-tailed deer"], counts: [{ species: "White-tailed deer", count: 14 }], photos: [],
     });
     const r = assemblePwd888({ ...base, containers: [
       night("o3", "2026-09-20"), night("o1", "2026-09-06"), night("o2", "2026-09-13"), night("o4", "2026-09-27"),
@@ -126,10 +126,29 @@ const cases: [string, () => void][] = [
   ["census photo station maps to CE-11 remote detection", () => {
     const k = censusToContainer({
       id: "x", observedOn: "2026-05-05", method: "game_camera", methodLabel: "Game Camera Pull",
-      milesSurveyed: null, species: ["Bobcat"], photos: [],
+      milesSurveyed: null, species: ["Bobcat"], counts: [], photos: [],
     });
     assert.equal(k.subActivityCode, "CE-11");
     assert.deepEqual(k.fieldValues.methods, ["Remote detection (i.e. cameras)"]);
+  }],
+  ["census counts are documentation: no photo needed", () => {
+    const k = censusToContainer({
+      id: "n1", observedOn: "2026-03-03", method: "direct_observation", methodLabel: "Direct Observation",
+      milesSurveyed: null, species: ["Turkey"], counts: [{ species: "Turkey", count: 6 }], photos: [],
+    });
+    const r = assemblePwd888({ ...base, containers: [k] });
+    assert.equal(r.payload.partII.CE, true);
+    assert.deepEqual(r.payload.partV.map((x) => [x.kind, x.censusCounts]), [["census_record", [{ species: "Turkey", count: 6 }]]]);
+  }],
+  ["a census with no counts is not documented, even with species listed", () => {
+    const k = censusToContainer({
+      id: "n2", observedOn: "2026-03-03", method: "direct_observation", methodLabel: "Direct Observation",
+      milesSurveyed: null, species: ["Turkey"], counts: [{ species: "Turkey", count: 0 }], photos: [],
+    });
+    const r = assemblePwd888({ ...base, containers: [k] });
+    assert.equal(r.payload.partII.CE, false);
+    assert.equal(r.payload.partIV.length, 0);
+    assert.ok(r.gaps.some((g) => g.key === "activity.census:n2.evidence" && /no counts recorded/.test(g.label)));
   }],
   ["exhibits are numbered in Part IV order", () => {
     const r = assemblePwd888({ ...base, containers: [c("CE-02", "2026-01-01", { target_species: "deer" }), c("HC-04", "2026-06-01", { acres_treated: 4 })] });

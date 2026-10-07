@@ -13,7 +13,14 @@ import type { GapAnalysis, ReportGap } from "../gap-analysis";
 /** One piece of Part V supporting documentation. */
 export type ReportEvidence = {
   id: string;
-  kind: "document" | "field_log" | "census_photo";
+  /**
+   * `census_record` is the census observation's own data sheet — its species
+   * counts. It is evidence in its own right: TPWD treats a census data sheet
+   * as documentation, so a count needs no photo. It exists only when at least
+   * one species has a count above zero; a census with no counts documents
+   * nothing.
+   */
+  kind: "document" | "field_log" | "census_photo" | "census_record";
   docType: "photo" | "receipt" | "note";
   capturedAt: string | null;
   /** Only a human-written or human-confirmed caption — never an AI proposal. */
@@ -21,6 +28,8 @@ export type ReportEvidence = {
   lat: number | null;
   lng: number | null;
   storagePath: string | null;
+  /** `census_record` only: what was counted, for the Part V data sheet. */
+  censusCounts?: { species: string; count: number }[];
 };
 
 /** A unit of performed work: an activity row, or a census observation. */

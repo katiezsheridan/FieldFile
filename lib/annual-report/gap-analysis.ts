@@ -39,6 +39,8 @@ export type ReportGap = {
 /** One container, reduced to what the count cares about. */
 export type ContainerInput = {
   id: string;
+  /** A census observation documents itself through its counts; see pwd888/census.ts. */
+  source?: "activity" | "census";
   practiceCode: PracticeCode | null;
   /** Null means the landowner has not said WHICH item of the practice this was. */
   subActivityCode: string | null;
@@ -102,7 +104,10 @@ const has = (v: unknown): boolean =>
  *     just not counted.
  *   * CLASSIFIED. A container with no sub-activity names a practice, which is
  *     a category, not an act, so it cannot satisfy "performed".
- *   * DOCUMENTED. No evidence, no documentation.
+ *   * DOCUMENTED. No evidence, no documentation. For a census observation
+ *     its own recorded counts are evidence (the census data sheet), so a
+ *     photo is optional there — but a census with no counts is not
+ *     documented. pwd888/census.ts builds that record.
  *
  * None of these is a judgement we get to make for the landowner. Each is a gap
  * to close, and the report must not claim a practice on the strength of any of
@@ -179,7 +184,10 @@ export function analyzeReportGaps(input: GapAnalysisInput): GapAnalysis {
       gaps.push({
         key: `activity.${c.id}.evidence`,
         section: "Part V",
-        label: `"${name}" has no photo or receipt attached. Part V asks you to attach supporting documentation.`,
+        label:
+          c.source === "census"
+            ? `"${name}" on ${c.performedOn ?? "an unknown date"} has no counts recorded. Record what you counted (a photo is optional) for it to count as documented.`
+            : `"${name}" has no photo or receipt attached. Part V asks you to attach supporting documentation.`,
         bucket: 3,
         severity: c.subActivityCode ? "blocking" : "warning",
       });

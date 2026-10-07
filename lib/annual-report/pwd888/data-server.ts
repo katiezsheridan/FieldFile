@@ -135,6 +135,26 @@ async function activityContainers(
   });
 }
 
+type CountRow = {
+  count_total: number | null;
+  count_buck: number | null;
+  count_doe: number | null;
+  count_fawn: number | null;
+  count_male: number | null;
+  count_female: number | null;
+  count_juvenile: number | null;
+  count_unknown: number | null;
+};
+
+/** `count_total` when entered, else the sex/age breakdown summed. */
+export function speciesTotal(c: CountRow): number {
+  if (c.count_total && c.count_total > 0) return c.count_total;
+  return [
+    c.count_buck, c.count_doe, c.count_fawn, c.count_male,
+    c.count_female, c.count_juvenile, c.count_unknown,
+  ].reduce<number>((n, v) => n + (v ?? 0), 0);
+}
+
 /** Census observations dated in the tax year, as CE containers. */
 async function censusContainers(
   propertyId: string,
@@ -151,7 +171,12 @@ async function censusContainers(
   const ids = obs.map((o) => o.id);
 
   const [countRes, photoRes] = await Promise.all([
-    db.from("census_species_counts").select("observation_id, category, species").in("observation_id", ids),
+    db
+      .from("census_species_counts")
+      .select(
+        "observation_id, category, species, count_total, count_buck, count_doe, count_fawn, count_male, count_female, count_juvenile, count_unknown"
+      )
+      .in("observation_id", ids),
     db.from("documents").select(DOC_COLUMNS).in("observation_id", ids),
   ]);
   if (countRes.error) throw countRes.error;
@@ -161,19 +186,22 @@ async function censusContainers(
   const countsBy = groupBy(counts ?? [], (c) => c.observation_id as string | null);
   const photosBy = groupBy((photos ?? []) as DocRow[], (d) => d.observation_id);
 
-  return obs.map((o) =>
-    censusToContainer({
+  return obs.map((o) => {
+    const rows = countsBy.get(o.id) ?? [];
+    return censusToContainer({
       id: o.id,
       observedOn: o.observed_on,
       method: o.method as CensusMethod,
       methodLabel: getMethodLabel(o.method as CensusMethod),
       milesSurveyed: o.miles_surveyed ?? null,
-      species: Array.from(
-        new Set((countsBy.get(o.id) ?? []).map((c) => getSpeciesLabel(c.category, c.species)))
-      ),
+      species: Array.from(new Set(rows.map((c) => getSpeciesLabel(c.category, c.species)))),
+      counts: rows.map((c) => ({
+        species: getSpeciesLabel(c.category, c.species),
+        count: speciesTotal(c),
+      })),
       photos: (photosBy.get(o.id) ?? []).map((d) => documentEvidence(d, "census_photo")),
-    })
-  );
+    });
+  });
 }
 
 /** Every container for the year: activities, then census observations. */
