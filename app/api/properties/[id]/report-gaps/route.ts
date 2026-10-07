@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { resolvePropertyId } from "@/lib/field-log-server";
 import { analyzePropertyYear } from "@/lib/annual-report/gap-analysis-server";
 import { blockingGaps, isReportReady } from "@/lib/annual-report/gap-analysis";
+import { describeError } from "@/lib/errors";
 
 /**
  * GET /api/properties/:idOrSlug/report-gaps?year=2026
@@ -31,11 +32,18 @@ export async function GET(
     return NextResponse.json({ error: "Invalid year" }, { status: 400 });
   }
 
-  const analysis = await analyzePropertyYear(propertyId, year);
-
-  return NextResponse.json({
-    ...analysis,
-    blockingCount: blockingGaps(analysis).length,
-    ready: isReportReady(analysis),
-  });
+  try {
+    const analysis = await analyzePropertyYear(propertyId, year);
+    return NextResponse.json({
+      ...analysis,
+      blockingCount: blockingGaps(analysis).length,
+      ready: isReportReady(analysis),
+    });
+  } catch (err) {
+    // The data layer throws rather than under-count, so a failed query is an
+    // error response here, not a readiness card that wrongly reads 0 of 3.
+    const message = describeError(err, "Could not analyse the report");
+    console.error("[report-gaps]", message);
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }

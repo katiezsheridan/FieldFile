@@ -50,7 +50,43 @@ export type FieldDef = {
   aiExtractable?: boolean;
   /** Render only while `key` holds (or, for multi_choice, contains) a value in `equals`. */
   showWhen?: { key: string; equals: (string | boolean)[] };
+  /**
+   * How this blank combines when several containers of the same sub-activity
+   * fall in one tax year — the form prints ONE set of blanks per line item.
+   * Omit to take the default for `inputType` (see `combineRuleOf`). Set it only
+   * where the default would misstate the year: work quantities that accrue
+   * across separate jobs (acres burned, miles of fence) are `sum`.
+   */
+  combine?: CombineRule;
 };
+
+/**
+ * `sum`   add the values — work that accrues across separate jobs.
+ * `max`   the largest value — an inventory (feeders, nest boxes) re-reported
+ *         on every visit, where adding would count the same feeder four times.
+ * `union` every option checked on any container.
+ * `join`  distinct text values, in date order.
+ * `agree` must match across containers; a disagreement is a conflict for the
+ *         landowner to settle, never something we pick for them.
+ * `dates` every date entered, plus the work date of each container that left
+ *         the blank empty — the blank exists to say when the work happened.
+ */
+export type CombineRule = "sum" | "max" | "union" | "join" | "agree" | "dates";
+
+const DEFAULT_COMBINE: Record<FieldInputType, CombineRule> = {
+  number: "agree",
+  integer: "max",
+  text: "join",
+  longtext: "join",
+  date: "dates",
+  date_range: "agree",
+  choice: "agree",
+  multi_choice: "union",
+  boolean: "agree",
+};
+
+export const combineRuleOf = (field: FieldDef): CombineRule =>
+  field.combine ?? DEFAULT_COMBINE[field.inputType];
 
 export type SubActivityDef = {
   /** Stable `{PRACTICE}-{NN}`. Never renumbered, never reused. */
@@ -62,6 +98,13 @@ export type SubActivityDef = {
   /** Position within the practice, as printed on the form. */
   sortOrder: number;
   helpText?: string;
+  /**
+   * Date blanks the form prints as a fixed set of slots (spotlight counts:
+   * "Dates (3 required) A. B. C."). One spotlight night is one container, so
+   * the slots are filled from every container's dates pooled together, in
+   * order, rather than field by field.
+   */
+  dateSlots?: string[];
   fields: FieldDef[];
 };
 
@@ -173,6 +216,7 @@ export const SUB_ACTIVITY_DEFS: SubActivityDef[] = [
     fields: [
       {
         key: "acres_burned",
+        combine: "sum",
         label: "Acres burned",
         inputType: "number",
         unit: "acres",
@@ -192,6 +236,7 @@ export const SUB_ACTIVITY_DEFS: SubActivityDef[] = [
     fields: [
       {
         key: "acres_seeded",
+        combine: "sum",
         label: "Acres seeded",
         inputType: "number",
         unit: "acres",
@@ -225,6 +270,7 @@ export const SUB_ACTIVITY_DEFS: SubActivityDef[] = [
     fields: [
       {
         key: "acres_treated",
+        combine: "sum",
         label: "Acres treated",
         inputType: "number",
         unit: "acres",
@@ -318,6 +364,7 @@ export const SUB_ACTIVITY_DEFS: SubActivityDef[] = [
       },
       {
         key: "miles_modified",
+        combine: "sum",
         label: "Miles of fencing modified",
         formLabel: "Miles of fencing that will be modified",
         inputType: "number",
@@ -325,6 +372,7 @@ export const SUB_ACTIVITY_DEFS: SubActivityDef[] = [
       },
       {
         key: "miles_replaced",
+        combine: "sum",
         label: "Miles replaced",
         inputType: "number",
         unit: "miles",
@@ -497,6 +545,7 @@ export const SUB_ACTIVITY_DEFS: SubActivityDef[] = [
       { key: "surface_area", label: "Surface area", inputType: "number", unit: "acres" },
       {
         key: "cubic_yards",
+        combine: "sum",
         label: "Cubic yards of soil displaced",
         formLabel: "Number of cubic yards of soil displaced",
         inputType: "integer",
@@ -529,6 +578,7 @@ export const SUB_ACTIVITY_DEFS: SubActivityDef[] = [
       },
       {
         key: "acres_treated_annually",
+        combine: "sum",
         label: "Acres treated annually",
         inputType: "number",
         unit: "acres",
@@ -1173,6 +1223,7 @@ export const SUB_ACTIVITY_DEFS: SubActivityDef[] = [
     fields: [
       {
         key: "acres_treated",
+        combine: "sum",
         label: "Acres treated",
         inputType: "number",
         unit: "acres",
@@ -1217,6 +1268,7 @@ export const SUB_ACTIVITY_DEFS: SubActivityDef[] = [
       { key: "mowing", label: "Mowing", inputType: "boolean" },
       {
         key: "acres_mowed_annually",
+        combine: "sum",
         label: "Acres mowed annually",
         inputType: "number",
         unit: "acres",
@@ -1234,6 +1286,7 @@ export const SUB_ACTIVITY_DEFS: SubActivityDef[] = [
     fields: [
       {
         key: "acres_treated_annually",
+        combine: "sum",
         label: "Acreage treated annually",
         formLabel: "Acreage to be treated annually",
         inputType: "number",
@@ -1242,6 +1295,7 @@ export const SUB_ACTIVITY_DEFS: SubActivityDef[] = [
       },
       {
         key: "half_cut_count",
+        combine: "sum",
         label: "Number of half-cuts annually",
         inputType: "integer",
       },
@@ -1305,6 +1359,7 @@ export const SUB_ACTIVITY_DEFS: SubActivityDef[] = [
     slug: "spotlight-counts",
     sortOrder: 1,
     helpText: "The form requires three dates.",
+    dateSlots: ["date_a", "date_b", "date_c"],
     fields: [
       { key: "target_species", label: "Targeted species", inputType: "text", requiredForForm: true },
       { key: "route_length", label: "Length of route", inputType: "number", unit: "miles" },
@@ -1337,6 +1392,7 @@ export const SUB_ACTIVITY_DEFS: SubActivityDef[] = [
       },
       {
         key: "dates",
+        combine: "dates",
         label: "Dates",
         inputType: "text",
         helpText: "The form prints one line — list the dates you observed.",
@@ -1355,6 +1411,7 @@ export const SUB_ACTIVITY_DEFS: SubActivityDef[] = [
       { key: "stand_count", label: "Number of stands", inputType: "integer", requiredForForm: true },
       {
         key: "dates",
+        combine: "dates",
         label: "Dates",
         inputType: "text",
         helpText: "The form prints one line — list the count dates.",
