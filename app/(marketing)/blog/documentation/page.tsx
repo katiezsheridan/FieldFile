@@ -107,7 +107,7 @@ const WATER_BOWL_PHOTOS = [
   {
     src: "/images/blog/proving-wildlife-management-practices/water-bowl-cleaning.jpg",
     alt: "The same water bowl mid-cleaning, with the algae scrubbed loose and still floating in the water before the bowl is dumped",
-    caption: "The work itself: scrubbing the algae loose before dumping the water.",
+    caption: "During: scrubbing the algae loose before dumping the water.",
   },
   {
     src: "/images/blog/proving-wildlife-management-practices/water-bowl-after.jpg",
