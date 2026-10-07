@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { SITE_URL, getPost, postUrl, formatPostDate } from "@/lib/blog";
 
-const SLUG = "wildlife-management-documentation";
+const SLUG = "documentation";
 const post = getPost(SLUG)!;
 const url = postUrl(SLUG);
 

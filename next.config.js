@@ -16,9 +16,16 @@ const nextConfig = {
       {
         // This post was first published under a longer slug and was live and in
         // the sitemap before the rename. Permanent (308) so search engines and
-        // any existing links follow it to the current URL.
+        // any existing links follow it to the current URL. Points straight at
+        // the current slug so there is no redirect chain.
         source: "/blog/proving-wildlife-management-practices-texas",
-        destination: "/blog/wildlife-management-documentation",
+        destination: "/blog/documentation",
+        permanent: true,
+      },
+      {
+        // Second rename of the same post. Permanent (308) for the same reason.
+        source: "/blog/wildlife-management-documentation",
+        destination: "/blog/documentation",
         permanent: true,
       },
       {
