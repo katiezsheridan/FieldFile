@@ -1,4 +1,5 @@
 import { PracticeDocumentation } from "./types";
+import { MIN_PRACTICES_PER_YEAR } from "./practices";
 
 // Single source of truth for "how complete is this plan". Used by the wizard
 // progress indicator, the review step, and the API's status guard, so the
@@ -49,7 +50,9 @@ export type PlanCompletionInput = {
   practices: { selected: boolean; documentation: PracticeDocumentation }[];
 };
 
-const MIN_PRACTICES = 3;
+// The statutory floor, Tax Code 23.51(7)(A): at least three of the seven.
+// Imported, never re-typed — see CLAUDE.md > "Annual Report Domain Model" > 2.
+const MIN_PRACTICES = MIN_PRACTICES_PER_YEAR;
 
 const present = (v?: string | null) => typeof v === "string" && v.trim().length > 0;
 

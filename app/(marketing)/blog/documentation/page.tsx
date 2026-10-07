@@ -101,18 +101,18 @@ const jsonLd = {
 const WATER_BOWL_PHOTOS = [
   {
     src: "/images/blog/proving-wildlife-management-practices/water-bowl-before.jpg",
-    alt: "A galvanized supplemental water bowl and its center stone covered in thick bright green algae",
-    caption: "Before: algae over the stone and across the water.",
+    alt: "A galvanized supplemental water bowl in the brush, half covered by a concrete slab, its water thick with bright green algae",
+    caption: "Before: green algae carpeting the bottom of the bowl.",
   },
   {
     src: "/images/blog/proving-wildlife-management-practices/water-bowl-cleaning.jpg",
-    alt: "A landowner crouched in a field of dry grass, scrubbing algae out of the supplemental water bowl with a brush",
-    caption: "The work itself: scrubbing the bowl out.",
+    alt: "The same water bowl drained, with the mat of algae pulled loose and a scrub brush lying in the grass beside it",
+    caption: "The work itself: draining the bowl and scrubbing the algae loose.",
   },
   {
     src: "/images/blog/proving-wildlife-management-practices/water-bowl-after.jpg",
-    alt: "The same water bowl after cleaning, holding clear water with a clean stone in the center",
-    caption: "After: clear water, clean stone.",
+    alt: "The same water bowl after cleaning, refilled with fresh water and the algae gone",
+    caption: "After: refilled, with the algae cleared out.",
   },
 ];
 
