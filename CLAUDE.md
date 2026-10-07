@@ -301,11 +301,11 @@ exists to prevent.
 | Two-letter practice codes (`HC`…`CE`) | **Built** — `PracticeCode` in `lib/types.ts`, mapping in `lib/practices.ts` |
 | 48 sub-activity codes + their 169 form fields | **Built** — `lib/sub-activities.ts`, generating the SQL seed. Plans still capture free-text `documentation.plannedActivities` |
 | Three-of-seven, plan side | **Built** — `MIN_PRACTICES` in `lib/plan-completion.ts` |
-| Three-of-seven, evidence-backed annual side | **Target** |
+| Three-of-seven, evidence-backed annual side | **Built** — `lib/annual-report/gap-analysis.ts`. A container counts only when dated AND classified AND documented; `qualifies()` is the one place that rule lives |
 | Activity as container | **Built** — `AddActivityForm` creates one and `EditActivityForm` reclassifies it; `documents.activity_id`, `census_observations` and now `field_log_entries` (`sub_activity_code` + `activity_id`) all hang off one. Field captures are grouped server-side by (property, sub-activity, capture date), so a fence line photographed six times in a day is one container, not six |
 | Practice chosen at capture time, never inferred | **Built** — field log capture and pin flows both require it up front |
 | Evidence query layer for the report | **Built** — `lib/field-log-server.ts`, `groupByPracticeCategory()` |
-| Gap analysis + bucket model | **Built for 50-129** (`buildPayload.ts`), **target for PWD-888** |
+| Gap analysis + bucket model | **Built** for both — `buildPayload.ts` (50-129) and `lib/annual-report/gap-analysis.ts` (PWD-888), sharing the `{ key, section, label, bucket }` shape. The PWD-888 side adds `severity`: blocking stops an honest render, warning only weakens it |
 | Adaptive questionnaire | **Target** |
 | PWD-888 render | **Target** — the blank form is at `templates/pwd_888.pdf`; nothing fills it yet. It has no AcroForm fields, so this will be a draw-onto-the-page fill, not the `getForm()` approach `fill50129` uses |
 | Propose-don't-assert plumbing | **Target** — there is no AI-generated content in the app today |
