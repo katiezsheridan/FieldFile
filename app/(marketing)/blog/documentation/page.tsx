@@ -112,7 +112,7 @@ const WATER_BOWL_PHOTOS = [
   {
     src: "/images/blog/proving-wildlife-management-practices/water-bowl-after.jpg",
     alt: "The same water bowl after cleaning, the rock in the bottom scrubbed clean of algae and fresh water starting to refill it, a scrub brush in the grass beside it",
-    caption: "After: the rock scrubbed clean and the bowl refilling.",
+    caption: "After: algae gone, rock clean, and the bowl refilling with fresh water.",
   },
 ];
 
