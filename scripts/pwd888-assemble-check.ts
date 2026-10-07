@@ -41,6 +41,7 @@ const base = {
   },
   additionalCounties: "",
   association: { member: false, name: null, proposedMember: null },
+  partIVAnswers: {},
 };
 
 const cases: [string, () => void][] = [
@@ -149,6 +150,17 @@ const cases: [string, () => void][] = [
     assert.equal(r.payload.partII.CE, false);
     assert.equal(r.payload.partIV.length, 0);
     assert.ok(r.gaps.some((g) => g.key === "activity.census:n2.evidence" && /no counts recorded/.test(g.label)));
+  }],
+  ["a confirmed answer settles a conflict and is marked 'answered'", () => {
+    const r = assemblePwd888({ ...base, partIVAnswers: { "partIV.HC-01.grazing_system": "Short duration system" }, containers: [
+      c("HC-01", "2026-01-15", { grazing_system: "1 herd/3 pasture" }),
+      c("HC-01", "2026-06-15", { grazing_system: "Short duration system" }),
+    ]});
+    const b = r.payload.partIV[0].blanks.find((x) => x.key === "grazing_system")!;
+    assert.equal(b.value, "Short duration system");
+    assert.equal(b.basis, "answered");
+    assert.equal(r.conflicts.length, 0);
+    assert.ok(!r.gaps.some((g) => g.key.endsWith(".conflict")));
   }],
   ["exhibits are numbered in Part IV order", () => {
     const r = assemblePwd888({ ...base, containers: [c("CE-02", "2026-01-01", { target_species: "deer" }), c("HC-04", "2026-06-01", { acres_treated: 4 })] });

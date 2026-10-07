@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { containerHref, gapContainerId } from "@/lib/annual-report/links";
 import type { GapAnalysis, ReportGap } from "@/lib/annual-report/gap-analysis";
 
 /**
@@ -77,7 +78,8 @@ export default function ReportReadinessCard({
 
       <p className="text-sm text-field-earth mb-4">
         A practice counts once an activity is dated, says what was done, and has
-        a photo or receipt attached. Texas requires three.
+        a photo or receipt attached — or, for a census, its counts recorded.
+        Texas requires three.
       </p>
 
       {/* The seven, in the order PWD-888 Part IV prints them. */}
@@ -136,15 +138,20 @@ export default function ReportReadinessCard({
           )}
         </>
       )}
+
+      <Link
+        href={`/properties/${propertyId}/annual-report?year=${taxYear}`}
+        className="mt-4 inline-flex items-center text-sm font-medium text-field-forest hover:underline"
+      >
+        Review the {taxYear} annual report →
+      </Link>
     </div>
   );
 }
 
 function GapRow({ gap, propertyId }: { gap: ReportGap; propertyId: string }) {
   // Gaps keyed to a container link straight to it — the fix is always there.
-  const activityId = gap.key.startsWith("activity.")
-    ? gap.key.split(".")[1]
-    : null;
+  const containerId = gapContainerId(gap.key);
 
   const body = (
     <>
@@ -165,9 +172,9 @@ function GapRow({ gap, propertyId }: { gap: ReportGap; propertyId: string }) {
 
   return (
     <li className="flex items-start gap-2 text-sm text-field-ink">
-      {activityId ? (
+      {containerId ? (
         <Link
-          href={`/properties/${propertyId}/activities/${activityId}`}
+          href={containerHref(propertyId, containerId)}
           className="flex items-start gap-2 hover:underline"
         >
           {body}

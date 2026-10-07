@@ -68,6 +68,12 @@ export type AssemblyInput = {
     /** The 50-129's "managed through an association?" answer. Proposed only. */
     proposedMember: boolean | null;
   };
+  /**
+   * Confirmed review-screen answers for Part IV blanks, keyed
+   * `partIV.<sub-activity code>.<field key>`. They win over the combined value
+   * — the landowner settling "which grazing system applied this year".
+   */
+  partIVAnswers: Record<string, FieldValue>;
 };
 
 export type Pwd888Entry = {

@@ -110,6 +110,28 @@ export function assemblePwd888(input: AssemblyInput): Pwd888Assembly {
     }));
     const combined = combineSubActivity(sub, contributions);
 
+    // A confirmed answer replaces whatever the containers said for that blank,
+    // and so settles any conflict or missing-blank gap on it.
+    for (const field of sub.fields) {
+      const answerKey = `partIV.${code}.${field.key}`;
+      if (!(answerKey in input.partIVAnswers)) continue;
+      const value = input.partIVAnswers[answerKey];
+      combined.blanks = combined.blanks.filter((b) => b.key !== field.key);
+      combined.conflicts = combined.conflicts.filter((c) => c.key !== field.key);
+      combined.missingRequired = combined.missingRequired.filter((f) => f.key !== field.key);
+      if (!isBlank(value)) {
+        combined.blanks.push({
+          key: field.key,
+          formLabel: field.formLabel ?? field.label,
+          value,
+          basis: "answered",
+          sourceIds: [],
+        });
+      }
+    }
+    const order = sub.fields.map((f) => f.key);
+    combined.blanks.sort((a, b) => order.indexOf(a.key) - order.indexOf(b.key));
+
     partIV.push({
       code,
       practiceCode: sub.practiceCode,

@@ -294,5 +294,8 @@ export async function fetchAssemblyInput(
       name: str(answers.get("association.name")),
       proposedMember: bool(managed),
     },
+    partIVAnswers: Object.fromEntries(
+      Array.from(answers.entries()).filter(([k]) => k.startsWith("partIV."))
+    ) as Record<string, FieldValue>,
   };
 }
