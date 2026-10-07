@@ -23,7 +23,7 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
-    slug: "wildlife-management-documentation",
+    slug: "documentation",
     title:
       "How to Document Wildlife Management Practices for Texas Appraisal Districts",
     description:
