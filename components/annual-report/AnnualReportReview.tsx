@@ -25,6 +25,8 @@ type ReviewResponse = Pwd888Assembly & {
   taxYear: number;
   blockingCount: number;
   ready: boolean;
+  /** Signed URL of the last generated PDF for this year, if any. */
+  pdfUrl: string | null;
 };
 
 // ---------------------------------------------------------------------------
@@ -198,6 +200,7 @@ export default function AnnualReportReview({
           <Questions data={data} saving={saving} save={save} />
           <FixList data={data} propertyId={propertyId} />
           <Preview data={data} />
+          <Generate data={data} propertyId={propertyId} />
           <p className="text-sm text-field-earth">
             FieldFile prepares the report. You review it, sign it, and submit it
             to your county appraisal district — not to Texas Parks and Wildlife.
@@ -528,6 +531,73 @@ function FixList({ data, propertyId }: { data: ReviewResponse; propertyId: strin
           );
         })}
       </ul>
+    </Card>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Generate
+// ---------------------------------------------------------------------------
+
+/**
+ * Draw the report onto the TPWD form. Allowed before it is ready — the PDF is
+ * then stamped DRAFT on every page — so the landowner can see where it stands.
+ */
+function Generate({ data, propertyId }: { data: ReviewResponse; propertyId: string }) {
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const [result, setResult] = useState<{ url: string; draft: boolean } | null>(null);
+  const url = result?.url ?? data.pdfUrl;
+
+  const generate = async () => {
+    setBusy(true);
+    setErr(null);
+    try {
+      const r = await fetch(`/api/properties/${propertyId}/annual-report/generate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ taxYear: data.taxYear }),
+      });
+      const body = await r.json();
+      if (!r.ok || !body.pdfUrl) setErr(body.error ?? "Could not generate the PDF");
+      else setResult({ url: body.pdfUrl, draft: body.draft });
+    } catch {
+      setErr("Could not generate the PDF");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Card
+      title="Generate the PDF"
+      subtitle={
+        data.ready
+          ? "Fills the official TPWD form, with your photos and census sheets attached as exhibits."
+          : "You can generate it now to see where it stands — every page will be marked DRAFT until the items above are settled."
+      }
+    >
+      <div className="flex flex-wrap items-center gap-3">
+        <button type="button" className={primaryBtn} disabled={busy} onClick={generate}>
+          {busy ? "Generating…" : data.ready ? "Generate PDF" : "Generate draft PDF"}
+        </button>
+        {url && (
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm font-medium text-field-forest hover:underline"
+          >
+            Open {result ? (result.draft ? "draft " : "") : "last generated "}PDF →
+          </a>
+        )}
+      </div>
+      {err && <p className="mt-3 text-sm text-field-terra">{err}</p>}
+      {url && (
+        <p className="mt-3 text-xs text-field-earth">
+          Regenerate after any change — the PDF does not update itself. The link expires after an hour.
+        </p>
+      )}
     </Card>
   );
 }
