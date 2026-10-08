@@ -24,6 +24,7 @@ import {
   type PartIInput,
 } from "@/lib/annual-report/pwd888/questions";
 import { ownerProfileToRow } from "@/lib/forms/form50129/serialize";
+import { reportPdfPath, signReportPdf } from "@/lib/forms/pwd888/storage";
 import type { FieldValue } from "@/lib/types";
 
 const db = createClient(
@@ -36,14 +37,19 @@ function resolveYear(raw: unknown): number | null {
   return Number.isInteger(n) && n >= 2000 && n <= 2100 ? n : null;
 }
 
-async function assembled(propertyId: string, year: number) {
-  const r = await buildPwd888(propertyId, year);
+async function assembled(propertyId: string, userId: string, year: number) {
+  const [r, pdfUrl] = await Promise.all([
+    buildPwd888(propertyId, year),
+    // Null until a PDF has been generated for this year.
+    signReportPdf(reportPdfPath(userId, propertyId, year)),
+  ]);
   const blocking = blockingGaps({ ...r.analysis, gaps: r.gaps });
   return {
     taxYear: year,
     ...r,
     blockingCount: blocking.length,
     ready: r.analysis.meetsMinimum && blocking.length === 0,
+    pdfUrl,
   };
 }
 
@@ -68,7 +74,7 @@ export async function GET(
   if (!year) return NextResponse.json({ error: "Invalid year" }, { status: 400 });
 
   try {
-    return NextResponse.json(await assembled(a.propertyId, year));
+    return NextResponse.json(await assembled(a.propertyId, a.userId, year));
   } catch (err) {
     const message = describeError(err, "Could not assemble the report");
     console.error("[annual-report]", message);
@@ -199,7 +205,7 @@ export async function PATCH(
     if (body.answers && Object.keys(body.answers).length > 0) {
       await saveAnswers(a.propertyId, a.userId, year, body.answers);
     }
-    return NextResponse.json(await assembled(a.propertyId, year));
+    return NextResponse.json(await assembled(a.propertyId, a.userId, year));
   } catch (err) {
     const message = describeError(err, "Could not save");
     console.error("[annual-report]", message);
