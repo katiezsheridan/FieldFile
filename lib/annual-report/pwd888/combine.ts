@@ -30,8 +30,9 @@ export type Contribution = {
  *   entered  one container, typed by the landowner
  *   combined several containers folded by the field's rule
  *   derived  filled from work dates or a census record, never typed into this blank
+ *   answered set on the review screen for this report, e.g. settling a conflict
  */
-export type BlankBasis = "entered" | "combined" | "derived";
+export type BlankBasis = "entered" | "combined" | "derived" | "answered";
 
 export type ReportBlank = {
   key: string;
