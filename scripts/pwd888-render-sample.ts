@@ -6,9 +6,10 @@
  * No database. Text blanks carry their field key, so a value that lands on the
  * wrong line names itself. Every option of every choice is ticked.
  */
-import { writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { SUB_ACTIVITY_DEFS } from "../lib/sub-activities";
 import { renderPwd888 } from "../lib/forms/pwd888/render";
+import { prepareImage } from "../lib/forms/pwd888/prepare-image";
 import type { Pwd888Payload } from "../lib/annual-report/pwd888/types";
 import type { FieldValue } from "../lib/types";
 
@@ -44,7 +45,18 @@ const payload: Pwd888Payload = {
     id: "r1", kind: "census_record", docType: "note", capturedAt: "2026-09-06", caption: null, lat: null,
     lng: null, storagePath: null, number: 1, containerId: "c", subActivityCode: "CE-01",
     censusCounts: [{ species: "White-tailed deer", count: 14 }],
+  }, {
+    // A photo: the repo's own hero image, shrunk the way a real upload is.
+    id: "ph1", kind: "document", docType: "photo", capturedAt: "2026-05-02T09:00:00Z", caption: "Feeder refilled",
+    lat: 30.12345, lng: -98.12345, storagePath: "public/images/hero-landscape.jpg", number: 2, containerId: "c",
+    subActivityCode: "SF-05",
+  }, {
+    // A multi-page PDF "receipt": the blank form itself, 8 pages, to exercise the page cap.
+    id: "rc1", kind: "document", docType: "receipt", capturedAt: "2026-05-03T09:00:00Z", caption: null,
+    lat: null, lng: null, storagePath: "templates/pwd_888.pdf", number: 3, containerId: "c", subActivityCode: "SF-05",
   }],
 };
 
-renderPwd888(payload).then((b) => { writeFileSync(process.argv[2], b); console.log("wrote", process.argv[2]); });
+renderPwd888(payload, {
+  loadImage: (x) => prepareImage(new Uint8Array(readFileSync(x.storagePath!))),
+}).then((b) => { writeFileSync(process.argv[2], b); console.log("wrote", process.argv[2]); });

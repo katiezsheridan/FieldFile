@@ -784,7 +784,7 @@ from (values
   ('SW-01', 'types', 'Type of project', null::text, 'multi_choice', null::text, '["Greentree reservoirs","Shallow roost pond development","Seasonally flooded crops","Artificially created wetlands","Marsh restoration/development/protection","Prairie pothole restoration/development/protection","Moist soil management units"]', 'true', 'false', '10'),
   ('SW-01', 'construction_date', 'Date of construction', 'On the form: "Planned date of construction"', 'date', null::text, null, 'true', 'false', '20'),
   -- ===== SW-02 Well/trough/windmill overflow/other wildlife watering facilities =====
-  ('SW-02', 'work', 'Work performed', null::text, 'multi_choice', null::text, '["Drill new well","Windmill","Pump","Pipeline","Modification(s) of existing water source","Fencing","Overflow","Trough modification"]', 'true', 'false', '10'),
+  ('SW-02', 'work', 'Work performed', null::text, 'multi_choice', null::text, '["Drill new well","Windmill","Pump","Pipeline","Modification(s) of existing water source","Fencing","Overflow","Trough modification","Pipeline (modification of existing source)"]', 'true', 'false', '10'),
   ('SW-02', 'well_depth', 'New well — depth', null::text, 'number', 'feet', null, 'false', 'false', '20'),
   ('SW-02', 'well_gpm', 'New well — gallons per minute', null::text, 'number', 'gpm', null, 'false', 'false', '30'),
   ('SW-02', 'pipeline_size', 'Pipeline — size', null::text, 'text', null::text, null, 'false', 'false', '40'),
@@ -831,10 +831,9 @@ from (values
   ('SF-07', 'species_planted_other', 'Other species planted', null::text, 'text', null::text, null, 'false', 'false', '30'),
   -- ===== SH-01 Nest boxes, bat boxes and raptor poles =====
   ('SH-01', 'target_species', 'Target species', null::text, 'text', null::text, null, 'false', 'false', '10'),
-  ('SH-01', 'cavity_type', 'Cavity type', null::text, 'text', null::text, null, 'false', 'false', '20'),
-  ('SH-01', 'cavity_box_count', 'Cavity nest boxes — number', null::text, 'integer', null::text, null, 'false', 'false', '30'),
-  ('SH-01', 'bat_box_count', 'Bat boxes — number', null::text, 'integer', null::text, null, 'false', 'false', '40'),
-  ('SH-01', 'raptor_pole_count', 'Raptor poles — number', null::text, 'integer', null::text, null, 'false', 'false', '50'),
+  ('SH-01', 'cavity_box_count', 'Cavity nest boxes — number', null::text, 'integer', null::text, null, 'false', 'false', '20'),
+  ('SH-01', 'bat_box_count', 'Bat boxes — number', null::text, 'integer', null::text, null, 'false', 'false', '30'),
+  ('SH-01', 'raptor_pole_count', 'Raptor poles — number', null::text, 'integer', null::text, null, 'false', 'false', '40'),
   -- ===== SH-02 Brush piles and slash retention =====
   ('SH-02', 'type', 'Type', null::text, 'multi_choice', null::text, '["Slash","Brush piles"]', 'true', 'false', '10'),
   ('SH-02', 'number_per_acre', 'Number per acre', null::text, 'number', null::text, null, 'false', 'false', '20'),
@@ -904,7 +903,7 @@ from (values
   ('CE-10', 'method_and_dates', 'Method and dates', null::text, 'longtext', null::text, null, 'true', 'false', '20'),
   -- ===== CE-11 Miscellaneous counts =====
   ('CE-11', 'species_counted', 'Species being counted', null::text, 'text', null::text, null, 'true', 'false', '10'),
-  ('CE-11', 'methods', 'Method', null::text, 'multi_choice', null::text, '["Remote detection (i.e. cameras)","Hahn (walking) line","Roost counts","Booming ground counts","Time/area counts","Songbird transects and counts","Quail call and covey counts","Point counts","Small mammal traps","Drift fences and pitfall traps","Bat departures","Dove call counts","Chachalaca counts","Turkey hen/poult counts","Waterfowl/water bird counts","Other"]', 'true', 'false', '20'),
+  ('CE-11', 'methods', 'Method', null::text, 'multi_choice', null::text, '["Remote detection (i.e. cameras)","Hahn (walking) line","Roost counts","Booming ground counts","Time/area counts","Songbird transects and counts","Quail call and covey counts","Point counts","Small mammal traps","Drift fences and pitfall traps","Bat departures","Dove call counts","Chachalaca counts","Turkey hen/poult counts","Waterfowl/water bird counts","Alligator nest/census counts","Other"]', 'true', 'false', '20'),
   ('CE-11', 'methods_other', 'Other method (describe)', null::text, 'text', null::text, null, 'false', 'false', '30')
 ) as v(sub_code, field_key, label, help_text, input_type, unit, choices,
        required_for_form, ai_extractable, sort_order)
