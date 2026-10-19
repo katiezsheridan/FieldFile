@@ -15,6 +15,10 @@ import { DocumentList } from "@/components/documents/DocumentList";
 
 interface ActivityEvidenceCardProps {
   activity: Activity;
+  /**
+   * The route's property param — a slug OR a uuid. For building URLs only;
+   * never write it to a uuid column (use `activity.propertyId` / `property.id`).
+   */
   propertyId: string;
   // Called after any evidence change so the parent can refetch.
   onChange: () => void;

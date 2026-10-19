@@ -76,6 +76,10 @@ interface Props {
   entries: MapEntry[];
   center?: { lat: number; lng: number } | null;
   propertyName?: string;
+  /**
+   * The route's property param — a slug OR a uuid. For building URLs only;
+   * never write it to a uuid column (use `activity.propertyId` / `property.id`).
+   */
   propertyId?: string;
   height?: number;
   // Draw a translucent GPS-accuracy circle around each located pin (detail view).
