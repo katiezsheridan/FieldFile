@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { trackConversion } from "@/lib/analytics";
 
 const pricingTiers = [
   {
@@ -111,8 +112,62 @@ const faqs = [
   },
 ];
 
+// The "Pricing view 30s" Ads conversion: a visitor who stays on this page for
+// 30 seconds. Only time with the tab visible counts, so a backgrounded tab
+// doesn't convert. Fires at most once per session — revisits and refreshes
+// won't double-count.
+const PRICING_VIEW_MS = 30_000;
+const PRICING_VIEW_TRACKED_KEY = "ff_pricing_view_tracked";
+
+function usePricingViewConversion() {
+  useEffect(() => {
+    try {
+      if (sessionStorage.getItem(PRICING_VIEW_TRACKED_KEY)) return;
+    } catch {
+      // Storage blocked — still track, just without the session dedupe.
+    }
+
+    let remaining = PRICING_VIEW_MS;
+    let startedAt = 0;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
+    const fire = () => {
+      trackConversion("pricing_view");
+      try {
+        sessionStorage.setItem(PRICING_VIEW_TRACKED_KEY, "1");
+      } catch {}
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
+
+    const start = () => {
+      startedAt = Date.now();
+      timer = setTimeout(fire, remaining);
+    };
+
+    const pause = () => {
+      clearTimeout(timer);
+      timer = undefined;
+      remaining -= Date.now() - startedAt;
+    };
+
+    function onVisibilityChange() {
+      if (document.visibilityState === "hidden" && timer) pause();
+      else if (document.visibilityState === "visible" && !timer) start();
+    }
+
+    if (document.visibilityState === "visible") start();
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
+  }, []);
+}
+
 export default function PricingPage() {
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
+  usePricingViewConversion();
 
   return (
     <div className="min-h-[calc(100vh-200px)] py-12 px-6">
