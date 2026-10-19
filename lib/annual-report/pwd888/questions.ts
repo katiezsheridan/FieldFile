@@ -110,4 +110,6 @@ export type AnnualReportPatch = {
   partI?: PartIInput;
   /** Keyed by a question key; `null` clears the answer. */
   answers?: Record<string, FieldValue>;
+  /** Record (or correct) the landowner's submission to the CAD, or undo it. */
+  submission?: { submittedOn: string; submittedTo: string } | "undo";
 };

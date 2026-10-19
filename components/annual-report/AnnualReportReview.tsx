@@ -9,6 +9,7 @@ import type { ReportGap } from "@/lib/annual-report/gap-analysis";
 import type { BlankBasis, ReportBlank } from "@/lib/annual-report/pwd888/combine";
 import type { AnnualReportPatch, PartIInput } from "@/lib/annual-report/pwd888/questions";
 import type { Pwd888Assembly, Pwd888Entry, Pwd888Exhibit } from "@/lib/annual-report/pwd888/types";
+import type { PeriodState } from "@/lib/annual-report/pwd888/period-server";
 import type { FieldValue } from "@/lib/types";
 
 /**
@@ -27,6 +28,7 @@ type ReviewResponse = Pwd888Assembly & {
   ready: boolean;
   /** Signed URL of the last generated PDF for this year, if any. */
   pdfUrl: string | null;
+  period: PeriodState;
 };
 
 // ---------------------------------------------------------------------------
@@ -151,6 +153,12 @@ export default function AnnualReportReview({
     };
   }, [propertyId, year]);
 
+  /** Re-read without blanking the screen — after a generate changes the period. */
+  const refresh = useCallback(async () => {
+    const r = await fetch(`/api/properties/${propertyId}/annual-report?year=${year}`);
+    if (r.ok) setData(await r.json());
+  }, [propertyId, year]);
+
   /** Save, then show the re-assembled report the server sends back. */
   const save = useCallback(
     async (what: string, patch: Omit<AnnualReportPatch, "taxYear">) => {
@@ -197,10 +205,12 @@ export default function AnnualReportReview({
       ) : (
         <>
           <Summary data={data} />
+          {data.period.status === "submitted" && <SubmittedBanner data={data} />}
           <Questions data={data} saving={saving} save={save} />
           <FixList data={data} propertyId={propertyId} />
           <Preview data={data} />
-          <Generate data={data} propertyId={propertyId} />
+          <Generate data={data} propertyId={propertyId} onGenerated={refresh} />
+          <Submission data={data} saving={saving} save={save} />
           <p className="text-sm text-field-earth">
             FieldFile prepares the report. You review it, sign it, and submit it
             to your county appraisal district — not to Texas Parks and Wildlife.
@@ -543,7 +553,15 @@ function FixList({ data, propertyId }: { data: ReviewResponse; propertyId: strin
  * Draw the report onto the TPWD form. Allowed before it is ready — the PDF is
  * then stamped DRAFT on every page — so the landowner can see where it stands.
  */
-function Generate({ data, propertyId }: { data: ReviewResponse; propertyId: string }) {
+function Generate({
+  data,
+  propertyId,
+  onGenerated,
+}: {
+  data: ReviewResponse;
+  propertyId: string;
+  onGenerated: () => void;
+}) {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [result, setResult] = useState<{ url: string; draft: boolean } | null>(null);
@@ -560,7 +578,10 @@ function Generate({ data, propertyId }: { data: ReviewResponse; propertyId: stri
       });
       const body = await r.json();
       if (!r.ok || !body.pdfUrl) setErr(body.error ?? "Could not generate the PDF");
-      else setResult({ url: body.pdfUrl, draft: body.draft });
+      else {
+        setResult({ url: body.pdfUrl, draft: body.draft });
+        onGenerated();
+      }
     } catch {
       setErr("Could not generate the PDF");
     } finally {
@@ -596,8 +617,130 @@ function Generate({ data, propertyId }: { data: ReviewResponse; propertyId: stri
       {url && (
         <p className="mt-3 text-xs text-field-earth">
           Regenerate after any change — the PDF does not update itself. The link expires after an hour.
+          {data.period.status === "submitted" &&
+            " You have already recorded a submission; a new PDF does not change the copy you submitted."}
         </p>
       )}
+    </Card>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Submission
+// ---------------------------------------------------------------------------
+
+function SubmittedBanner({ data }: { data: ReviewResponse }) {
+  const p = data.period;
+  return (
+    <div className="rounded-lg border border-field-forest/40 bg-field-forest/5 p-5">
+      <h2 className="text-lg font-semibold text-field-ink">
+        Submitted to {p.submittedTo} on {p.submittedOn ? fmtDate(p.submittedOn) : "—"}
+      </h2>
+      <p className="mt-1 text-sm text-field-earth">
+        Keep the signed copy you handed in. FieldFile keeps the PDF as it stood when you recorded
+        the submission.
+        {p.submittedPdfUrl && (
+          <>
+            {" "}
+            <a
+              href={p.submittedPdfUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-field-forest hover:underline"
+            >
+              Open the submitted PDF →
+            </a>
+          </>
+        )}
+      </p>
+    </div>
+  );
+}
+
+/**
+ * Record that the landowner signed and handed in the report. FieldFile never
+ * submits — this records what they did. Only offered once a final (non-draft)
+ * PDF exists, and kept editable afterwards to correct the date or district.
+ */
+function Submission({ data, saving, save }: { data: ReviewResponse; saving: string | null; save: SaveFn }) {
+  const p = data.period;
+  const county = data.payload.partI.majorityCounty;
+  const defaultDistrict = county ? `${county.replace(/\b\w/g, (c) => c.toUpperCase())} CAD` : "";
+  const today = new Date().toISOString().slice(0, 10);
+  const [on, setOn] = useState(p.submittedOn ?? today);
+  const [to, setTo] = useState(p.submittedTo ?? defaultDistrict);
+  const [confirmUndo, setConfirmUndo] = useState(false);
+  useEffect(() => {
+    setOn(p.submittedOn ?? today);
+    setTo(p.submittedTo ?? defaultDistrict);
+  }, [p.submittedOn, p.submittedTo]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (p.status !== "finalized" && p.status !== "submitted") {
+    return (
+      <Card
+        title="Record your submission"
+        subtitle="Once the final PDF (no DRAFT stamp) is generated, sign it, hand it to your appraisal district, and record it here."
+      >
+        <p className="text-sm text-field-earth">
+          {data.ready
+            ? "Generate the PDF above first."
+            : "Settle the items above, then generate the final PDF."}
+        </p>
+      </Card>
+    );
+  }
+
+  const submitted = p.status === "submitted";
+  return (
+    <Card
+      title={submitted ? "Your submission" : "Record your submission"}
+      subtitle={
+        submitted
+          ? "Correct the date or district if needed."
+          : "After you sign the PDF and give it to your appraisal district, record when and where. We keep a copy of the PDF as it stands now."
+      }
+    >
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label="Date submitted">
+          <input type="date" className={inputCls} value={on} max={today} onChange={(e) => setOn(e.target.value)} />
+        </Field>
+        <Field label="Appraisal district">
+          <input className={inputCls} value={to} placeholder="e.g. Hays CAD" onChange={(e) => setTo(e.target.value)} />
+        </Field>
+      </div>
+      <div className="mt-4 flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          className={primaryBtn}
+          disabled={!on || !to.trim() || saving === "submission"}
+          onClick={() => save("submission", { submission: { submittedOn: on, submittedTo: to.trim() } })}
+        >
+          {saving === "submission" ? "Saving…" : submitted ? "Save changes" : "I submitted it"}
+        </button>
+        {submitted &&
+          (confirmUndo ? (
+            <span className="flex items-center gap-2 text-sm">
+              <span className="text-field-earth">Undo the recorded submission?</span>
+              <button
+                type="button"
+                className="font-medium text-field-terra hover:underline"
+                onClick={() => {
+                  setConfirmUndo(false);
+                  save("submission", { submission: "undo" });
+                }}
+              >
+                Yes, undo
+              </button>
+              <button type="button" className="text-field-earth hover:underline" onClick={() => setConfirmUndo(false)}>
+                Cancel
+              </button>
+            </span>
+          ) : (
+            <button type="button" className="text-sm text-field-earth hover:underline" onClick={() => setConfirmUndo(true)}>
+              Recorded by mistake? Undo
+            </button>
+          ))}
+      </div>
     </Card>
   );
 }
