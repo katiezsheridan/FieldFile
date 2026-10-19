@@ -84,14 +84,18 @@ const FIELD_LABELS: Record<string, string> = {
   "PC-04.methods_other": "Other:",
 };
 
-/** Printed wording of an option where it differs from the catalog choice. */
-const CHOICE_LABELS: Record<string, Record<string, string>> = {
+/**
+ * Printed wording of an option where it differs from the catalog choice.
+ * `{ label, nth }` picks a repeat: the second "pipeline" printed in the band.
+ */
+const CHOICE_LABELS: Record<string, Record<string, string | { label: string; nth: number }>> = {
   "HC-01.grazing_system": { "1 herd/3 pasture": "1 herd/3pasture" },
   "HC-07.enhancement": { "Moist soil management": "moist soil" },
   "EC-03.techniques": { "Rip-rap, etc.": "rip-rap," },
   // The form misspells both of these; match what is printed.
   "EC-05.activities": { "Revegetating/stabilize levee areas": "revegtating/stabilize levee areas" },
   "SH-03.plant_types": { Grasses: "grases" },
+  "SW-02.work": { "Pipeline (modification of existing source)": { label: "pipeline", nth: 1 } },
   "PC-04.methods": {
     "Poison collars (1080 certified, licensed applicator)": "poison collars (1080 certified",
   },
@@ -109,11 +113,7 @@ const FIELD_BAND: Record<string, string> = { "PC-01": "PC-03", "PC-02": "PC-03" 
  * continuation page, never dropped. CE-02 prints an "other" box for
  * "Observations from" but no line to describe it.
  */
-export const CONTINUATION_ONLY = new Set([
-  "CE-02.observed_from_other",
-  // "□ Cavity type. Number: ___" — the form's cavity type is the box, not a blank.
-  "SH-01.cavity_type",
-]);
+export const CONTINUATION_ONLY = new Set(["CE-02.observed_from_other"]);
 
 /**
  * A blank printed more than once, the right copy depending on another answer.
@@ -187,7 +187,10 @@ export function resolveSubActivity(sub: SubActivityDef, measure: Measure): Resol
       const boxes: Record<string, Box> = {};
       for (const choice of f.choices ?? []) {
         const printed = CHOICE_LABELS[`${sub.code}.${f.key}`]?.[choice] ?? choice;
-        const box = optionBox(band, printed);
+        const box =
+          typeof printed === "string"
+            ? optionBox(band, printed)
+            : optionBox(band, printed.label, printed.nth);
         if (box) boxes[choice] = box;
         else unresolved.push(`${f.key} option "${choice}"`);
       }

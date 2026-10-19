@@ -25,7 +25,11 @@ import { blankAfter, optionBox, pageBand, type Blank, type Box, type Measure } f
 
 export const TEMPLATE_PATH = path.join(process.cwd(), "templates", "pwd_888.pdf");
 
-export type ExhibitImage = { bytes: Uint8Array; type: "jpg" | "png" };
+/** A photo ready to embed, or a PDF (a receipt) whose pages are drawn in. */
+export type ExhibitImage = { bytes: Uint8Array; type: "jpg" | "png" | "pdf" };
+
+/** Pages of an attached PDF drawn into the report; the rest are noted, not dropped silently. */
+const MAX_PDF_PAGES = 4;
 
 export type RenderOptions = {
   templateBytes?: Uint8Array;
@@ -347,20 +351,49 @@ async function exhibitPages(ctx: Ctx, f: Pwd888Payload, opts: RenderOptions) {
       continue;
     }
 
-    const img = opts.loadImage ? await opts.loadImage(x).catch(() => null) : null;
-    if (!img) {
-      page.drawText("Image not available in this copy — kept in the landowner's FieldFile records.", {
+    const unavailable = (why = "Image not available in this copy") =>
+      page.drawText(`${why} — kept in the landowner's FieldFile records.`, {
         x: 45, y, size: 10, font: ctx.font, color: rgb(0.45, 0.45, 0.45),
       });
+    const img = opts.loadImage ? await opts.loadImage(x).catch(() => null) : null;
+    if (!img) {
+      unavailable();
       continue;
     }
-    const embedded = img.type === "png" ? await ctx.doc.embedPng(img.bytes) : await ctx.doc.embedJpg(img.bytes);
-    const maxW = 522;
-    const maxH = y - 50;
-    const scale = Math.min(maxW / embedded.width, maxH / embedded.height, 1);
-    const w = embedded.width * scale;
-    const h = embedded.height * scale;
-    page.drawImage(embedded, { x: 45 + (maxW - w) / 2, y: y - h, width: w, height: h });
+
+    // Fit within the space left on the page, centred, never enlarged.
+    const fit = (w0: number, h0: number, top: number) => {
+      const maxW = 522;
+      const maxH = top - 50;
+      const scale = Math.min(maxW / w0, maxH / h0, 1);
+      return { x: 45 + (maxW - w0 * scale) / 2, y: top - h0 * scale, width: w0 * scale, height: h0 * scale };
+    };
+
+    try {
+      if (img.type === "pdf") {
+        const src = await PDFDocument.load(img.bytes, { ignoreEncryption: true });
+        const count = src.getPageCount();
+        const indices = Array.from({ length: Math.min(count, MAX_PDF_PAGES) }, (_, i) => i);
+        const pages = await ctx.doc.embedPdf(img.bytes, indices);
+        pages.forEach((ep, i) => {
+          const target = i === 0 ? page : ctx.doc.addPage(LETTER);
+          if (i > 0) header(ctx, target, `Exhibit ${x.number} (page ${i + 1} of ${count})`, f);
+          target.drawPage(ep, fit(ep.width, ep.height, i === 0 ? y : 700));
+        });
+        if (count > MAX_PDF_PAGES) {
+          const last = ctx.doc.getPages()[ctx.doc.getPageCount() - 1];
+          last.drawText(
+            `Pages ${MAX_PDF_PAGES + 1}–${count} of this document are kept in the landowner's FieldFile records.`,
+            { x: 45, y: 40, size: 9, font: ctx.font, color: rgb(0.45, 0.45, 0.45) }
+          );
+        }
+      } else {
+        const embedded = img.type === "png" ? await ctx.doc.embedPng(img.bytes) : await ctx.doc.embedJpg(img.bytes);
+        page.drawImage(embedded, fit(embedded.width, embedded.height, y));
+      }
+    } catch {
+      unavailable("This file could not be embedded");
+    }
   }
 }
 

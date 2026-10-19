@@ -892,6 +892,10 @@ export const SUB_ACTIVITY_DEFS: SubActivityDef[] = [
           "Fencing",
           "Overflow",
           "Trough modification",
+          // The form prints "pipeline" twice: with the new well's windmill and
+          // pump (above), and again under modification of an existing source.
+          // Two boxes need two values; this one names the second.
+          "Pipeline (modification of existing source)",
         ],
         requiredForForm: true,
       },
@@ -1174,7 +1178,6 @@ export const SUB_ACTIVITY_DEFS: SubActivityDef[] = [
       "Edwards Plateau / Cross Timbers minimum intensity: one box per 20 acres, maintained annually.",
     fields: [
       { key: "target_species", label: "Target species", inputType: "text" },
-      { key: "cavity_type", label: "Cavity type", inputType: "text" },
       { key: "cavity_box_count", label: "Cavity nest boxes — number", inputType: "integer" },
       { key: "bat_box_count", label: "Bat boxes — number", inputType: "integer" },
       { key: "raptor_pole_count", label: "Raptor poles — number", inputType: "integer" },
@@ -1590,6 +1593,7 @@ export const SUB_ACTIVITY_DEFS: SubActivityDef[] = [
           "Chachalaca counts",
           "Turkey hen/poult counts",
           "Waterfowl/water bird counts",
+          "Alligator nest/census counts",
           "Other",
         ],
         requiredForForm: true,
