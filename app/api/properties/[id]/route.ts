@@ -1,7 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import { uniquePropertySlug } from "@/lib/property-slug";
+import { recordSlugChange, resolvePropertyRef, uniquePropertySlug } from "@/lib/property-slug";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -19,17 +19,16 @@ export async function GET(
 
   const { id } = await params;
 
-  // Check if it's a UUID or slug
-  const isUUID =
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
-      id
-    );
+  // uuid, current slug, or a slug from before a rename.
+  const ref = await resolvePropertyRef(supabase, id, userId);
+  if (!ref) {
+    return NextResponse.json({ error: "Property not found" }, { status: 404 });
+  }
 
   const { data: prop, error: propError } = await supabase
     .from("properties")
     .select("*")
-    .eq(isUUID ? "id" : "slug", id)
-    .eq("user_id", userId)
+    .eq("id", ref.id)
     .single();
 
   if (propError) {
@@ -133,8 +132,10 @@ export async function PATCH(
   }
 
   const { id } = await params;
-  const isUUID =
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+  const ref = await resolvePropertyRef(supabase, id, userId);
+  if (!ref) {
+    return NextResponse.json({ error: "Property not found" }, { status: 404 });
+  }
 
   let body: Record<string, unknown>;
   try {
@@ -146,26 +147,14 @@ export async function PATCH(
   const updates: Record<string, unknown> = {};
   if ("name" in body) updates.name = body.name;
 
-  // The slug follows the name. This changes the property's URL, so anything
-  // already linking to the old slug stops resolving — the accepted trade for a
-  // slug that always matches what the owner calls the place. The client should
-  // navigate to the returned slug after a rename.
+  // The slug follows the name, which changes the property's URL. The old
+  // slug is kept in property_slug_history (below, once the update lands), so
+  // bookmarks and shared links still resolve and the pages redirect them. The
+  // client should still navigate to the returned slug after a rename.
   if ("name" in body && typeof body.name === "string" && body.name.trim()) {
-    // Resolve to the row's uuid first: a property must not collide with its
-    // own current slug, or every rename would walk the -2, -3 suffix upward.
-    const { data: target } = await supabase
-      .from("properties")
-      .select("id")
-      .eq(isUUID ? "id" : "slug", id)
-      .eq("user_id", userId)
-      .maybeSingle();
-
-    updates.slug = await uniquePropertySlug(
-      supabase,
-      userId,
-      body.name,
-      target?.id
-    );
+    // Exclude the property itself, or every rename would walk the -2, -3
+    // suffix upward against its own current slug.
+    updates.slug = await uniquePropertySlug(supabase, userId, body.name, ref.id);
   }
   if ("county" in body) updates.county = body.county;
   if ("acreage" in body) updates.acreage = body.acreage;
@@ -204,7 +193,7 @@ export async function PATCH(
   const { data, error } = await supabase
     .from("properties")
     .update(updates)
-    .eq(isUUID ? "id" : "slug", id)
+    .eq("id", ref.id)
     .eq("user_id", userId)
     .select()
     .single();
@@ -215,6 +204,7 @@ export async function PATCH(
   if (!data) {
     return NextResponse.json({ error: "Property not found" }, { status: 404 });
   }
+  if (updates.slug) await recordSlugChange(supabase, userId, ref.id, ref.slug, data.slug);
 
   return NextResponse.json({
     id: data.id,
@@ -246,13 +236,15 @@ export async function DELETE(
   }
 
   const { id } = await params;
-  const isUUID =
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+  const ref = await resolvePropertyRef(supabase, id, userId);
+  if (!ref) {
+    return NextResponse.json({ error: "Property not found" }, { status: 404 });
+  }
 
   const { data, error } = await supabase
     .from("properties")
     .delete()
-    .eq(isUUID ? "id" : "slug", id)
+    .eq("id", ref.id)
     .eq("user_id", userId)
     .select("id")
     .maybeSingle();
