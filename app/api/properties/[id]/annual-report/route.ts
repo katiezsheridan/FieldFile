@@ -25,6 +25,13 @@ import {
 } from "@/lib/annual-report/pwd888/questions";
 import { ownerProfileToRow } from "@/lib/forms/form50129/serialize";
 import { reportPdfPath, signReportPdf } from "@/lib/forms/pwd888/storage";
+import {
+  ensurePeriod,
+  getPeriodState,
+  PeriodError,
+  recordSubmission,
+  undoSubmission,
+} from "@/lib/annual-report/pwd888/period-server";
 import type { FieldValue } from "@/lib/types";
 
 const db = createClient(
@@ -38,10 +45,11 @@ function resolveYear(raw: unknown): number | null {
 }
 
 async function assembled(propertyId: string, userId: string, year: number) {
-  const [r, pdfUrl] = await Promise.all([
+  const [r, pdfUrl, period] = await Promise.all([
     buildPwd888(propertyId, year),
     // Null until a PDF has been generated for this year.
     signReportPdf(reportPdfPath(userId, propertyId, year)),
+    getPeriodState(userId, propertyId, year),
   ]);
   const blocking = blockingGaps({ ...r.analysis, gaps: r.gaps });
   return {
@@ -50,6 +58,7 @@ async function assembled(propertyId: string, userId: string, year: number) {
     blockingCount: blocking.length,
     ready: r.analysis.meetsMinimum && blocking.length === 0,
     pdfUrl,
+    period,
   };
 }
 
@@ -112,19 +121,6 @@ async function savePartI(propertyId: string, userId: string, p: PartIInput) {
       .eq("id", propertyId);
     if (error) throw error;
   }
-}
-
-async function ensurePeriod(propertyId: string, year: number): Promise<string> {
-  const { data, error } = await db
-    .from("report_periods")
-    .upsert(
-      { property_id: propertyId, tax_year: year },
-      { onConflict: "property_id,tax_year", ignoreDuplicates: false }
-    )
-    .select("id")
-    .single();
-  if (error) throw error;
-  return data.id as string;
 }
 
 /**
@@ -191,6 +187,16 @@ export async function PATCH(
   const year = resolveYear(body.taxYear);
   if (!year) return NextResponse.json({ error: "Invalid year" }, { status: 400 });
 
+  const sub = body.submission;
+  if (sub && sub !== "undo") {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(sub.submittedOn ?? "") || !sub.submittedTo?.trim()) {
+      return NextResponse.json({ error: "Enter the date and the appraisal district." }, { status: 400 });
+    }
+    if (sub.submittedOn > new Date().toISOString().slice(0, 10)) {
+      return NextResponse.json({ error: "The submission date can't be in the future." }, { status: 400 });
+    }
+  }
+
   // Validate everything before writing anything.
   for (const [key, value] of Object.entries(body.answers ?? {})) {
     const q = describeQuestion(key);
@@ -205,8 +211,15 @@ export async function PATCH(
     if (body.answers && Object.keys(body.answers).length > 0) {
       await saveAnswers(a.propertyId, a.userId, year, body.answers);
     }
+    if (sub === "undo") await undoSubmission(a.userId, a.propertyId, year);
+    else if (sub) {
+      await recordSubmission(a.userId, a.propertyId, year, sub.submittedOn, sub.submittedTo.trim());
+    }
     return NextResponse.json(await assembled(a.propertyId, a.userId, year));
   } catch (err) {
+    if (err instanceof PeriodError) {
+      return NextResponse.json({ error: err.message }, { status: 409 });
+    }
     const message = describeError(err, "Could not save");
     console.error("[annual-report]", message);
     return NextResponse.json({ error: message }, { status: 500 });

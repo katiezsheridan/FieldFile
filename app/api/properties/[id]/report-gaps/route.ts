@@ -4,6 +4,7 @@ import { resolvePropertyId } from "@/lib/field-log-server";
 import { analyzePropertyYear } from "@/lib/annual-report/gap-analysis-server";
 import { blockingGaps, isReportReady } from "@/lib/annual-report/gap-analysis";
 import { describeError } from "@/lib/errors";
+import { getPeriodState } from "@/lib/annual-report/pwd888/period-server";
 
 /**
  * GET /api/properties/:idOrSlug/report-gaps?year=2026
@@ -33,11 +34,18 @@ export async function GET(
   }
 
   try {
-    const analysis = await analyzePropertyYear(propertyId, year);
+    const [analysis, period] = await Promise.all([
+      analyzePropertyYear(propertyId, year),
+      getPeriodState(userId, propertyId, year),
+    ]);
     return NextResponse.json({
       ...analysis,
       blockingCount: blockingGaps(analysis).length,
       ready: isReportReady(analysis),
+      submitted:
+        period.status === "submitted"
+          ? { on: period.submittedOn, to: period.submittedTo }
+          : null,
     });
   } catch (err) {
     // The data layer throws rather than under-count, so a failed query is an

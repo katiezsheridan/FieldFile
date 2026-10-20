@@ -10,3 +10,11 @@ export { uploadFilingPdf as uploadReportPdf, signFilingPdf as signReportPdf } fr
 export function reportPdfPath(userId: string, propertyId: string, taxYear: number): string {
   return `pwd888/${userId}/${propertyId}/${taxYear}.pdf`;
 }
+
+/**
+ * The copy kept when the landowner records that they submitted the report —
+ * the working PDF above is overwritten on every regenerate, this never is.
+ */
+export function submittedPdfPath(userId: string, propertyId: string, taxYear: number): string {
+  return `pwd888/${userId}/${propertyId}/${taxYear}-submitted.pdf`;
+}

@@ -16,7 +16,12 @@ import type { GapAnalysis, ReportGap } from "@/lib/annual-report/gap-analysis";
  * a problem that surfaces at audit, which is far too late.
  */
 
-type GapResponse = GapAnalysis & { blockingCount: number; ready: boolean };
+type GapResponse = GapAnalysis & {
+  blockingCount: number;
+  ready: boolean;
+  /** Set once the landowner has recorded handing the report in. */
+  submitted: { on: string | null; to: string | null } | null;
+};
 
 export default function ReportReadinessCard({
   propertyId,
@@ -75,6 +80,18 @@ export default function ReportReadinessCard({
           {qualifyingPractices} of 3 required
         </span>
       </div>
+
+      {data.submitted && (
+        <p className="mb-3 rounded-md bg-field-forest/10 px-3 py-2 text-sm font-medium text-field-forest">
+          ✓ Submitted to {data.submitted.to}
+          {data.submitted.on &&
+            ` on ${new Date(`${data.submitted.on}T12:00:00`).toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            })}`}
+        </p>
+      )}
 
       <p className="text-sm text-field-earth mb-4">
         A practice counts once an activity is dated, says what was done, and has
