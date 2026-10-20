@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { containerHref, gapContainerId } from "@/lib/annual-report/links";
+import { gapHref } from "@/lib/annual-report/links";
 import type { GapAnalysis, ReportGap } from "@/lib/annual-report/gap-analysis";
 import type { PracticeCode } from "@/lib/types";
 
@@ -22,6 +22,8 @@ type GapResponse = GapAnalysis & {
   ready: boolean;
   /** The wildlife plan's selected practices — display only, never counted. */
   planned: { planYear: number; codes: PracticeCode[] } | null;
+  /** Set once the landowner has recorded handing the report in. */
+  submitted: { on: string | null; to: string | null } | null;
 };
 
 export default function ReportReadinessCard({
@@ -89,6 +91,18 @@ export default function ReportReadinessCard({
           {qualifyingPractices} of 3 required
         </span>
       </div>
+
+      {data.submitted && (
+        <p className="mb-3 rounded-md bg-field-forest/10 px-3 py-2 text-sm font-medium text-field-forest">
+          ✓ Submitted to {data.submitted.to}
+          {data.submitted.on &&
+            ` on ${new Date(`${data.submitted.on}T12:00:00`).toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            })}`}
+        </p>
+      )}
 
       <p className="text-sm text-field-earth mb-4">
         A practice counts once an activity is dated, says what was done, and has
@@ -195,7 +209,7 @@ export default function ReportReadinessCard({
 
 function GapRow({ gap, propertyId }: { gap: ReportGap; propertyId: string }) {
   // Gaps keyed to a container link straight to it — the fix is always there.
-  const containerId = gapContainerId(gap.key);
+  const href = gapHref(propertyId, gap.key);
 
   const body = (
     <>
@@ -216,9 +230,9 @@ function GapRow({ gap, propertyId }: { gap: ReportGap; propertyId: string }) {
 
   return (
     <li className="flex items-start gap-2 text-sm text-field-ink">
-      {containerId ? (
+      {href ? (
         <Link
-          href={containerHref(propertyId, containerId)}
+          href={href}
           className="flex items-start gap-2 hover:underline"
         >
           {body}

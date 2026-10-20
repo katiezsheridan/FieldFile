@@ -19,6 +19,7 @@ import { buildPwd888 } from "@/lib/annual-report/pwd888/build-server";
 import { loadExhibitImage } from "@/lib/annual-report/pwd888/exhibit-images-server";
 import { renderPwd888 } from "@/lib/forms/pwd888/render";
 import { reportPdfPath, signReportPdf, uploadReportPdf } from "@/lib/forms/pwd888/storage";
+import { noteGenerated } from "@/lib/annual-report/pwd888/period-server";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -58,6 +59,7 @@ export async function POST(
     const { error } = await uploadReportPdf(path, bytes);
     if (error) throw new Error(error);
     const pdfUrl = await signReportPdf(path);
+    await noteGenerated(propertyId, year, ready);
 
     return NextResponse.json({ taxYear: year, ready, draft: !ready, pdfUrl });
   } catch (err) {

@@ -6,6 +6,10 @@ import { EvidenceRequirement, Document } from "@/lib/types";
 interface ActivityChecklistProps {
   requiredEvidence: EvidenceRequirement[];
   documents: Document[];
+  /**
+   * The route's property param — a slug OR a uuid. For building URLs only;
+   * never write it to a uuid column (use `activity.propertyId` / `property.id`).
+   */
   propertyId?: string;
   hasLocations?: boolean;
 }
