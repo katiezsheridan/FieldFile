@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { containerHref, gapContainerId } from "@/lib/annual-report/links";
+import { gapHref } from "@/lib/annual-report/links";
 import type { GapAnalysis, ReportGap } from "@/lib/annual-report/gap-analysis";
 
 /**
@@ -151,7 +151,7 @@ export default function ReportReadinessCard({
 
 function GapRow({ gap, propertyId }: { gap: ReportGap; propertyId: string }) {
   // Gaps keyed to a container link straight to it — the fix is always there.
-  const containerId = gapContainerId(gap.key);
+  const href = gapHref(propertyId, gap.key);
 
   const body = (
     <>
@@ -172,9 +172,9 @@ function GapRow({ gap, propertyId }: { gap: ReportGap; propertyId: string }) {
 
   return (
     <li className="flex items-start gap-2 text-sm text-field-ink">
-      {containerId ? (
+      {href ? (
         <Link
-          href={containerHref(propertyId, containerId)}
+          href={href}
           className="flex items-start gap-2 hover:underline"
         >
           {body}

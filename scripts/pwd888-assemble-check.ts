@@ -162,6 +162,13 @@ const cases: [string, () => void][] = [
     assert.equal(r.conflicts.length, 0);
     assert.ok(!r.gaps.some((g) => g.key.endsWith(".conflict")));
   }],
+  ["a census ACTIVITY with no photo points to the census section, not just 'attach a photo'", () => {
+    const r = assemblePwd888({ ...base, containers: [c("CE-01", "2026-09-06", { target_species: "deer" }, false)] });
+    assert.equal(r.payload.partII.CE, false);
+    const g = r.gaps.find((x) => x.key.endsWith(".censusCounts"));
+    assert.ok(g && /Census section/.test(g.label) && g.severity === "blocking");
+    assert.ok(!r.gaps.some((x) => x.key.endsWith(".evidence")));
+  }],
   ["exhibits are numbered in Part IV order", () => {
     const r = assemblePwd888({ ...base, containers: [c("CE-02", "2026-01-01", { target_species: "deer" }), c("HC-04", "2026-06-01", { acres_treated: 4 })] });
     assert.deepEqual(r.payload.partV.map((x) => [x.number, x.subActivityCode]), [[1, "HC-04"], [2, "CE-02"]]);
