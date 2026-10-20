@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createActivity, createDocument, fetchSubActivityIdMap } from "@/lib/hooks";
 import { uploadDocument } from "@/lib/supabase";
+import type { PracticeCode } from "@/lib/types";
 import {
   PRACTICE_DEF_BY_CODE,
   SUB_ACTIVITY_BY_CODE,
@@ -23,14 +24,17 @@ interface AddActivityFormProps {
   propertyId: string;
   onSuccess: () => void;
   onCancel: () => void;
+  /** Start on this practice — set when the landowner taps "Log it" on a planned practice. */
+  initialPracticeCode?: PracticeCode;
 }
 
 export default function AddActivityForm({
   propertyId,
   onSuccess,
   onCancel,
+  initialPracticeCode,
 }: AddActivityFormProps) {
-  const [draft, setDraft] = useState<ContainerDraft>(emptyDraft);
+  const [draft, setDraft] = useState<ContainerDraft>(() => emptyDraft(initialPracticeCode));
   const [name, setName] = useState("");
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);

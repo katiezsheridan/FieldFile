@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { containerHref, gapContainerId } from "@/lib/annual-report/links";
 import type { GapAnalysis, ReportGap } from "@/lib/annual-report/gap-analysis";
+import type { PracticeCode } from "@/lib/types";
 
 /**
  * Where a property stands against the annual report, for one tax year.
@@ -16,14 +17,25 @@ import type { GapAnalysis, ReportGap } from "@/lib/annual-report/gap-analysis";
  * a problem that surfaces at audit, which is far too late.
  */
 
-type GapResponse = GapAnalysis & { blockingCount: number; ready: boolean };
+type GapResponse = GapAnalysis & {
+  blockingCount: number;
+  ready: boolean;
+  /** The wildlife plan's selected practices — display only, never counted. */
+  planned: { planYear: number; codes: PracticeCode[] } | null;
+};
 
 export default function ReportReadinessCard({
   propertyId,
   taxYear,
+  onLogPractice,
+  refreshKey,
 }: {
   propertyId: string;
   taxYear: number;
+  /** Open Add Activity on this practice. Offered for planned, unlogged ones. */
+  onLogPractice?: (code: PracticeCode) => void;
+  /** Bump to re-read, e.g. after an activity is added on the same page. */
+  refreshKey?: number;
 }) {
   const [data, setData] = useState<GapResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -31,7 +43,9 @@ export default function ReportReadinessCard({
 
   useEffect(() => {
     let active = true;
-    setLoading(true);
+    // A refresh after a save keeps showing the old numbers until the new ones
+    // arrive, rather than flashing the skeleton.
+    if (!refreshKey) setLoading(true);
     fetch(`/api/properties/${propertyId}/report-gaps?year=${taxYear}`)
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => {
@@ -44,7 +58,7 @@ export default function ReportReadinessCard({
     return () => {
       active = false;
     };
-  }, [propertyId, taxYear]);
+  }, [propertyId, taxYear, refreshKey]);
 
   if (loading) {
     return (
@@ -82,6 +96,21 @@ export default function ReportReadinessCard({
         Texas requires three.
       </p>
 
+      {data.planned && data.planned.codes.length > 0 && (() => {
+        const unlogged = practices.filter(
+          (p) => data.planned!.codes.includes(p.code) && p.containers === 0
+        ).length;
+        return (
+          <p className="text-sm text-field-earth mb-3">
+            Your {data.planned.planYear} wildlife plan selected{" "}
+            {data.planned.codes.length} practice{data.planned.codes.length === 1 ? "" : "s"}
+            {unlogged > 0
+              ? ` — ${unlogged} not logged yet for ${taxYear}. Planning a practice doesn't count it; logging the work does.`
+              : `, and all are logged for ${taxYear}.`}
+          </p>
+        );
+      })()}
+
       {/* The seven, in the order PWD-888 Part IV prints them. */}
       <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 mb-4">
         {practices.map((p) => (
@@ -99,13 +128,28 @@ export default function ReportReadinessCard({
                 }
               />
               {p.name}
+              {data.planned?.codes.includes(p.code) && (
+                <span className="ml-2 rounded bg-field-mist px-1.5 py-0.5 text-[11px] font-medium text-field-earth">
+                  Planned
+                </span>
+              )}
             </span>
             <span className="text-xs text-field-earth shrink-0">
-              {p.counts
-                ? `${p.qualifying} counted`
-                : p.containers > 0
-                  ? `${p.containers} not counted`
-                  : "—"}
+              {p.counts ? (
+                `${p.qualifying} counted`
+              ) : p.containers > 0 ? (
+                `${p.containers} not counted`
+              ) : data.planned?.codes.includes(p.code) && onLogPractice ? (
+                <button
+                  type="button"
+                  onClick={() => onLogPractice(p.code)}
+                  className="font-medium text-field-forest hover:underline"
+                >
+                  Log it →
+                </button>
+              ) : (
+                "—"
+              )}
             </span>
           </li>
         ))}

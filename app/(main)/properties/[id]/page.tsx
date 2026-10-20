@@ -20,7 +20,7 @@ import { DocumentList } from "@/components/documents/DocumentList";
 import PropertyMapSection from "@/components/map/PropertyMapSection";
 import { CollapsibleSection } from "@/components/ui/CollapsibleSection";
 import { canApplyFor1d1 } from "@/lib/forms/form50129/eligibility";
-import { Document } from "@/lib/types";
+import { Document, type PracticeCode } from "@/lib/types";
 
 function inferType(file: File): Document["type"] {
   if (file.type.startsWith("image/")) return "photo";
@@ -31,6 +31,18 @@ export default function PropertyPage() {
   const params = useParams();
   const id = params.id as string;
   const [showAddForm, setShowAddForm] = useState(false);
+  // Set by "Log it" on a planned practice: opens Add Activity on that practice.
+  const [logPractice, setLogPractice] = useState<{ code: PracticeCode; at: number } | null>(null);
+  const [readinessKey, setReadinessKey] = useState(0);
+  const startLogging = useCallback((code: PracticeCode) => {
+    setLogPractice({ code, at: Date.now() });
+    setShowAddForm(true);
+    // After the section opens and the form mounts.
+    setTimeout(
+      () => document.getElementById("add-activity")?.scrollIntoView({ behavior: "smooth", block: "start" }),
+      50
+    );
+  }, []);
   const [uploadingLand, setUploadingLand] = useState(false);
 
   const { property: supabaseProperty, loading, refetch } = useProperty(id);
@@ -258,6 +270,8 @@ export default function PropertyPage() {
           <ReportReadinessCard
             propertyId={property.id}
             taxYear={new Date().getFullYear()}
+            onLogPractice={startLogging}
+            refreshKey={readinessKey}
           />
         </div>
 
@@ -265,6 +279,7 @@ export default function PropertyPage() {
         <CollapsibleSection
           title="Wildlife Management Activities"
           summary={`${completedCount}/${totalCount} complete`}
+          openSignal={logPractice?.at}
         >
           <div className="space-y-4">
             {!showAddForm && (
@@ -280,14 +295,24 @@ export default function PropertyPage() {
               // property.id, NOT the route param: `id` is the slug
               // (/properties/promised-land-ranch) and activities.property_id is
               // a uuid. Passing the slug fails with 22P02 invalid input syntax.
-              <AddActivityForm
-                propertyId={property.id}
-                onSuccess={() => {
-                  setShowAddForm(false);
-                  refetch();
-                }}
-                onCancel={() => setShowAddForm(false)}
-              />
+              <div id="add-activity" className="scroll-mt-4">
+                <AddActivityForm
+                  // Remount when "Log it" picks a different practice.
+                  key={logPractice?.at ?? "manual"}
+                  propertyId={property.id}
+                  initialPracticeCode={logPractice?.code}
+                  onSuccess={() => {
+                    setShowAddForm(false);
+                    setLogPractice(null);
+                    refetch();
+                    setReadinessKey((k) => k + 1);
+                  }}
+                  onCancel={() => {
+                    setShowAddForm(false);
+                    setLogPractice(null);
+                  }}
+                />
+              </div>
             )}
 
             {property.activities.length === 0 ? (

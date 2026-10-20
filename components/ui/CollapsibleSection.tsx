@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 interface CollapsibleSectionProps {
@@ -8,6 +8,8 @@ interface CollapsibleSectionProps {
   // Optional right-aligned summary (e.g. a count) shown in the header.
   summary?: ReactNode;
   defaultOpen?: boolean;
+  /** Bump to force the section open (e.g. when something inside is revealed). */
+  openSignal?: number;
   children: ReactNode;
 }
 
@@ -19,9 +21,13 @@ export function CollapsibleSection({
   title,
   summary,
   defaultOpen = true,
+  openSignal,
   children,
 }: CollapsibleSectionProps) {
   const [open, setOpen] = useState(defaultOpen);
+  useEffect(() => {
+    if (openSignal) setOpen(true);
+  }, [openSignal]);
 
   return (
     <section className="bg-white border border-field-wheat rounded-lg overflow-hidden">

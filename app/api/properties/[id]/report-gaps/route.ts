@@ -4,6 +4,7 @@ import { resolvePropertyId } from "@/lib/field-log-server";
 import { analyzePropertyYear } from "@/lib/annual-report/gap-analysis-server";
 import { blockingGaps, isReportReady } from "@/lib/annual-report/gap-analysis";
 import { describeError } from "@/lib/errors";
+import { plannedPractices } from "@/lib/annual-report/planned-practices-server";
 
 /**
  * GET /api/properties/:idOrSlug/report-gaps?year=2026
@@ -33,9 +34,13 @@ export async function GET(
   }
 
   try {
-    const analysis = await analyzePropertyYear(propertyId, year);
+    const [analysis, planned] = await Promise.all([
+      analyzePropertyYear(propertyId, year),
+      plannedPractices(propertyId, year),
+    ]);
     return NextResponse.json({
       ...analysis,
+      planned,
       blockingCount: blockingGaps(analysis).length,
       ready: isReportReady(analysis),
     });
