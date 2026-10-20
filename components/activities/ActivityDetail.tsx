@@ -12,6 +12,10 @@ import EditActivityForm from "./EditActivityForm";
 
 interface ActivityDetailProps {
   activity: Activity;
+  /**
+   * The route's property param — a slug OR a uuid. For building URLs only;
+   * never write it to a uuid column (use `activity.propertyId` / `property.id`).
+   */
   propertyId: string;
   onUpdate?: (activity: Activity) => void;
   onDocsChange?: () => void;

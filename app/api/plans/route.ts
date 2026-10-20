@@ -2,6 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { mapPlanRow } from "@/lib/plan-serialize";
+import { resolvePropertyId } from "@/lib/field-log-server";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -13,7 +14,8 @@ const supabase = createClient(
 // existing plan rather than erroring. Used by the setup flow and anywhere a
 // landowner starts (or resumes) a plan.
 //
-// Body: { propertyId: string, year?: number }
+// Body: { propertyId: string, year?: number } — propertyId may be a slug or a
+// uuid; it is resolved (and ownership checked) before anything is written.
 export async function POST(request: Request) {
   const { userId } = await auth();
   if (!userId) {
@@ -27,20 +29,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const { propertyId } = body;
   const year = body.year ?? new Date().getFullYear();
-  if (!propertyId) {
+  if (!body.propertyId) {
     return NextResponse.json({ error: "Missing propertyId" }, { status: 400 });
   }
 
-  // Ownership: the property must belong to this user.
-  const { data: property } = await supabase
-    .from("properties")
-    .select("id")
-    .eq("id", propertyId)
-    .eq("user_id", userId)
-    .maybeSingle();
-  if (!property) {
+  // Ownership, and slug → uuid: a slug compared against properties.id fails
+  // the uuid cast and would read as "not found".
+  const propertyId = await resolvePropertyId(body.propertyId, userId);
+  if (!propertyId) {
     return NextResponse.json({ error: "Property not found" }, { status: 404 });
   }
 
