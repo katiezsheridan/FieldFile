@@ -4,6 +4,7 @@ import { resolvePropertyId } from "@/lib/field-log-server";
 import { analyzePropertyYear } from "@/lib/annual-report/gap-analysis-server";
 import { blockingGaps, isReportReady } from "@/lib/annual-report/gap-analysis";
 import { describeError } from "@/lib/errors";
+import { plannedPractices } from "@/lib/annual-report/planned-practices-server";
 import { getPeriodState } from "@/lib/annual-report/pwd888/period-server";
 
 /**
@@ -34,12 +35,14 @@ export async function GET(
   }
 
   try {
-    const [analysis, period] = await Promise.all([
+    const [analysis, planned, period] = await Promise.all([
       analyzePropertyYear(propertyId, year),
+      plannedPractices(propertyId, year),
       getPeriodState(userId, propertyId, year),
     ]);
     return NextResponse.json({
       ...analysis,
+      planned,
       blockingCount: blockingGaps(analysis).length,
       ready: isReportReady(analysis),
       submitted:

@@ -26,10 +26,11 @@ export type ContainerDraft = {
   locationLabel: string;
 };
 
-export function emptyDraft(): ContainerDraft {
+/** A blank draft, optionally pre-set to a practice (e.g. "Log it" from the plan). */
+export function emptyDraft(practiceCode: PracticeCode = "HC"): ContainerDraft {
   return {
-    practiceCode: "HC",
-    subActivityCode: "HC-01",
+    practiceCode,
+    subActivityCode: subActivitiesFor(practiceCode)[0]?.code ?? "",
     fieldValues: {},
     performedOn: new Date().toISOString().split("T")[0],
     performedThrough: "",
