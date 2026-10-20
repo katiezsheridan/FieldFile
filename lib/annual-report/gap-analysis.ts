@@ -181,13 +181,21 @@ export function analyzeReportGaps(input: GapAnalysisInput): GapAnalysis {
     }
 
     if (c.evidenceCount === 0) {
+      // Census data is counts. A census OBSERVATION documents itself once it
+      // has counts; a census ACTIVITY (Add Activity / field log) has nowhere
+      // to put counts, so it needs a photo or document — or the counts belong
+      // in the census section, where they alone are enough. Say so, and link
+      // there (see gapHref in links.ts), rather than only asking for a photo.
+      const censusActivity = c.source !== "census" && c.practiceCode === "CE";
       gaps.push({
-        key: `activity.${c.id}.evidence`,
+        key: censusActivity ? `activity.${c.id}.censusCounts` : `activity.${c.id}.evidence`,
         section: "Part V",
         label:
           c.source === "census"
             ? `"${name}" on ${c.performedOn ?? "an unknown date"} has no counts recorded. Record what you counted (a photo is optional) for it to count as documented.`
-            : `"${name}" has no photo or receipt attached. Part V asks you to attach supporting documentation.`,
+            : censusActivity
+              ? `"${name}" has no photo or document. If you counted wildlife, record the counts in the Census section — counts alone are enough, no photo needed. Or attach a photo to this activity.`
+              : `"${name}" has no photo or receipt attached. Part V asks you to attach supporting documentation.`,
         bucket: 3,
         severity: c.subActivityCode ? "blocking" : "warning",
       });

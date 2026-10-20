@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { PRACTICE_DEFS, SUB_ACTIVITY_BY_CODE } from "@/lib/sub-activities";
-import { containerHref, gapContainerId } from "@/lib/annual-report/links";
+import { containerHref, gapHref } from "@/lib/annual-report/links";
 import type { ReportGap } from "@/lib/annual-report/gap-analysis";
 import type { BlankBasis, ReportBlank } from "@/lib/annual-report/pwd888/combine";
 import type { AnnualReportPatch, PartIInput } from "@/lib/annual-report/pwd888/questions";
@@ -497,8 +497,8 @@ function FixList({ data, propertyId }: { data: ReviewResponse; propertyId: strin
 
   const entryFor = (code: string) => data.payload.partIV.find((e) => e.code === code);
   const hrefFor = (g: ReportGap): string | null => {
-    const cid = gapContainerId(g.key);
-    if (cid) return containerHref(propertyId, cid);
+    const direct = gapHref(propertyId, g.key);
+    if (direct) return direct;
     const m = /^report\.([A-Z]{2}-\d{2})\./.exec(g.key);
     const first = m ? entryFor(m[1])?.containerIds[0] : undefined;
     return first ? containerHref(propertyId, first) : null;
