@@ -25,10 +25,13 @@ export default function EditActivityForm({
   activity,
   onSaved,
   onCancel,
+  datesFromWorkLog = false,
 }: {
   activity: Activity;
   onSaved: () => void;
   onCancel: () => void;
+  /** Dates follow the work log; shown read-only. */
+  datesFromWorkLog?: boolean;
 }) {
   const [draft, setDraft] = useState<ContainerDraft | null>(null);
   const [subActivityIds, setSubActivityIds] = useState<Record<
@@ -140,7 +143,7 @@ export default function EditActivityForm({
         </div>
       )}
 
-      <ActivityContainerFields draft={draft} onChange={setDraft} />
+      <ActivityContainerFields draft={draft} onChange={setDraft} datesFromWorkLog={datesFromWorkLog} />
 
       <div className="mt-6">
         <FormError

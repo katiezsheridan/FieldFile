@@ -169,6 +169,21 @@ const cases: [string, () => void][] = [
     assert.ok(g && /Census section/.test(g.label) && g.severity === "blocking");
     assert.ok(!r.gaps.some((x) => x.key.endsWith(".evidence")));
   }],
+  ["work-log visits supply every date; a sum still counts the activity once", () => {
+    const feeder = { ...c("HC-02", "2026-01-03", { acres_burned: 10 }), visitDates: ["2026-01-03", "2026-04-04", "2026-10-06"] };
+    const r = assemblePwd888({ ...base, containers: [feeder] });
+    const e = r.payload.partIV[0];
+    assert.deepEqual(e.workDates, ["2026-01-03", "2026-04-04", "2026-10-06"]);
+    assert.deepEqual(e.blanks.find((b) => b.key === "burn_date")!.value, ["2026-01-03", "2026-04-04", "2026-10-06"]);
+    assert.equal(e.blanks.find((b) => b.key === "acres_burned")!.value, 10);
+  }],
+  ["spotlight nights logged as visits of ONE activity fill Dates A-C", () => {
+    const spot = { ...c("CE-01", "2026-09-06", { target_species: "deer" }), visitDates: ["2026-09-06", "2026-09-13", "2026-09-20"] };
+    const r = assemblePwd888({ ...base, containers: [spot] });
+    const slot = (k: string) => r.payload.partIV[0].blanks.find((b) => b.key === k)?.value;
+    assert.deepEqual([slot("date_a"), slot("date_b"), slot("date_c")], ["2026-09-06", "2026-09-13", "2026-09-20"]);
+    assert.ok(!r.gaps.some((g) => g.key.startsWith("report.CE-01.date_")));
+  }],
   ["exhibits are numbered in Part IV order", () => {
     const r = assemblePwd888({ ...base, containers: [c("CE-02", "2026-01-01", { target_species: "deer" }), c("HC-04", "2026-06-01", { acres_treated: 4 })] });
     assert.deepEqual(r.payload.partV.map((x) => [x.number, x.subActivityCode]), [[1, "HC-04"], [2, "CE-02"]]);

@@ -202,6 +202,7 @@ export function useActivity(activityId: string | undefined) {
         url: doc.url,
         storagePath: doc.storage_path ?? undefined,
         uploadedAt: doc.uploaded_at,
+        visitId: doc.visit_id ?? undefined,
         metadata: doc.gps_lat
           ? { gpsCoordinates: { lat: doc.gps_lat, lng: doc.gps_lng } }
           : undefined,
@@ -612,6 +613,9 @@ export async function createDocument(
     storagePath?: string;
     gpsLat?: number;
     gpsLng?: number;
+    /** Attach to a work-log visit. Omitted entirely when unset, so this still
+        works against a database without the work-log migration. */
+    visitId?: string;
   }
 ) {
   console.log("Creating document record:", { activityId, doc });
@@ -626,6 +630,7 @@ export async function createDocument(
       storage_path: doc.storagePath,
       gps_lat: doc.gpsLat,
       gps_lng: doc.gpsLng,
+      ...(doc.visitId ? { visit_id: doc.visitId } : {}),
     })
     .select()
     .single();

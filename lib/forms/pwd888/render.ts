@@ -263,7 +263,11 @@ const KIND: Record<Pwd888Exhibit["kind"], string> = {
 function exhibitTitle(x: Pwd888Exhibit): string {
   const kind = x.docType === "receipt" ? "Receipt" : KIND[x.kind];
   const sub = SUB_ACTIVITY_BY_CODE[x.subActivityCode];
-  const date = x.capturedAt ? fmtDate(x.capturedAt.slice(0, 10)) : "undated";
+  const date = x.visitDate
+    ? `visit of ${fmtDate(x.visitDate)}`
+    : x.capturedAt
+      ? fmtDate(x.capturedAt.slice(0, 10))
+      : "undated";
   return `${kind} — ${sub ? `${PRACTICE_DEF_BY_CODE[sub.practiceCode].name}: ${sub.name}` : x.subActivityCode}, ${date}`;
 }
 

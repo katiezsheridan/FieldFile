@@ -30,6 +30,8 @@ export type ReportEvidence = {
   storagePath: string | null;
   /** `census_record` only: what was counted, for the Part V data sheet. */
   censusCounts?: { species: string; count: number }[];
+  /** The work-log visit this shows, when it was attached to one (YYYY-MM-DD). */
+  visitDate?: string | null;
 };
 
 /** A unit of performed work: an activity row, or a census observation. */
@@ -42,6 +44,12 @@ export type ReportContainer = {
   practiceCode: PracticeCode | null;
   subActivityCode: string | null;
   performedOn: string | null;
+  /**
+   * Every day the work was done, from the work log. Empty for an activity
+   * without visits (and for census observations), which are their
+   * performedOn alone.
+   */
+  visitDates?: string[];
   fieldValues: Record<string, FieldValue>;
   evidence: ReportEvidence[];
 };

@@ -876,7 +876,11 @@ const EXHIBIT_KIND: Record<Pwd888Exhibit["kind"], string> = {
 
 function ExhibitRow({ exhibit: x }: { exhibit: Pwd888Exhibit }) {
   const kind = x.docType === "receipt" ? "Receipt" : EXHIBIT_KIND[x.kind];
-  const when = x.capturedAt ? fmtDate(x.capturedAt.slice(0, 10)) : null;
+  const when = x.visitDate
+    ? `visit of ${fmtDate(x.visitDate)}`
+    : x.capturedAt
+      ? fmtDate(x.capturedAt.slice(0, 10))
+      : null;
   return (
     <li className="text-sm text-field-ink">
       <span className="font-medium">Exhibit {x.number}</span>

@@ -52,6 +52,8 @@ export type Document = {
   url: string;
   storagePath?: string;
   uploadedAt: string;
+  /** The work-log visit this shows, if it was attached to one. */
+  visitId?: string;
   metadata?: {
     gpsCoordinates?: { lat: number; lng: number };
     timestamp?: string;
