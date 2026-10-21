@@ -12,6 +12,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
+import { resolvePropertyId } from "@/lib/field-log-server";
 import { buildPayload, type FilingAnswers } from "@/lib/forms/form50129/buildPayload";
 import { ownerProfileToRow, type OwnerProfileInput } from "@/lib/forms/form50129/serialize";
 import { signFilingPdf } from "@/lib/forms/form50129/storage";
@@ -27,26 +28,6 @@ type FilingStatus = (typeof FILING_STATUSES)[number];
 function resolveYear(raw: string | number | null | undefined): number {
   const n = Number(raw);
   return Number.isInteger(n) && n > 1900 ? n : new Date().getFullYear();
-}
-
-const UUID_RE =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-/**
- * Resolve a route param (UUID or slug) to the property's real UUID, scoped to
- * this user. Returns null if the property doesn't exist or isn't theirs.
- */
-async function resolvePropertyId(
-  param: string,
-  userId: string,
-): Promise<string | null> {
-  const { data } = await supabase
-    .from("properties")
-    .select("id")
-    .eq(UUID_RE.test(param) ? "id" : "slug", param)
-    .eq("user_id", userId)
-    .maybeSingle();
-  return data?.id ?? null;
 }
 
 /** Clerk account name/email, used to prefill Section 1 before a profile exists. */

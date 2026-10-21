@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { resolvePropertyRef } from "./property-slug";
 import type { PracticeCategory } from "@/lib/types";
 
 // Server-only data access for field-log entries. The 'field-log' bucket is
@@ -14,20 +15,12 @@ export const fieldLogDb = createClient(
 export const BUCKET = "field-log";
 export const SIGNED_URL_TTL = 60 * 60; // 1 hour
 
-// Resolve a UUID-or-slug route param to a property id the caller owns. Returns
-// undefined when there's no such property for this user (caller answers 404).
+// Resolve a route param — uuid, slug, or a slug from before a rename — to a
+// property id the caller owns. Undefined when there's no such property for
+// this user (caller answers 404). See resolvePropertyRef in lib/property-slug.
 export async function resolvePropertyId(idOrSlug: string, userId: string) {
-  const isUUID =
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
-      idOrSlug
-    );
-  const { data } = await fieldLogDb
-    .from("properties")
-    .select("id")
-    .eq(isUUID ? "id" : "slug", idOrSlug)
-    .eq("user_id", userId)
-    .single();
-  return data?.id as string | undefined;
+  const ref = await resolvePropertyRef(fieldLogDb, idOrSlug, userId);
+  return ref?.id;
 }
 
 export function mapEntry(e: any, signedUrl: string | null = null) {

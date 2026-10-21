@@ -12,6 +12,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
+import { resolvePropertyId } from "@/lib/field-log-server";
 import { buildPayload } from "@/lib/forms/form50129/buildPayload";
 import { fill50129 } from "@/lib/forms/form50129/fill";
 import {
@@ -31,23 +32,6 @@ const supabase = createClient(
 function resolveYear(raw: unknown): number {
   const n = Number(raw);
   return Number.isInteger(n) && n > 1900 ? n : new Date().getFullYear();
-}
-
-const UUID_RE =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-/** Resolve a UUID-or-slug param to the property's real UUID for this user. */
-async function resolvePropertyId(
-  param: string,
-  userId: string,
-): Promise<string | null> {
-  const { data } = await supabase
-    .from("properties")
-    .select("id")
-    .eq(UUID_RE.test(param) ? "id" : "slug", param)
-    .eq("user_id", userId)
-    .maybeSingle();
-  return data?.id ?? null;
 }
 
 export async function POST(
