@@ -110,7 +110,8 @@ export default function WorkLog({
     load();
   }, [load]);
 
-  const save = async (draft: Draft, visitId?: string) => {
+  /** Save the visit, then upload any files picked in the form onto it. */
+  const save = async (draft: Draft, visitId: string | undefined, files: File[]) => {
     setBusy(visitId ?? "new");
     setError(null);
     try {
@@ -130,6 +131,7 @@ export default function WorkLog({
         setError(body.error ?? "Could not save the visit");
         return false;
       }
+      if (files.length) await uploadTo(body.visit.id, files);
       await load();
       onChanged();
       return true;
@@ -152,12 +154,9 @@ export default function WorkLog({
     }
   };
 
-  const attach = async (visitId: string, files: FileList | null) => {
-    if (!files?.length) return;
-    setBusy(`photo:${visitId}`);
-    setError(null);
+  const uploadTo = async (visitId: string, files: File[]) => {
     try {
-      for (const file of Array.from(files)) {
+      for (const file of files) {
         const up = await uploadDocument(file, activity.id);
         if (!up) continue;
         await createDocument(activity.id, {
@@ -168,9 +167,18 @@ export default function WorkLog({
           visitId,
         });
       }
-      onChanged();
     } catch {
-      setError("Could not attach the file");
+      setError("The visit saved, but a file could not be attached. Try adding it again.");
+    }
+  };
+
+  const attach = async (visitId: string, files: FileList | null) => {
+    if (!files?.length) return;
+    setBusy(`photo:${visitId}`);
+    setError(null);
+    try {
+      await uploadTo(visitId, Array.from(files));
+      onChanged();
     } finally {
       setBusy(null);
     }
@@ -221,8 +229,8 @@ export default function WorkLog({
             saving={busy === "new"}
             submitLabel="Save visit"
             onCancel={() => setAdding(false)}
-            onSubmit={async (d) => {
-              if (await save(d)) setAdding(false);
+            onSubmit={async (d, files) => {
+              if (await save(d, undefined, files)) setAdding(false);
             }}
           />
         ) : (
@@ -253,8 +261,8 @@ export default function WorkLog({
                     saving={busy === v.id}
                     submitLabel="Save changes"
                     onCancel={() => setEditingId(null)}
-                    onSubmit={async (d) => {
-                      if (await save(d, v.id)) setEditingId(null);
+                    onSubmit={async (d, files) => {
+                      if (await save(d, v.id, files)) setEditingId(null);
                     }}
                   />
                 </li>
@@ -374,10 +382,11 @@ function VisitForm({
   max: string;
   saving: boolean;
   submitLabel: string;
-  onSubmit: (d: Draft) => void;
+  onSubmit: (d: Draft, files: File[]) => void;
   onCancel: () => void;
 }) {
   const [d, setD] = useState(initial);
+  const [files, setFiles] = useState<File[]>([]);
   const set = (k: keyof Draft) => (e: { target: { value: string } }) => setD((x) => ({ ...x, [k]: e.target.value }));
   return (
     <div className="mb-2 rounded-md border border-field-wheat bg-field-cream/50 p-4">
@@ -408,15 +417,44 @@ function VisitForm({
             <input className={inputCls} value={d.timeSpent} placeholder="2 hours" onChange={set("timeSpent")} />
           </label>
         </div>
+        <div className="sm:col-span-2">
+          <span className="mb-1 block text-xs font-medium text-field-earth">Photos or receipts</span>
+          <label className="inline-flex cursor-pointer items-center rounded-md border border-dashed border-field-wheat bg-white px-3 py-2 text-sm text-field-forest hover:border-field-forest">
+            + Choose files
+            <input
+              type="file"
+              accept="image/*,application/pdf"
+              multiple
+              className="hidden"
+              onChange={(e) => {
+                const picked = Array.from(e.target.files ?? []);
+                setFiles((f) => [...f, ...picked]);
+                e.target.value = "";
+              }}
+            />
+          </label>
+          {files.length > 0 && (
+            <ul className="mt-2 space-y-1">
+              {files.map((f, i) => (
+                <li key={`${f.name}-${i}`} className="flex items-center justify-between rounded bg-white px-2 py-1 text-xs text-field-ink">
+                  <span className="truncate">{f.name}</span>
+                  <button type="button" className="ml-3 text-field-terra hover:underline" onClick={() => setFiles((x) => x.filter((_, j) => j !== i))}>
+                    Remove
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
       <div className="mt-3 flex gap-3">
         <button
           type="button"
           disabled={saving || !d.visitedOn}
-          onClick={() => onSubmit(d)}
+          onClick={() => onSubmit(d, files)}
           className="rounded-lg bg-field-forest px-4 py-2 text-sm font-medium text-white hover:bg-field-forest/90 disabled:opacity-50"
         >
-          {saving ? "Saving…" : submitLabel}
+          {saving ? (files.length ? "Saving and uploading…" : "Saving…") : files.length ? `${submitLabel} + ${files.length} file${files.length === 1 ? "" : "s"}` : submitLabel}
         </button>
         <button type="button" onClick={onCancel} className="text-sm text-field-earth hover:underline">
           Cancel
