@@ -76,41 +76,14 @@ export default function ActivityDetail({
     return [];
   };
 
-  const [noteEntries, setNoteEntries] = useState(parseNotes(activity.notes));
-  const [newNote, setNewNote] = useState("");
-  // Defaults to today; set it back for work being logged after the fact.
-  const [noteDate, setNoteDate] = useState(texasDate());
+  // Read-only: notes from before the work log (new notes live on visits).
+  const [noteEntries] = useState(parseNotes(activity.notes));
   const [status, setStatus] = useState<ActivityStatus>(activity.status);
   const [dueDate, setDueDate] = useState(activity.dueDate || `${new Date().getFullYear()}-12-31`);
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
 
-  const saveNote = async () => {
-    if (!newNote.trim()) return;
-
-    const entry = { date: noteDate || texasDate(), text: newNote.trim() };
-    // Newest first, by the date the note is about, not when it was typed.
-    const updated = [entry, ...noteEntries].sort((a, b) => b.date.localeCompare(a.date));
-    setNoteEntries(updated);
-    setNewNote("");
-    setNoteDate(texasDate());
-
-    setIsSaving(true);
-    const { error } = await supabase
-      .from("activities")
-      .update({
-        notes: JSON.stringify(updated),
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", activity.id);
-
-    setIsSaving(false);
-    if (!error) {
-      setLastSaved(new Date());
-      onUpdate?.({ ...activity, notes: JSON.stringify(updated) });
-    }
-  };
 
   // Save status changes immediately
   const handleStatusChange = async (newStatus: ActivityStatus) => {
@@ -427,81 +400,29 @@ export default function ActivityDetail({
         )}
       </div>
 
-      {/* Notes */}
-      <div className="bg-white border border-field-wheat rounded-lg p-6">
-        <h2 className="text-lg font-semibold text-field-ink mb-4">
-          Activity Notes
-        </h2>
-
-        {/* New note input */}
-        <div className="mb-6">
-          <div className="flex items-center gap-2 mb-2">
-            <svg className="w-4 h-4 text-field-ink/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-            </svg>
-            <input
-              type="date"
-              aria-label="Date of this note"
-              value={noteDate}
-              max={texasDate()}
-              onChange={(e) => setNoteDate(e.target.value)}
-              className="rounded-md border border-field-wheat px-2 py-1 text-sm text-field-ink/70 focus:outline-none focus:ring-2 focus:ring-field-forest/20 focus:border-field-forest"
-            />
-          </div>
-          <textarea
-            value={newNote}
-            onChange={(e) => setNewNote(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && e.metaKey) {
-                e.preventDefault();
-                saveNote();
-              }
-            }}
-            placeholder="Add a note about what you did..."
-            className="w-full min-h-[80px] p-3 border border-field-wheat rounded-lg text-field-ink/80 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-field-forest/20 focus:border-field-forest"
-          />
-          <div className="flex items-center justify-between mt-2">
-            <span className="text-xs text-field-ink/40">
-              The note&apos;s date is a label. The date the annual report counts is the
-              activity&apos;s <strong>Date performed</strong> — change it with Edit above.
-            </span>
-            <button
-              onClick={saveNote}
-              disabled={!newNote.trim()}
-              className="px-4 py-1.5 bg-field-forest text-white text-sm font-medium rounded-lg hover:bg-field-forest/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-            >
-              Save note
-            </button>
-          </div>
-        </div>
-
-        {/* Previous notes */}
-        {noteEntries.length > 0 ? (
-          <div className="space-y-4 border-t border-field-wheat pt-4">
+      {/* Earlier notes. New notes go on work-log visits, each with its own date;
+          this only keeps notes written before the work log existed visible. */}
+      {noteEntries.length > 0 && (
+        <div className="bg-white border border-field-wheat rounded-lg p-6">
+          <h2 className="text-lg font-semibold text-field-ink mb-1">Earlier notes</h2>
+          <p className="text-sm text-field-earth mb-4">
+            Written before the work log. Add new notes to a visit in the work log above.
+          </p>
+          <div className="space-y-4">
             {noteEntries.map((entry, i) => (
               <div key={i} className="flex gap-3">
                 <div className="flex-shrink-0 w-1 bg-field-forest/20 rounded-full" />
                 <div>
                   <p className="text-xs font-medium text-field-ink/50 mb-1">
-                    {new Date(entry.date + "T12:00:00").toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
+                    {formatDate(entry.date)}
                   </p>
-                  <p className="text-sm text-field-ink/80 whitespace-pre-wrap">
-                    {entry.text}
-                  </p>
+                  <p className="text-sm text-field-ink/80 whitespace-pre-wrap">{entry.text}</p>
                 </div>
               </div>
             ))}
           </div>
-        ) : (
-          <p className="text-sm text-field-ink/40 border-t border-field-wheat pt-4">
-            No notes yet. Add your first note above.
-          </p>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Locations */}
       {activity.locations && activity.locations.length > 0 && (
