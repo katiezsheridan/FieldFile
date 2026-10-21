@@ -8,6 +8,7 @@ import {
   visibleFields,
 } from "@/lib/sub-activities";
 import { Activity, FieldValue, PracticeCode } from "@/lib/types";
+import { texasDate } from "@/lib/dates";
 import SubActivityFields from "./SubActivityFields";
 
 /**
@@ -32,7 +33,7 @@ export function emptyDraft(practiceCode: PracticeCode = "HC"): ContainerDraft {
     practiceCode,
     subActivityCode: subActivitiesFor(practiceCode)[0]?.code ?? "",
     fieldValues: {},
-    performedOn: new Date().toISOString().split("T")[0],
+    performedOn: texasDate(),
     performedThrough: "",
     multiDay: false,
     locationLabel: "",
@@ -52,7 +53,7 @@ export function draftFromActivity(
       activity.performedOn ??
       activity.completedDate ??
       activity.dueDate ??
-      new Date().toISOString().split("T")[0],
+      texasDate(),
     performedThrough: activity.performedThrough ?? "",
     multiDay: Boolean(activity.performedThrough),
     locationLabel: activity.locationLabel ?? "",
