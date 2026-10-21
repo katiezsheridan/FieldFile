@@ -8,6 +8,7 @@ import {
   type FieldDef,
 } from "@/lib/sub-activities";
 import { Activity, FieldValue } from "@/lib/types";
+import { formatDate } from "@/lib/utils";
 
 /**
  * Read-only view of what this activity will put on PWD-888 Part IV: the
@@ -90,8 +91,8 @@ export default function ActivityReportDetails({
       {activity.performedOn && (
         <p className="text-sm text-field-ink mb-4">
           <span className="text-field-ink/60">Performed:</span>{" "}
-          {activity.performedOn}
-          {activity.performedThrough && <> to {activity.performedThrough}</>}
+          {formatDate(activity.performedOn)}
+          {activity.performedThrough && <> – {formatDate(activity.performedThrough)}</>}
           {activity.locationLabel && <> · {activity.locationLabel}</>}
         </p>
       )}

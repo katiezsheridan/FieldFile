@@ -9,6 +9,7 @@ import { updateDocumentName, deleteDocumentRecord } from "@/lib/hooks";
 import ActivityChecklist from "./ActivityChecklist";
 import ActivityReportDetails from "./ActivityReportDetails";
 import EditActivityForm from "./EditActivityForm";
+import WorkLog from "./WorkLog";
 
 interface ActivityDetailProps {
   activity: Activity;
@@ -28,6 +29,7 @@ export default function ActivityDetail({
   onDocsChange,
 }: ActivityDetailProps) {
   const [editingContainer, setEditingContainer] = useState(false);
+  const [visitCount, setVisitCount] = useState(0);
   const [editingDocId, setEditingDocId] = useState<string | null>(null);
   const [docDraftName, setDocDraftName] = useState("");
   const [docBusyId, setDocBusyId] = useState<string | null>(null);
@@ -260,18 +262,9 @@ export default function ActivityDetail({
 
         {/* Dates */}
         <div className="flex flex-wrap items-center gap-6 text-sm">
-          <div className="flex items-center gap-2">
-            <span className="text-field-ink/60">Due date:</span>
-            <input
-              type="date"
-              value={dueDate}
-              onChange={(e) => handleDueDateChange(e.target.value)}
-              className="px-2 py-1 border border-field-wheat rounded-lg text-field-ink font-medium text-sm focus:outline-none focus:ring-2 focus:ring-field-forest/20 focus:border-field-forest"
-            />
-          </div>
           {activity.completedDate && (
             <div>
-              <span className="text-field-ink/60">Completed:</span>{" "}
+              <span className="text-field-ink/60">Last done:</span>{" "}
               <span className="text-field-ink font-medium">
                 {formatDate(activity.completedDate)}
               </span>
@@ -284,6 +277,7 @@ export default function ActivityDetail({
       {editingContainer ? (
         <EditActivityForm
           activity={activity}
+          datesFromWorkLog={visitCount > 0}
           onSaved={() => {
             setEditingContainer(false);
             onDocsChange?.();
@@ -296,6 +290,14 @@ export default function ActivityDetail({
           onEdit={() => setEditingContainer(true)}
         />
       )}
+
+      {/* Every time the work was done — the activity's dates follow this. */}
+      <WorkLog
+        activity={activity}
+        propertyId={propertyId}
+        onChanged={() => onDocsChange?.()}
+        onCountChange={setVisitCount}
+      />
 
       {/* Evidence Checklist */}
       <div className="bg-white border border-field-wheat rounded-lg p-6">

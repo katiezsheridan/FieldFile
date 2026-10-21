@@ -89,9 +89,12 @@ const inputClass =
 export default function ActivityContainerFields({
   draft,
   onChange,
+  datesFromWorkLog = false,
 }: {
   draft: ContainerDraft;
   onChange: (next: ContainerDraft) => void;
+  /** The activity has work-log visits, so its dates follow them and aren't edited here. */
+  datesFromWorkLog?: boolean;
 }) {
   const subActivities = useMemo(
     () => subActivitiesFor(draft.practiceCode),
@@ -159,18 +162,30 @@ export default function ActivityContainerFields({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-field-ink mb-1">
-            Date performed
+            {datesFromWorkLog ? "Dates" : "Date performed"}
           </label>
-          <input
-            type="date"
-            value={draft.performedOn}
-            onChange={(e) => onChange({ ...draft, performedOn: e.target.value })}
-            required
-            className={inputClass}
-          />
-          <p className="mt-1 text-xs text-field-earth">
-            The date the work happened — this is the year it counts toward.
-          </p>
+          {datesFromWorkLog ? (
+            <p className="rounded-md border border-field-wheat bg-field-mist/50 px-3 py-2 text-sm text-field-ink">
+              {draft.performedOn}
+              {draft.performedThrough && ` to ${draft.performedThrough}`}
+              <span className="block text-xs text-field-earth">
+                From the work log — add, edit or remove visits there.
+              </span>
+            </p>
+          ) : (
+            <>
+              <input
+                type="date"
+                value={draft.performedOn}
+                onChange={(e) => onChange({ ...draft, performedOn: e.target.value })}
+                required
+                className={inputClass}
+              />
+              <p className="mt-1 text-xs text-field-earth">
+                The first time you did it — this is the year it counts toward.
+              </p>
+            </>
+          )}
         </div>
         <div>
           <label className="block text-sm font-medium text-field-ink mb-1">
@@ -188,33 +203,14 @@ export default function ActivityContainerFields({
         </div>
       </div>
 
-      <div>
-        <label className="flex items-center gap-2 text-sm text-field-ink">
-          <input
-            type="checkbox"
-            checked={draft.multiDay}
-            onChange={(e) =>
-              onChange({
-                ...draft,
-                multiDay: e.target.checked,
-                performedThrough: e.target.checked ? draft.performedThrough : "",
-              })
-            }
-          />
-          <span>This work spanned more than one day</span>
-        </label>
-        {draft.multiDay && (
-          <input
-            type="date"
-            value={draft.performedThrough}
-            onChange={(e) =>
-              onChange({ ...draft, performedThrough: e.target.value })
-            }
-            min={draft.performedOn}
-            className={`${inputClass} mt-2`}
-          />
-        )}
-      </div>
+      {/* Repeated work is logged as visits on the activity page, not as a
+          date range here: each time gets its own date, notes and photos. */}
+      {!datesFromWorkLog && (
+        <p className="text-xs text-field-earth">
+          Did this more than once this year? After saving, log each time in the activity&apos;s
+          work log — each visit gets its own date, notes and photos.
+        </p>
+      )}
 
       {subActivity && (
         <div className="border-t border-field-wheat pt-4">

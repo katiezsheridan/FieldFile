@@ -105,6 +105,7 @@ export function assemblePwd888(input: AssemblyInput): Pwd888Assembly {
     const contributions: Contribution[] = group.map((c) => ({
       containerId: c.id,
       performedOn: c.performedOn!,
+      workDates: c.visitDates,
       fieldValues: c.fieldValues,
       fromCensus: c.source === "census",
     }));
@@ -137,7 +138,9 @@ export function assemblePwd888(input: AssemblyInput): Pwd888Assembly {
       practiceCode: sub.practiceCode,
       name: sub.name,
       containerIds: group.map((c) => c.id),
-      workDates: Array.from(new Set(group.map((c) => c.performedOn!))),
+      workDates: Array.from(
+        new Set(group.flatMap((c) => (c.visitDates?.length ? c.visitDates : [c.performedOn!])))
+      ).sort(),
       blanks: combined.blanks,
       overflowDates: combined.overflowDates,
     });

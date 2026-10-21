@@ -9,6 +9,7 @@
  */
 
 import { createClient } from "@supabase/supabase-js";
+import { isMissingSchemaError } from "@/lib/errors";
 import { getMethodLabel, getSpeciesLabel } from "@/lib/census-species";
 import { isPracticeCode } from "@/lib/practices";
 import type { CensusMethod, FieldValue, PracticeCode } from "@/lib/types";
@@ -35,6 +36,8 @@ type DocRow = {
   gps_lng: number | null;
   caption: string | null;
   caption_source: string | null;
+  /** Absent before the work-log migration. */
+  visit_id?: string | null;
 };
 
 const DOC_COLUMNS =
@@ -43,12 +46,19 @@ const DOC_COLUMNS =
 const docType = (t: string | null): ReportEvidence["docType"] =>
   t === "receipt" || t === "note" ? t : "photo";
 
-function documentEvidence(d: DocRow, kind: ReportEvidence["kind"]): ReportEvidence {
+function documentEvidence(
+  d: DocRow,
+  kind: ReportEvidence["kind"],
+  visitDate: string | null = null
+): ReportEvidence {
   return {
     id: d.id,
     kind,
     docType: docType(d.type),
-    capturedAt: d.captured_at ?? d.taken_at ?? d.uploaded_at,
+    // The visit's day beats the upload time: a photo of January's feeder fill
+    // uploaded in October is still January's evidence.
+    capturedAt: d.captured_at ?? d.taken_at ?? visitDate ?? d.uploaded_at,
+    visitDate,
     // An AI-proposed caption is not an assertion until someone confirms it.
     caption: d.caption_source === "ai_proposed" ? null : d.caption,
     lat: d.captured_lat ?? d.gps_lat,
@@ -90,27 +100,32 @@ async function activityContainers(
   const activities = rows ?? [];
   const ids = activities.map((a) => a.id);
 
-  const [docs, captures] = ids.length
+  const [docs, captures, visits] = ids.length
     ? await Promise.all([
-        db.from("documents").select(DOC_COLUMNS).in("activity_id", ids),
+        documentsFor("activity_id", ids),
         db
           .from("field_log_entries")
           .select("id, activity_id, photo_path, captured_at, latitude, longitude, note")
           .in("activity_id", ids)
           .not("photo_path", "is", null),
+        visitsFor(ids),
       ])
-    : [{ data: [] as DocRow[] }, { data: [] }];
+    : [{ data: [] as DocRow[] }, { data: [] }, [] as VisitRow[]];
 
   // A failed evidence query must throw, not read as "no evidence" — the latter
   // quietly drops every practice below the floor.
   for (const r of [docs, captures]) if ("error" in r && r.error) throw r.error;
   const docsBy = groupBy((docs.data ?? []) as DocRow[], (d) => d.activity_id);
+  const visitsBy = groupBy(visits, (v) => v.activity_id);
+  const visitDate = new Map(visits.map((v) => [v.id, v.visited_on]));
   const capsBy = groupBy(captures.data ?? [], (c) => c.activity_id as string | null);
 
   return activities.map((a) => {
     const joined = a.sub_activities as { code?: string } | null;
     const evidence: ReportEvidence[] = [
-      ...(docsBy.get(a.id) ?? []).map((d) => documentEvidence(d, "document")),
+      ...(docsBy.get(a.id) ?? []).map((d) =>
+        documentEvidence(d, "document", d.visit_id ? visitDate.get(d.visit_id) ?? null : null)
+      ),
       ...(capsBy.get(a.id) ?? []).map((c) => ({
         id: c.id,
         kind: "field_log" as const,
@@ -129,10 +144,37 @@ async function activityContainers(
       practiceCode: isPracticeCode(a.practice_code) ? (a.practice_code as PracticeCode) : null,
       subActivityCode: joined?.code ?? null,
       performedOn: a.performed_on ?? null,
+      visitDates: Array.from(new Set((visitsBy.get(a.id) ?? []).map((v) => v.visited_on))).sort(),
       fieldValues: (a.field_values ?? {}) as Record<string, FieldValue>,
       evidence,
     };
   });
+}
+
+type VisitRow = { id: string; activity_id: string; visited_on: string };
+
+/** Work-log visits for these activities; none before the work-log migration. */
+async function visitsFor(activityIds: string[]): Promise<VisitRow[]> {
+  const { data, error } = await db
+    .from("activity_visits")
+    .select("id, activity_id, visited_on")
+    .in("activity_id", activityIds);
+  if (error) {
+    if (isMissingSchemaError(error)) return [];
+    throw error;
+  }
+  return (data ?? []).map((v) => ({ ...v, visited_on: String(v.visited_on) }));
+}
+
+/**
+ * Documents by activity or observation, with their visit link when the
+ * work-log migration has added documents.visit_id — and without it otherwise,
+ * so the report keeps working on either side of the migration.
+ */
+async function documentsFor(column: "activity_id" | "observation_id", ids: string[]) {
+  const withVisit = await db.from("documents").select(`${DOC_COLUMNS}, visit_id`).in(column, ids);
+  if (!withVisit.error || !isMissingSchemaError(withVisit.error)) return withVisit;
+  return db.from("documents").select(DOC_COLUMNS).in(column, ids);
 }
 
 type CountRow = {
@@ -177,7 +219,7 @@ async function censusContainers(
         "observation_id, category, species, count_total, count_buck, count_doe, count_fawn, count_male, count_female, count_juvenile, count_unknown"
       )
       .in("observation_id", ids),
-    db.from("documents").select(DOC_COLUMNS).in("observation_id", ids),
+    documentsFor("observation_id", ids),
   ]);
   if (countRes.error) throw countRes.error;
   if (photoRes.error) throw photoRes.error;

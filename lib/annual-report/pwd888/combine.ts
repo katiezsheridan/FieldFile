@@ -20,6 +20,8 @@ import type { FieldValue } from "@/lib/types";
 export type Contribution = {
   containerId: string;
   performedOn: string;
+  /** Every day the work was done (work-log visits); defaults to [performedOn]. */
+  workDates?: string[];
   fieldValues: Record<string, FieldValue>;
   /** True when the values came from a census record, not typed by the landowner. */
   fromCensus: boolean;
@@ -60,6 +62,9 @@ export type CombinedSubActivity = {
 };
 
 const formLabelOf = (f: FieldDef) => f.formLabel ?? f.label;
+
+/** The days a contribution's work was done: its visits, else its one date. */
+const datesOf = (c: Contribution) => (c.workDates?.length ? c.workDates : [c.performedOn]);
 
 /**
  * Empty, for the purposes of the form. Zero counts as empty: the add-activity
@@ -114,7 +119,7 @@ function combineField(
     });
     const fromWorkDates = contributions
       .filter((c) => isBlank(c.fieldValues[field.key]))
-      .map((c) => c.performedOn);
+      .flatMap(datesOf);
     const all = distinctSorted([...entered, ...fromWorkDates]);
     if (all.length === 0) return null;
     const basis: BlankBasis =
@@ -200,7 +205,7 @@ export function combineSubActivity(
     );
     const fromWorkDates = contributions
       .filter((c) => sub.dateSlots!.every((k) => isBlank(c.fieldValues[k])))
-      .map((c) => c.performedOn);
+      .flatMap(datesOf);
     const pooled = distinctSorted([...entered, ...fromWorkDates]);
     sub.dateSlots.forEach((key, i) => {
       if (!pooled[i]) return;
@@ -212,7 +217,7 @@ export function combineSubActivity(
         basis: entered.includes(pooled[i]) ? basisFor(contributions) : "derived",
         sourceIds: contributions
           .filter((c) =>
-            c.performedOn === pooled[i] ||
+            datesOf(c).includes(pooled[i]) ||
             sub.dateSlots!.some((k) => c.fieldValues[k] === pooled[i])
           )
           .map((c) => c.containerId),

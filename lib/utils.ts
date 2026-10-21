@@ -6,7 +6,10 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function formatDate(date: string): string {
-  return new Date(date).toLocaleDateString("en-US", {
+  // A bare YYYY-MM-DD parses as UTC midnight, which is the previous evening in
+  // Texas — "2026-01-03" would read Jan 2. Read it as a local calendar date.
+  const d = /^\d{4}-\d{2}-\d{2}$/.test(date) ? new Date(`${date}T12:00:00`) : new Date(date);
+  return d.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
