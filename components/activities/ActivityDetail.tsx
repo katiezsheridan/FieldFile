@@ -9,6 +9,7 @@ import { updateDocumentName, deleteDocumentRecord } from "@/lib/hooks";
 import ActivityChecklist from "./ActivityChecklist";
 import ActivityReportDetails from "./ActivityReportDetails";
 import EditActivityForm from "./EditActivityForm";
+import { texasDate } from "@/lib/dates";
 
 interface ActivityDetailProps {
   activity: Activity;
@@ -67,7 +68,7 @@ export default function ActivityDetail({
     } catch {
       // Legacy plain text — migrate to a single dated entry
       if (raw.trim()) {
-        return [{ date: new Date().toISOString().split("T")[0], text: raw }];
+        return [{ date: texasDate(), text: raw }];
       }
     }
     return [];
@@ -75,28 +76,23 @@ export default function ActivityDetail({
 
   const [noteEntries, setNoteEntries] = useState(parseNotes(activity.notes));
   const [newNote, setNewNote] = useState("");
+  // Defaults to today; set it back for work being logged after the fact.
+  const [noteDate, setNoteDate] = useState(texasDate());
   const [status, setStatus] = useState<ActivityStatus>(activity.status);
   const [dueDate, setDueDate] = useState(activity.dueDate || `${new Date().getFullYear()}-12-31`);
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
-  const today = new Date().toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
 
   const saveNote = async () => {
     if (!newNote.trim()) return;
 
-    const entry = {
-      date: new Date().toISOString().split("T")[0],
-      text: newNote.trim(),
-    };
-    const updated = [entry, ...noteEntries];
+    const entry = { date: noteDate || texasDate(), text: newNote.trim() };
+    // Newest first, by the date the note is about, not when it was typed.
+    const updated = [entry, ...noteEntries].sort((a, b) => b.date.localeCompare(a.date));
     setNoteEntries(updated);
     setNewNote("");
+    setNoteDate(texasDate());
 
     setIsSaving(true);
     const { error } = await supabase
@@ -126,7 +122,7 @@ export default function ActivityDetail({
 
     // Set completed_date when marking as complete
     if (newStatus === "complete") {
-      updates.completed_date = new Date().toISOString().split("T")[0];
+      updates.completed_date = texasDate();
     } else if (activity.status === "complete") {
       // Clear completed_date when changing away from complete
       updates.completed_date = null;
@@ -145,7 +141,7 @@ export default function ActivityDetail({
         status: newStatus,
         completedDate:
           newStatus === "complete"
-            ? new Date().toISOString().split("T")[0]
+            ? texasDate()
             : undefined,
       });
     }
@@ -441,7 +437,14 @@ export default function ActivityDetail({
             <svg className="w-4 h-4 text-field-ink/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
             </svg>
-            <span className="text-sm text-field-ink/50">{today}</span>
+            <input
+              type="date"
+              aria-label="Date of this note"
+              value={noteDate}
+              max={texasDate()}
+              onChange={(e) => setNoteDate(e.target.value)}
+              className="rounded-md border border-field-wheat px-2 py-1 text-sm text-field-ink/70 focus:outline-none focus:ring-2 focus:ring-field-forest/20 focus:border-field-forest"
+            />
           </div>
           <textarea
             value={newNote}
@@ -452,12 +455,13 @@ export default function ActivityDetail({
                 saveNote();
               }
             }}
-            placeholder="Add a note about what you did today..."
+            placeholder="Add a note about what you did..."
             className="w-full min-h-[80px] p-3 border border-field-wheat rounded-lg text-field-ink/80 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-field-forest/20 focus:border-field-forest"
           />
           <div className="flex items-center justify-between mt-2">
             <span className="text-xs text-field-ink/40">
-              This note will be saved with today&apos;s date
+              The note&apos;s date is a label. The date the annual report counts is the
+              activity&apos;s <strong>Date performed</strong> — change it with Edit above.
             </span>
             <button
               onClick={saveNote}

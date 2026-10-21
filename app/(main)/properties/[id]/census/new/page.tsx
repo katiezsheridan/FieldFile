@@ -14,6 +14,7 @@ import type { CensusMethod } from "@/lib/types";
 import CensusLocationPicker from "@/components/census/CensusLocationPickerWrapper";
 import { FileUploader } from "@/components/documents/FileUploader";
 import { uploadObservationPhoto } from "@/lib/supabase";
+import { texasDate } from "@/lib/dates";
 
 type SpeciesEntry = {
   categoryId: string;
@@ -515,7 +516,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 function todayISO() {
-  return new Date().toISOString().slice(0, 10);
+  return texasDate();
 }
 
 function toNum(v: string | undefined): number | null {

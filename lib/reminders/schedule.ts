@@ -11,6 +11,8 @@
  * nudge, not a backlog of three emails.
  */
 
+import { texasDate } from "@/lib/dates";
+
 export type ReminderKind = "activities" | "report";
 
 export type DueReminder = {
@@ -43,9 +45,7 @@ const daysBetween = (from: string, to: string) =>
   Math.round((Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / 86_400_000);
 
 /** Today's calendar date in Texas (America/Chicago), YYYY-MM-DD. */
-export function texasToday(now: Date = new Date()): string {
-  return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Chicago" }).format(now);
-}
+export const texasToday = (now: Date = new Date()): string => texasDate(now);
 
 /** The reminders due on `today` (YYYY-MM-DD), before any per-property check. */
 export function dueReminders(today: string): DueReminder[] {
