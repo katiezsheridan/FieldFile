@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { gapHref } from "@/lib/annual-report/links";
 import type { GapAnalysis, ReportGap } from "@/lib/annual-report/gap-analysis";
@@ -31,6 +31,7 @@ export default function ReportReadinessCard({
   taxYear,
   onLogPractice,
   refreshKey,
+  onSummary,
 }: {
   propertyId: string;
   taxYear: number;
@@ -38,8 +39,14 @@ export default function ReportReadinessCard({
   onLogPractice?: (code: PracticeCode) => void;
   /** Bump to re-read, e.g. after an activity is added on the same page. */
   refreshKey?: number;
+  /** Told the count whenever it loads, for a summary elsewhere on the page. */
+  onSummary?: (s: { qualifying: number; meetsMinimum: boolean }) => void;
 }) {
   const [data, setData] = useState<GapResponse | null>(null);
+  // Latest callback without making it an effect dependency (a parent's inline
+  // setter would otherwise re-fetch on every render).
+  const onSummaryRef = useRef(onSummary);
+  onSummaryRef.current = onSummary;
   const [loading, setLoading] = useState(true);
   const [showAll, setShowAll] = useState(false);
 
@@ -53,6 +60,7 @@ export default function ReportReadinessCard({
       .then((d) => {
         if (active) {
           setData(d);
+          if (d) onSummaryRef.current?.({ qualifying: d.qualifyingPractices, meetsMinimum: d.meetsMinimum });
           setLoading(false);
         }
       })
@@ -88,7 +96,8 @@ export default function ReportReadinessCard({
               : "text-sm font-medium text-field-terra"
           }
         >
-          {qualifyingPractices} of 3 required
+          {meetsMinimum ? "✓ " : ""}
+          {qualifyingPractices} of 7 practices · 3 required
         </span>
       </div>
 

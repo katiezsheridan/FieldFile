@@ -10,6 +10,7 @@ import ActivityChecklist from "./ActivityChecklist";
 import ActivityReportDetails from "./ActivityReportDetails";
 import EditActivityForm from "./EditActivityForm";
 import WorkLog from "./WorkLog";
+import ActivityNotes from "./ActivityNotes";
 import { texasDate } from "@/lib/dates";
 
 interface ActivityDetailProps {
@@ -61,23 +62,7 @@ export default function ActivityDetail({
       setDocBusyId(null);
     }
   };
-  // Parse notes as dated entries (JSON array) or migrate from plain string
-  const parseNotes = (raw: string): { date: string; text: string }[] => {
-    if (!raw) return [];
-    try {
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) return parsed;
-    } catch {
-      // Legacy plain text — migrate to a single dated entry
-      if (raw.trim()) {
-        return [{ date: texasDate(), text: raw }];
-      }
-    }
-    return [];
-  };
 
-  // Read-only: notes from before the work log (new notes live on visits).
-  const [noteEntries] = useState(parseNotes(activity.notes));
   const [status, setStatus] = useState<ActivityStatus>(activity.status);
   const [dueDate, setDueDate] = useState(activity.dueDate || `${new Date().getFullYear()}-12-31`);
   const [isSaving, setIsSaving] = useState(false);
@@ -400,29 +385,8 @@ export default function ActivityDetail({
         )}
       </div>
 
-      {/* Earlier notes. New notes go on work-log visits, each with its own date;
-          this only keeps notes written before the work log existed visible. */}
-      {noteEntries.length > 0 && (
-        <div className="bg-white border border-field-wheat rounded-lg p-6">
-          <h2 className="text-lg font-semibold text-field-ink mb-1">Earlier notes</h2>
-          <p className="text-sm text-field-earth mb-4">
-            Written before the work log. Add new notes to a visit in the work log above.
-          </p>
-          <div className="space-y-4">
-            {noteEntries.map((entry, i) => (
-              <div key={i} className="flex gap-3">
-                <div className="flex-shrink-0 w-1 bg-field-forest/20 rounded-full" />
-                <div>
-                  <p className="text-xs font-medium text-field-ink/50 mb-1">
-                    {formatDate(entry.date)}
-                  </p>
-                  <p className="text-sm text-field-ink/80 whitespace-pre-wrap">{entry.text}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Notes about the activity as a whole, editable any time. */}
+      <ActivityNotes activity={activity} />
 
       {/* Locations */}
       {activity.locations && activity.locations.length > 0 && (

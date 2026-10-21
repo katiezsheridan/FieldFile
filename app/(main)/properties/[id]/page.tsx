@@ -34,6 +34,7 @@ export default function PropertyPage() {
   // Set by "Log it" on a planned practice: opens Add Activity on that practice.
   const [logPractice, setLogPractice] = useState<{ code: PracticeCode; at: number } | null>(null);
   const [readinessKey, setReadinessKey] = useState(0);
+  const [summary, setSummary] = useState<{ qualifying: number; meetsMinimum: boolean } | null>(null);
   const startLogging = useCallback((code: PracticeCode) => {
     setLogPractice({ code, at: Date.now() });
     setShowAddForm(true);
@@ -134,10 +135,7 @@ export default function PropertyPage() {
     );
   }
 
-  const completedCount = property.activities.filter(
-    (a) => a.status === "complete"
-  ).length;
-  const totalCount = property.activities.length;
+  const activityCount = property.activities.length;
 
   return (
     <div className="min-h-full bg-field-cream">
@@ -158,62 +156,27 @@ export default function PropertyPage() {
                 </span>
               </div>
             </div>
-            <div className="text-right">
-              <div className="text-3xl font-bold text-field-forest">
-                {completedCount}/{totalCount}
+            {/* The number that matters: practices documented for this year,
+                as the readiness card below counts them. */}
+            {summary && (
+              <div className="text-right">
+                <div
+                  className={
+                    summary.meetsMinimum
+                      ? "text-3xl font-bold text-field-forest"
+                      : "text-3xl font-bold text-field-terra"
+                  }
+                >
+                  {summary.qualifying} of 3
+                </div>
+                <div className="text-sm text-field-ink/60">
+                  practices documented for {new Date().getFullYear()}
+                  {summary.meetsMinimum ? " ✓" : ""}
+                </div>
               </div>
-              <div className="text-sm text-field-ink/60">
-                activities complete
-              </div>
-            </div>
+            )}
           </div>
         </div>
-
-        {/* Field log — mobile capture of geotagged practice evidence */}
-        <Link
-          href={`/properties/${id}/field-log`}
-          className="group flex items-center gap-4 bg-white border border-field-wheat rounded-lg p-5 hover:border-field-forest/50 transition-colors"
-        >
-          <div className="shrink-0 w-11 h-11 rounded-lg bg-field-forest/10 flex items-center justify-center text-field-forest">
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={1.5}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"
-              />
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z"
-              />
-            </svg>
-          </div>
-          <div className="min-w-0 flex-1">
-            <h2 className="text-xl font-semibold text-field-ink">Field log</h2>
-            <p className="text-sm text-field-earth mt-0.5">
-              Capture geotagged, timestamped photo evidence from the field.
-            </p>
-          </div>
-          <svg
-            className="w-5 h-5 shrink-0 text-field-earth group-hover:text-field-forest transition-colors"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M8.25 4.5l7.5 7.5-7.5 7.5"
-            />
-          </svg>
-        </Link>
 
         {/* 1-d-1 application — assemble & generate the Form 50-129 to file.
             Only offered to landowners who told us at setup that they do not
@@ -272,13 +235,14 @@ export default function PropertyPage() {
             taxYear={new Date().getFullYear()}
             onLogPractice={startLogging}
             refreshKey={readinessKey}
+            onSummary={setSummary}
           />
         </div>
 
         {/* Activities with inline evidence */}
         <CollapsibleSection
           title="Wildlife Management Activities"
-          summary={`${completedCount}/${totalCount} complete`}
+          summary={`${activityCount} ${activityCount === 1 ? "activity" : "activities"}`}
           openSignal={logPractice?.at}
         >
           <div className="space-y-4">

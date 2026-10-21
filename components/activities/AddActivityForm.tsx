@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { createActivity, createDocument, fetchSubActivityIdMap } from "@/lib/hooks";
 import { uploadDocument } from "@/lib/supabase";
 import type { PracticeCode } from "@/lib/types";
+import { texasDate } from "@/lib/dates";
 import {
   PRACTICE_DEF_BY_CODE,
   SUB_ACTIVITY_BY_CODE,
@@ -88,7 +89,10 @@ export default function AddActivityForm({
         description: `${practice.name} — ${sub.name}`,
         status: "in_progress",
         requiredEvidence: [],
-        notes,
+        // Same shape as the activity page's Notes card: dated entries.
+        notes: notes.trim()
+          ? JSON.stringify([{ date: texasDate(), text: notes.trim() }])
+          : "",
         dueDate: draft.performedOn,
         completedDate: draft.performedOn,
         practiceCode: draft.practiceCode,
@@ -212,7 +216,7 @@ export default function AddActivityForm({
             ))}
           </ul>
         )}
-        <EvidenceUploader onUpload={handleStage} />
+        <EvidenceUploader onUpload={handleStage} actionLabel="Add to this activity" variant="secondary" />
       </div>
 
       <div className="mt-6">
@@ -223,13 +227,17 @@ export default function AddActivityForm({
         />
       </div>
 
-      <div className="flex gap-3 mt-4">
+      <div className="flex flex-wrap items-center gap-3 mt-6 border-t border-field-wheat pt-5">
         <button
           type="submit"
           disabled={saving || (!subActivityIds && !catalogMissing)}
-          className="px-4 py-2 bg-field-forest text-white font-medium rounded-lg hover:bg-field-forest/90 disabled:opacity-50"
+          className="px-6 py-3 bg-field-forest text-white text-base font-semibold rounded-lg hover:bg-field-forest/90 disabled:opacity-50"
         >
-          {saving ? "Adding..." : "Add Activity"}
+          {saving
+            ? "Saving…"
+            : pendingDocs.length
+              ? `Save activity + ${pendingDocs.length} file${pendingDocs.length === 1 ? "" : "s"}`
+              : "Save activity"}
         </button>
         <button
           type="button"

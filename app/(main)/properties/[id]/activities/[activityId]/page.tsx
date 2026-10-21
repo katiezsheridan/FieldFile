@@ -140,7 +140,9 @@ export default function ActivityDetailPage() {
         {showUploader && (
           <div className="mt-8 bg-white border border-field-wheat rounded-lg p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-field-ink">Upload Evidence</h3>
+              <h3 className="text-lg font-semibold text-field-ink">
+                Add a photo or receipt to the whole activity
+              </h3>
               <button
                 onClick={() => setShowUploader(false)}
                 className="text-field-ink/60 hover:text-field-ink"
@@ -150,20 +152,24 @@ export default function ActivityDetailPage() {
                 </svg>
               </button>
             </div>
-            <EvidenceUploader onUpload={handleUpload} uploading={uploading} />
+            <EvidenceUploader onUpload={handleUpload} uploading={uploading} actionLabel="Upload" />
           </div>
         )}
 
-        {/* Upload Evidence Button */}
+        {/* Activity-level evidence. Secondary: photos of a particular time go
+            on that visit in the work log, which is where most belong. */}
         {!showUploader && (
-          <div className="mt-8">
+          <div className="mt-6">
             <button
               type="button"
               onClick={() => setShowUploader(true)}
-              className="w-full sm:w-auto px-6 py-3 bg-field-forest text-white font-medium rounded-lg hover:bg-field-forest/90 transition-colors"
+              className="px-4 py-2 border border-field-forest text-field-forest text-sm font-medium rounded-lg hover:bg-field-forest/5 transition-colors"
             >
-              Upload Evidence
+              + Add a photo or receipt to the whole activity
             </button>
+            <p className="mt-1 text-xs text-field-earth">
+              For a photo of one particular time, add it to that visit in the work log instead.
+            </p>
           </div>
         )}
       </div>

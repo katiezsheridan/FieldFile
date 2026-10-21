@@ -784,7 +784,7 @@ from (values
   ('SW-01', 'types', 'Type of project', null::text, 'multi_choice', null::text, '["Greentree reservoirs","Shallow roost pond development","Seasonally flooded crops","Artificially created wetlands","Marsh restoration/development/protection","Prairie pothole restoration/development/protection","Moist soil management units"]', 'true', 'false', '10'),
   ('SW-01', 'construction_date', 'Date of construction', 'On the form: "Planned date of construction"', 'date', null::text, null, 'true', 'false', '20'),
   -- ===== SW-02 Well/trough/windmill overflow/other wildlife watering facilities =====
-  ('SW-02', 'work', 'Work performed', null::text, 'multi_choice', null::text, '["Drill new well","Windmill","Pump","Pipeline","Modification(s) of existing water source","Fencing","Overflow","Trough modification","Pipeline (modification of existing source)"]', 'true', 'false', '10'),
+  ('SW-02', 'work', 'Work performed', null::text, 'multi_choice', null::text, '["Drill new well","Windmill","Pump","Pipeline","Modification(s) of existing water source","Fencing","Overflow","Trough modification","Pipeline (modification of existing source)"]', 'false', 'false', '10'),
   ('SW-02', 'well_depth', 'New well — depth', null::text, 'number', 'feet', null, 'false', 'false', '20'),
   ('SW-02', 'well_gpm', 'New well — gallons per minute', null::text, 'number', 'gpm', null, 'false', 'false', '30'),
   ('SW-02', 'pipeline_size', 'Pipeline — size', null::text, 'text', null::text, null, 'false', 'false', '40'),

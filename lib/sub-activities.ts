@@ -897,7 +897,6 @@ export const SUB_ACTIVITY_DEFS: SubActivityDef[] = [
           // Two boxes need two values; this one names the second.
           "Pipeline (modification of existing source)",
         ],
-        requiredForForm: true,
       },
       {
         key: "well_depth",

@@ -7,9 +7,21 @@ import { cn } from "@/lib/utils";
 interface EvidenceUploaderProps {
   onUpload: (file: File, type: "photo" | "receipt" | "note", date?: string) => void;
   uploading?: boolean;
+  /** Label for the button that hands the file over. */
+  actionLabel?: string;
+  /**
+   * "secondary" when this sits inside a form with its own Save button, so the
+   * button that only stages a file never outranks the one that saves.
+   */
+  variant?: "primary" | "secondary";
 }
 
-export function EvidenceUploader({ onUpload, uploading }: EvidenceUploaderProps) {
+export function EvidenceUploader({
+  onUpload,
+  uploading,
+  actionLabel = "Upload Evidence",
+  variant = "primary",
+}: EvidenceUploaderProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [docType, setDocType] = useState<"photo" | "receipt" | "note">("photo");
@@ -148,9 +160,14 @@ export function EvidenceUploader({ onUpload, uploading }: EvidenceUploaderProps)
         type="button"
         onClick={handleUpload}
         disabled={uploading}
-        className="w-full px-4 py-2 bg-field-forest text-white font-medium rounded-lg hover:bg-field-forest/90 disabled:opacity-50"
+        className={cn(
+          "px-4 py-2 font-medium rounded-lg disabled:opacity-50",
+          variant === "primary"
+            ? "w-full bg-field-forest text-white hover:bg-field-forest/90"
+            : "border border-field-forest text-field-forest hover:bg-field-forest/5"
+        )}
       >
-        {uploading ? "Uploading..." : "Upload Evidence"}
+        {uploading ? "Uploading..." : actionLabel}
       </button>
     </div>
   );
