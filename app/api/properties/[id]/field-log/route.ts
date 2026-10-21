@@ -1,5 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
+import { texasDate } from "@/lib/dates";
 import { isPracticeCategory } from "@/lib/field-log";
 import { PRACTICE_CODE_BY_CATEGORY } from "@/lib/practices";
 import {
@@ -141,7 +142,12 @@ export async function POST(
   // CAPTURE date so an entry flushed from the offline queue days later still
   // joins the day the work actually happened.
   const capturedAt = payload.capturedAt || new Date().toISOString();
-  const performedOn = String(capturedAt).slice(0, 10);
+  // The Texas calendar day of the capture, not the UTC one: an evening photo
+  // must not roll into the next day (or, on Dec 31, the next tax year).
+  const capturedDate = new Date(String(capturedAt));
+  const performedOn = Number.isNaN(capturedDate.getTime())
+    ? String(capturedAt).slice(0, 10)
+    : texasDate(capturedDate);
 
   const activityId = subActivity
     ? await findOrCreateContainer({
