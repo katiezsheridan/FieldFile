@@ -211,7 +211,6 @@ function CountyCard({ county }: { county: WildlifeCounty }) {
   return (
     <details
       id={county.slug}
-      open
       data-print-expand
       className="group scroll-mt-6 rounded-xl border border-field-wheat bg-white transition-shadow duration-500 data-[highlight=true]:ring-4 data-[highlight=true]:ring-field-gold"
     >
