@@ -3,7 +3,6 @@ import Link from "next/link";
 import { SITE_URL, getPost, postUrl, formatPostDate } from "@/lib/blog";
 import {
   COMMON_REQUIREMENTS,
-  GENERAL_VERIFY,
   LAST_VERIFIED,
   STATE_SOURCES,
   WILDLIFE_COUNTIES,
@@ -13,6 +12,7 @@ import {
   type WildlifeCounty,
 } from "@/lib/wildlife-counties";
 import { CountySearch } from "@/components/blog/CountySearch";
+import { BackToTop } from "@/components/blog/BackToTop";
 
 const SLUG = "texas-wildlife-valuation-requirements-hays-blanco-llano-comal";
 const post = getPost(SLUG)!;
@@ -33,27 +33,27 @@ type Faq = { q: string; a: string };
 const FAQS: Faq[] = [
   {
     q: "Can wildlife management be the first use that qualifies my land?",
-    a: "No. The land must already be appraised as 1-d-1 open space agricultural land before you switch to wildlife management. Hays and Comal also say it must have been qualified in the prior year.",
+    a: "No. The land must already have 1-d-1 agricultural valuation. Hays and Comal also want it qualified the prior year.",
   },
   {
-    q: "How many wildlife management practices do I need each year?",
-    a: "At least three of the seven: habitat control, erosion control, predator control, supplemental water, supplemental food, supplemental shelter, and census counts. Hays, Blanco, Llano and Comal are all in the Edwards Plateau ecoregion, so TPWD's Edwards Plateau guidelines set the intensity standards.",
+    q: "How many practices do I need each year?",
+    a: "At least three of the seven. All four counties use TPWD's Edwards Plateau intensity standards.",
   },
   {
-    q: "When is the deadline to apply for wildlife valuation?",
-    a: "The statutory deadline is before May 1 of the tax year, so in practice file between January 1 and April 30. Late applications are generally accepted until the appraisal review board approves the appraisal records, with a 10 percent penalty.",
+    q: "When is the deadline?",
+    a: "April 30. Late filings are generally accepted until the appraisal records are approved, with a 10 percent penalty.",
   },
   {
-    q: "Do I have to file an annual report every year?",
-    a: "It depends on the county. Comal requires an annual report every year once approved. Hays asks for a PWD 888 report by letter for the years it specifies. Blanco asks for a wildlife update every 2 years on a staggered schedule. Llano sends annual update forms to existing wildlife properties.",
+    q: "Do I file an annual report every year?",
+    a: "Depends on the county. Comal: every year. Hays: when it sends a letter. Blanco: every 2 years by last name. Llano: annual update forms.",
   },
   {
-    q: "Is there a minimum acreage for wildlife valuation?",
-    a: "Only if your tract has been reduced in size since January 1 of the preceding tax year, for example by a split, sale, or new survey. If that happened, your CAD's wildlife use requirement sets the minimum acres. Otherwise there is no minimum.",
+    q: "Is there a minimum acreage?",
+    a: "Only if your tract got smaller (split, sale, or resurvey) since January 1 of the prior year. Then the CAD's wildlife use requirement sets the minimum.",
   },
   {
-    q: "Is it safe to mail my application on the last day?",
-    a: "It is risky. Tax Code 1.08 counts a filing as timely if it is postmarked or deposited by the deadline, but USPS postmarks may now be applied days after mailing. File online where available, hand-deliver, or get a certificate of mailing.",
+    q: "Can I mail my application on the last day?",
+    a: "It is risky. Postmarks can lag days behind mailing. File online, hand-deliver, or get a certificate of mailing.",
   },
 ];
 
@@ -129,13 +129,17 @@ const jsonLd = {
   ],
 };
 
-const TABLE_COLUMNS: { key: keyof WildlifeCounty["snapshot"]; label: string; verify?: VerifyTarget }[] = [
-  { key: "filingDeadline", label: "Filing deadline", verify: "filingDeadline" },
-  { key: "minimumAcreage", label: "Minimum acreage rule", verify: "minimumAcreage" },
+const TABLE_COLUMNS: {
+  key: keyof WildlifeCounty["snapshot"];
+  label: string;
+  verify?: VerifyTarget;
+}[] = [
+  { key: "filingDeadline", label: "Filing deadline" },
+  { key: "minimumAcreage", label: "Minimum acreage", verify: "minimumAcreage" },
   { key: "planRenewal", label: "Plan renewal" },
-  { key: "reporting", label: "Reporting to the CAD", verify: "reporting" },
+  { key: "reporting", label: "Reporting", verify: "reporting" },
   { key: "inspections", label: "Inspections", verify: "inspections" },
-  { key: "mainContact", label: "Main contact" },
+  { key: "mainContact", label: "Phone" },
 ];
 
 function hasFlag(county: WildlifeCounty, target: VerifyTarget) {
@@ -150,22 +154,13 @@ function VerifyBadge() {
   );
 }
 
-function SourceItem({ source }: { source: SourceLink }) {
-  return (
-    <li>
-      {source.url ? (
-        <a
-          href={source.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={linkClass}
-        >
-          {source.label}
-        </a>
-      ) : (
-        <span>{source.label} (not available online)</span>
-      )}
-    </li>
+function ExternalLink({ source }: { source: SourceLink }) {
+  return source.url ? (
+    <a href={source.url} target="_blank" rel="noopener noreferrer" className={linkClass}>
+      {source.label}
+    </a>
+  ) : (
+    <span>{source.label}</span>
   );
 }
 
@@ -177,13 +172,7 @@ function SectionHeading({ id, children }: { id: string; children: React.ReactNod
   );
 }
 
-function CardSubheading({
-  children,
-  verify,
-}: {
-  children: React.ReactNode;
-  verify?: boolean;
-}) {
+function CardSubheading({ children, verify }: { children: React.ReactNode; verify?: boolean }) {
   return (
     <h4 className="mt-6 text-base font-semibold text-field-ink">
       {children}
@@ -202,8 +191,23 @@ function Bullets({ items }: { items: string[] }) {
   );
 }
 
+function Chevron({ className }: { className: string }) {
+  return (
+    <svg
+      aria-hidden="true"
+      className={className}
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+    </svg>
+  );
+}
+
 function CountyCard({ county }: { county: WildlifeCounty }) {
-  const websiteLabel = county.filing.website.replace(/^https?:\/\//, "");
+  const shortName = county.name.replace(" County", "");
   return (
     <details
       id={county.slug}
@@ -211,91 +215,50 @@ function CountyCard({ county }: { county: WildlifeCounty }) {
       data-print-expand
       className="group scroll-mt-6 rounded-xl border border-field-wheat bg-white transition-shadow duration-500 data-[highlight=true]:ring-4 data-[highlight=true]:ring-field-gold"
     >
-      <summary className="flex cursor-pointer list-none items-start gap-3 rounded-xl px-5 py-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-field-forest [&::-webkit-details-marker]:hidden">
-        <svg
-          aria-hidden="true"
-          className="mt-1 h-5 w-5 shrink-0 text-field-earth transition-transform duration-200 group-open:rotate-90"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={2}
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-        </svg>
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 rounded-xl px-5 py-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-field-forest [&::-webkit-details-marker]:hidden">
         <h3 className="text-xl font-semibold text-field-ink">
           {county.name}
-          <span className="block text-sm font-normal text-field-earth">
-            {county.cadName}
-          </span>
+          <span className="block text-sm font-normal text-field-earth">{county.cadName}</span>
         </h3>
+        <Chevron className="h-5 w-5 shrink-0 text-field-ink/40 transition-transform group-open:rotate-180" />
       </summary>
 
-      <div className="border-t border-field-wheat/60 px-5 pb-6 pt-2 text-base leading-relaxed text-field-ink/90">
-        <CardSubheading>Snapshot</CardSubheading>
-        <dl className="mt-2 grid gap-x-4 gap-y-2 sm:grid-cols-[11rem_1fr]">
-          <div className="contents">
-            <dt className="font-medium text-field-ink">Ecoregion</dt>
-            <dd>{county.ecoregion}</dd>
-          </div>
-          {TABLE_COLUMNS.filter((c) => c.key !== "mainContact").map((col) => (
-            <div key={col.key} className="contents">
-              <dt className="font-medium text-field-ink">{col.label}</dt>
-              <dd>
-                {county.snapshot[col.key]}
-                {col.verify && hasFlag(county, col.verify) && <VerifyBadge />}
-              </dd>
-            </div>
-          ))}
-        </dl>
-
-        <CardSubheading verify={hasFlag(county, "minimumAcreage")}>
-          Minimum acreage
-        </CardSubheading>
-        <Bullets items={county.minimumAcreageDetail} />
-
+      <div className="border-t border-field-wheat/60 px-5 pb-6 pt-1 text-base leading-relaxed text-field-ink/90">
         <CardSubheading>What to file</CardSubheading>
         <Bullets items={county.application} />
 
         <CardSubheading verify={hasFlag(county, "standards")}>
-          What is unique here
+          Unique to {shortName}
         </CardSubheading>
         <Bullets items={county.uniqueRequirements} />
 
-        <CardSubheading verify={hasFlag(county, "reporting")}>
-          Reporting
-        </CardSubheading>
+        <CardSubheading verify={hasFlag(county, "reporting")}>Reporting</CardSubheading>
         <Bullets items={county.reporting} />
 
-        <CardSubheading verify={hasFlag(county, "inspections")}>
-          Inspections
-        </CardSubheading>
+        <CardSubheading verify={hasFlag(county, "inspections")}>Inspections</CardSubheading>
         <Bullets items={county.inspections} />
 
-        <CardSubheading verify={hasFlag(county, "filingDeadline")}>
-          Where and how to file
-        </CardSubheading>
-        <Bullets items={county.filing.notes} />
-        <dl className="mt-3 grid gap-x-4 gap-y-1 rounded-lg bg-field-mist p-4 text-sm sm:grid-cols-[8rem_1fr]">
+        <div className="mt-6 rounded-lg border border-field-forest/20 bg-field-forest/5 p-4">
+          <h4 className="font-semibold text-field-ink">How FieldFile helps in {shortName}</h4>
+          <Bullets items={county.fieldfileHelps} />
+        </div>
+
+        <CardSubheading>Contact and forms</CardSubheading>
+        <dl className="mt-2 grid gap-x-4 gap-y-1 rounded-lg bg-field-mist p-4 text-sm sm:grid-cols-[6rem_1fr]">
           <dt className="font-medium text-field-ink">Address</dt>
-          <dd>{county.filing.address}</dd>
-          {county.filing.mailingAddress && (
-            <>
-              <dt className="font-medium text-field-ink">Mailing</dt>
-              <dd>{county.filing.mailingAddress}</dd>
-            </>
-          )}
+          <dd>
+            {county.filing.address}
+            {county.filing.mailingAddress && (
+              <span className="block">Mail: {county.filing.mailingAddress}</span>
+            )}
+          </dd>
           <dt className="font-medium text-field-ink">Phone</dt>
           <dd>
             <a href={`tel:+1${county.filing.phone.replace(/\D/g, "")}`} className={linkClass}>
               {county.filing.phone}
             </a>
+            {county.filing.fax && <span> (fax {county.filing.fax})</span>}
           </dd>
-          {county.filing.fax && (
-            <>
-              <dt className="font-medium text-field-ink">Fax</dt>
-              <dd>{county.filing.fax}</dd>
-            </>
-          )}
           {county.filing.email && (
             <>
               <dt className="font-medium text-field-ink">Email</dt>
@@ -312,45 +275,29 @@ function CountyCard({ county }: { county: WildlifeCounty }) {
               <dd>{county.filing.hours}</dd>
             </>
           )}
-          <dt className="font-medium text-field-ink">Website</dt>
+          <dt className="font-medium text-field-ink">Online</dt>
           <dd>
             <a href={county.filing.website} target="_blank" rel="noopener noreferrer" className={linkClass}>
-              {websiteLabel}
+              {county.filing.website.replace(/^https?:\/\//, "")}
             </a>
+            {county.filing.forms.map((f) => (
+              <span key={f.label}>
+                {" · "}
+                <ExternalLink source={f} />
+              </span>
+            ))}
           </dd>
         </dl>
-        <p className="mt-3 text-sm font-medium text-field-ink">Forms</p>
-        <ul className="mt-1 list-disc space-y-1 pl-5 text-sm marker:text-field-forest">
-          {county.filing.forms.map((f) =>
-            f.url ? (
-              <li key={f.label}>
-                <a href={f.url} target="_blank" rel="noopener noreferrer" className={linkClass}>
-                  {f.label}
-                </a>
-              </li>
-            ) : (
-              <li key={f.label}>{f.label}</li>
-            )
-          )}
-        </ul>
 
-        {county.verifyFlags.length > 0 && (
-          <div className="mt-6 rounded-lg border border-field-terra/40 bg-field-cream p-4 text-sm">
-            <p className="font-semibold text-field-ink">Verify with the CAD</p>
-            <ul className="mt-2 list-disc space-y-1 pl-5 marker:text-field-terra">
-              {county.verifyFlags.map((f) => (
-                <li key={f.note}>{f.note}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        <CardSubheading>Sources</CardSubheading>
-        <ul className="mt-2 list-disc space-y-1 pl-5 text-sm marker:text-field-forest">
-          {county.sources.map((s) => (
-            <SourceItem key={s.label} source={s} />
+        <p className="mt-4 text-sm text-field-earth">
+          Sources{hasFlag(county, "sources") && <VerifyBadge />}:{" "}
+          {county.sources.map((s, i) => (
+            <span key={s.label}>
+              {i > 0 && "; "}
+              <ExternalLink source={s} />
+            </span>
           ))}
-        </ul>
+        </p>
       </div>
     </details>
   );
@@ -367,7 +314,6 @@ export default function WildlifeCountyRequirementsPost() {
       />
 
       <div className="mx-auto max-w-4xl px-4 py-12 md:py-16">
-        {/* Breadcrumb */}
         <nav aria-label="Breadcrumb" className="mb-6 text-sm text-field-earth print:hidden">
           <ol className="flex flex-wrap items-center gap-1">
             <li>
@@ -385,13 +331,13 @@ export default function WildlifeCountyRequirementsPost() {
         </nav>
 
         {/* Hero */}
-        <header className="mb-8">
-          <h1 className="text-3xl font-bold leading-tight text-field-ink md:text-4xl">
+        <header>
+          <h1 tabIndex={-1} className="text-3xl font-bold leading-tight text-field-ink focus:outline-none md:text-4xl">
             {post.title}
           </h1>
           <p className="mt-4 text-lg text-field-earth">
             What each county appraisal district asks for to get and keep
-            wildlife management valuation, with every source linked.
+            wildlife valuation.
           </p>
           <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-field-earth">
             <span>
@@ -407,45 +353,59 @@ export default function WildlifeCountyRequirementsPost() {
               Report a correction
             </a>
           </div>
-          <div className="mt-6 space-y-4 text-lg leading-relaxed text-field-ink/90">
-            <p>
-              The state sets the wildlife valuation rules, but your county
-              appraisal district decides how to apply them, so a neighbor one
-              county over may file different paperwork on a different schedule.
-              FieldFile was built by a Texas landowner who went through this
-              process herself in Hays County, and this is the guide we wish we
-              had. Find your county below, see what it asks for, and check
-              anything we flagged with the CAD directly.
-            </p>
-          </div>
+          <p className="mt-6 text-lg leading-relaxed text-field-ink/90">
+            Texas sets the rules, but each county appraisal district applies
+            them its own way. FieldFile was built by a Texas landowner who went
+            through this herself in Hays County. Start with what every county
+            requires, then find yours.
+          </p>
         </header>
 
-        <CountySearch />
-
         <div className="mt-12 space-y-14 text-lg leading-relaxed text-field-ink/90">
+          {/* Common requirements */}
+          <section aria-labelledby="common-requirements">
+            <SectionHeading id="common-requirements">What every county requires</SectionHeading>
+            <ul className="mt-5 grid gap-x-8 gap-y-4 md:grid-cols-2">
+              {COMMON_REQUIREMENTS.map((req) => (
+                <li key={req.title} className="flex gap-3">
+                  <svg
+                    aria-hidden="true"
+                    className="mt-1 h-5 w-5 shrink-0 text-field-forest"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2.5}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                  </svg>
+                  <div className="text-base">
+                    <p className="font-semibold text-field-ink">
+                      {req.title}
+                      {req.verify && <VerifyBadge />}
+                    </p>
+                    <p className="mt-0.5">{req.detail}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          <CountySearch />
+
           {/* At a glance */}
           <section aria-labelledby="at-a-glance">
-            <SectionHeading id="at-a-glance">At a glance</SectionHeading>
-            <p className="mt-3 text-base text-field-earth">
-              Tap a county name to jump to its full card. On a phone, swipe the
-              table sideways.
-            </p>
+            <SectionHeading id="at-a-glance">Compare counties</SectionHeading>
             <div
               role="region"
               aria-labelledby="at-a-glance"
               tabIndex={0}
               className="mt-4 overflow-x-auto rounded-xl border border-field-wheat bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-field-forest"
             >
-              <table className="w-full min-w-[56rem] border-collapse print:min-w-0 text-left text-sm">
-                <caption className="sr-only">
-                  Wildlife valuation requirements by county
-                </caption>
+              <table className="w-full min-w-[52rem] border-collapse text-left text-sm print:min-w-0">
+                <caption className="sr-only">Wildlife valuation requirements by county</caption>
                 <thead className="bg-field-mist text-field-ink">
                   <tr>
-                    <th
-                      scope="col"
-                      className="sticky left-0 z-10 bg-field-mist px-4 py-3 font-semibold"
-                    >
+                    <th scope="col" className="sticky left-0 z-10 bg-field-mist px-4 py-3 font-semibold">
                       County
                     </th>
                     {TABLE_COLUMNS.map((col) => (
@@ -460,14 +420,14 @@ export default function WildlifeCountyRequirementsPost() {
                     <tr key={county.slug} className="border-t border-field-wheat align-top">
                       <th
                         scope="row"
-                        className="sticky left-0 z-10 w-28 bg-white px-4 py-3 font-semibold shadow-[1px_0_0_theme(colors.field.wheat)]"
+                        className="sticky left-0 z-10 w-24 bg-white px-4 py-3 font-semibold shadow-[1px_0_0_theme(colors.field.wheat)]"
                       >
                         <a href={`#${county.slug}`} className={linkClass}>
                           {county.name.replace(" County", "")}
                         </a>
                       </th>
                       {TABLE_COLUMNS.map((col) => (
-                        <td key={col.key} className="min-w-[10rem] px-4 py-3 text-field-ink/90">
+                        <td key={col.key} className="min-w-[9rem] px-4 py-3 text-field-ink/90">
                           {county.snapshot[col.key]}
                           {col.verify && hasFlag(county, col.verify) && (
                             <span className="mt-1 block">
@@ -483,68 +443,9 @@ export default function WildlifeCountyRequirementsPost() {
             </div>
           </section>
 
-          {/* Common requirements */}
-          <section aria-labelledby="common-requirements">
-            <SectionHeading id="common-requirements">
-              Requirements that apply in every county
-            </SectionHeading>
-            <p className="mt-3">
-              These come from state law and apply in Hays, Blanco, Llano and
-              Comal alike.
-            </p>
-            <ul className="mt-5 space-y-4">
-              {COMMON_REQUIREMENTS.map((req) => (
-                <li key={req.title} className="flex gap-3">
-                  <svg
-                    aria-hidden="true"
-                    className="mt-1 h-5 w-5 shrink-0 text-field-forest"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2.5}
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                  </svg>
-                  <div>
-                    <p className="font-semibold text-field-ink">
-                      {req.title}
-                      {req.verify && <VerifyBadge />}
-                    </p>
-                    <p className="mt-1 text-base">{req.detail}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </section>
-
-          {/* Timeline */}
-          <section aria-labelledby="timeline">
-            <SectionHeading id="timeline">Your year at a glance</SectionHeading>
-            <ol className="mt-6 border-l-2 border-field-wheat">
-              {WILDLIFE_YEAR.map((entry) => (
-                <li key={entry.when} className="relative pb-8 pl-6 last:pb-0">
-                  <span
-                    aria-hidden="true"
-                    className="absolute -left-[9px] top-1.5 h-4 w-4 rounded-full border-2 border-field-cream bg-field-forest"
-                  />
-                  <p className="text-sm font-semibold uppercase tracking-wide text-field-earth">
-                    {entry.when}
-                  </p>
-                  <p className="mt-1 font-semibold text-field-ink">{entry.title}</p>
-                  <p className="mt-1 text-base">{entry.detail}</p>
-                </li>
-              ))}
-            </ol>
-          </section>
-
           {/* County cards */}
           <section aria-labelledby="counties">
             <SectionHeading id="counties">County by county</SectionHeading>
-            <p className="mt-3">
-              Each card collapses if you want a shorter page. Items marked{" "}
-              <VerifyBadge /> are things we could not confirm from the CAD&apos;s
-              published documents.
-            </p>
             <div className="mt-6 space-y-6">
               {WILDLIFE_COUNTIES.map((county) => (
                 <CountyCard key={county.slug} county={county} />
@@ -552,45 +453,36 @@ export default function WildlifeCountyRequirementsPost() {
             </div>
           </section>
 
-          {/* How FieldFile helps */}
-          <section aria-labelledby="how-fieldfile-helps">
-            <SectionHeading id="how-fieldfile-helps">How FieldFile helps</SectionHeading>
-            <div className="mt-3 space-y-4">
-              <p>
-                Every county above asks some version of the same question: what
-                did you do, where, and when, and can you prove it. FieldFile is
-                built around that question.
-              </p>
-              <ul className="list-disc space-y-2 pl-6 marker:text-field-forest">
-                <li>
-                  <strong className="font-semibold text-field-ink">Activity log.</strong>{" "}
-                  Record each activity under the practice it counts toward, with
-                  the date, cost, and notes. That is the dated log Hays asks for
-                  at inspection and Blanco asks for on its update form.
+          {/* Timeline */}
+          <section aria-labelledby="timeline">
+            <SectionHeading id="timeline">Your year</SectionHeading>
+            <ol className="mt-6 border-l-2 border-field-wheat text-base">
+              {WILDLIFE_YEAR.map((entry) => (
+                <li key={entry.when} className="relative pb-6 pl-6 last:pb-0">
+                  <span
+                    aria-hidden="true"
+                    className="absolute -left-[9px] top-1.5 h-4 w-4 rounded-full border-2 border-field-cream bg-field-forest"
+                  />
+                  <p>
+                    <span className="font-semibold text-field-ink">
+                      {entry.when}: {entry.title}.
+                    </span>{" "}
+                    {entry.detail}
+                  </p>
                 </li>
-                <li>
-                  <strong className="font-semibold text-field-ink">Map.</strong>{" "}
-                  Pin where each practice happened on your property map, the
-                  placement map Blanco requires and Hays recommends.
-                </li>
-                <li>
-                  <strong className="font-semibold text-field-ink">Photos and receipts.</strong>{" "}
-                  Attach them to the activity they prove, so they are ready for an
-                  audit even in a county that tells you not to send them.
-                </li>
-                <li>
-                  <strong className="font-semibold text-field-ink">Annual report.</strong>{" "}
-                  FieldFile prepares a PWD 888 annual report from what you
-                  logged, for the years your CAD asks about.
-                </li>
-              </ul>
-              <p>
-                FieldFile prepares the paperwork. You review it, sign it, and
-                submit it to your CAD. It does not replace checking your
-                county&apos;s current rules.
-              </p>
-            </div>
-            <div className="mt-6 flex flex-wrap gap-3 print:hidden">
+              ))}
+            </ol>
+          </section>
+
+          {/* CTA */}
+          <aside className="rounded-2xl border border-field-wheat bg-field-mist p-6 md:p-8 print:hidden">
+            <h2 className="text-xl font-semibold text-field-ink">Keep it all in one place</h2>
+            <p className="mt-2 text-base text-field-ink/80">
+              Log activities, pin them on a map, attach photos and receipts, and
+              let FieldFile prepare your annual report. You review, sign, and
+              submit it to your CAD.
+            </p>
+            <div className="mt-5 flex flex-wrap gap-3">
               <Link
                 href="/signup"
                 className="rounded-lg bg-field-forest px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-field-forest/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-field-forest focus-visible:ring-offset-2"
@@ -599,98 +491,55 @@ export default function WildlifeCountyRequirementsPost() {
               </Link>
               <Link
                 href="/how-it-works"
-                className="px-2 py-2.5 text-sm font-medium text-field-forest hover:underline"
+                className="rounded-lg border border-field-forest px-5 py-2.5 text-sm font-medium text-field-forest transition-colors hover:bg-field-forest/10"
               >
                 See how it works
               </Link>
-              <Link
-                href="/pricing"
-                className="px-2 py-2.5 text-sm font-medium text-field-forest hover:underline"
-              >
-                Pricing
-              </Link>
             </div>
-          </section>
+          </aside>
 
-          {/* FAQ */}
+          {/* FAQ: same card + chevron look as /faq, as native <details> so
+              answers stay in the server-rendered HTML for crawlers. */}
           <section aria-labelledby="faq">
-            <SectionHeading id="faq">Frequently asked questions</SectionHeading>
-            <dl className="mt-5 space-y-6">
+            <SectionHeading id="faq">FAQ</SectionHeading>
+            <div className="mt-5 space-y-3">
               {FAQS.map((f) => (
-                <div key={f.q}>
-                  <dt className="font-semibold text-field-ink">{f.q}</dt>
-                  <dd className="mt-1 text-base">{f.a}</dd>
-                </div>
+                <details
+                  key={f.q}
+                  data-print-expand
+                  className="group overflow-hidden rounded-xl border border-field-wheat bg-white"
+                >
+                  <summary className="flex w-full cursor-pointer list-none items-center justify-between gap-4 p-4 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-field-forest [&::-webkit-details-marker]:hidden">
+                    <span className="text-base font-medium text-field-ink">{f.q}</span>
+                    <Chevron className="h-5 w-5 flex-shrink-0 text-field-ink/40 transition-transform group-open:rotate-180" />
+                  </summary>
+                  <div className="px-4 pb-4">
+                    <p className="text-base text-field-ink/70">{f.a}</p>
+                  </div>
+                </details>
               ))}
-            </dl>
-          </section>
-
-          {/* What we could not confirm */}
-          <section
-            aria-labelledby="not-confirmed"
-            className="rounded-2xl border border-field-terra/40 bg-white p-6"
-          >
-            <h2 id="not-confirmed" className="scroll-mt-6 text-xl font-semibold text-field-ink">
-              What we could not confirm
-            </h2>
-            <p className="mt-2 text-base">
-              Call or check with the CAD before relying on these.
-            </p>
-            <ul className="mt-4 space-y-3 text-base">
-              {WILDLIFE_COUNTIES.filter((c) => c.verifyFlags.length > 0).map((c) => (
-                <li key={c.slug}>
-                  <a href={`#${c.slug}`} className="font-semibold text-field-ink hover:text-field-forest hover:underline">
-                    {c.name}
-                  </a>
-                  <ul className="mt-1 list-disc space-y-1 pl-5 marker:text-field-terra">
-                    {c.verifyFlags.map((f) => (
-                      <li key={f.note}>{f.note}</li>
-                    ))}
-                  </ul>
-                </li>
-              ))}
-              <li>
-                <span className="font-semibold text-field-ink">All counties</span>
-                <ul className="mt-1 list-disc space-y-1 pl-5 marker:text-field-terra">
-                  {GENERAL_VERIFY.map((v) => (
-                    <li key={v}>{v}</li>
-                  ))}
-                </ul>
-              </li>
-            </ul>
-            <p className="mt-4 text-base">
-              Know something we missed?{" "}
-              <a href={CORRECTION_MAILTO} className={linkClass}>
-                Report a correction
-              </a>
-              .
-            </p>
+            </div>
           </section>
 
           {/* Sources and disclaimer */}
           <section aria-labelledby="sources">
-            <SectionHeading id="sources">Sources</SectionHeading>
-            <h3 className="mt-4 font-semibold text-field-ink">State</h3>
-            <ul className="mt-2 list-disc space-y-1.5 pl-5 text-base marker:text-field-forest">
+            <SectionHeading id="sources">State sources</SectionHeading>
+            <ul className="mt-3 list-disc space-y-1.5 pl-5 text-base marker:text-field-forest">
               {STATE_SOURCES.map((s) => (
-                <SourceItem key={s.label} source={s} />
+                <li key={s.label}>
+                  <ExternalLink source={s} />
+                </li>
               ))}
             </ul>
-            {WILDLIFE_COUNTIES.map((c) => (
-              <div key={c.slug}>
-                <h3 className="mt-5 font-semibold text-field-ink">{c.name}</h3>
-                <ul className="mt-2 list-disc space-y-1.5 pl-5 text-base marker:text-field-forest">
-                  {c.sources.map((s) => (
-                    <SourceItem key={s.label} source={s} />
-                  ))}
-                </ul>
-              </div>
-            ))}
+            <p className="mt-2 text-sm text-field-earth">County sources are listed in each county card.</p>
             <p className="mt-8 rounded-lg border border-field-wheat bg-field-mist px-5 py-4 text-sm text-field-ink/80">
-              This is general information, not legal or tax advice. Appraisal
-              district rules change, and each CAD can update its guidelines at
-              any time. Confirm your requirements with your county appraisal
-              district before you file. Last verified {lastVerified}.
+              General information, not legal or tax advice. Rules change, so
+              confirm with your county appraisal district before you file. Last
+              verified {lastVerified}.{" "}
+              <a href={CORRECTION_MAILTO} className={linkClass}>
+                Report a correction
+              </a>
+              .
             </p>
           </section>
         </div>
@@ -701,6 +550,8 @@ export default function WildlifeCountyRequirementsPost() {
           </Link>
         </div>
       </div>
+
+      <BackToTop />
     </article>
   );
 }

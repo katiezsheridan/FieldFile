@@ -43,7 +43,7 @@ export const BLOG_POSTS: BlogPost[] = [
     ],
     datePublished: "2026-10-22",
     dateModified: "2026-10-22",
-    readingTime: "12 min read",
+    readingTime: "6 min read",
   },
   {
     slug: "documentation",
