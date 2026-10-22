@@ -23,6 +23,29 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "texas-wildlife-valuation-requirements-hays-blanco-llano-comal",
+    title:
+      "Texas Wildlife Valuation (1-d-1-w) Requirements: Hays, Blanco, Llano and Comal Counties",
+    description:
+      "What the Hays, Blanco, Llano and Comal CADs require to get and keep 1-d-1-w wildlife valuation: deadlines, acreage, reports, inspections, sources.",
+    excerpt:
+      "Every county appraisal district applies the state's wildlife valuation rules its own way. Find your county to see its filing deadline, minimum acreage rule, reporting schedule, and inspections, with every source linked.",
+    primaryKeyword: "Texas wildlife valuation requirements by county",
+    keywords: [
+      "Texas wildlife valuation requirements",
+      "1-d-1-w",
+      "Hays CAD wildlife management",
+      "Blanco CAD wildlife",
+      "Llano CAD wildlife",
+      "Comal appraisal district wildlife",
+      "wildlife management plan Texas county",
+      "PWD 888 annual report",
+    ],
+    datePublished: "2026-10-22",
+    dateModified: "2026-10-22",
+    readingTime: "6 min read",
+  },
+  {
     slug: "documentation",
     title:
       "How to Document Wildlife Management Practices for Texas Appraisal Districts",
