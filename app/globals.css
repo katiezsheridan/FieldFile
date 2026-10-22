@@ -16,3 +16,19 @@ body {
   width: 100%;
   z-index: 0;
 }
+
+/* Wildlife county requirements post: print every county card expanded.
+   ::details-content covers current Chromium; CountySearch also opens all
+   cards on beforeprint for other browsers. */
+@media print {
+  .wildlife-guide details::details-content {
+    content-visibility: visible;
+    display: block;
+  }
+  .wildlife-guide details[data-print-expand] {
+    break-inside: auto;
+  }
+  .wildlife-guide .overflow-x-auto {
+    overflow: visible;
+  }
+}
