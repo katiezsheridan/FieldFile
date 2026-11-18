@@ -23,6 +23,28 @@ export type BlogPost = {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "wrapping-up-wildlife-valuation-year-annual-report",
+    title:
+      "Wrapping Up Your Wildlife Valuation Year: A Low-Stress Guide to the Annual Report",
+    description:
+      "Finish your Texas 1-d-1-w wildlife valuation year: meet three of seven practice categories, document it, and quick wins to log before December 31.",
+    excerpt:
+      "The calendar year is almost done. If you hold a 1-d-1 wildlife valuation in Texas, your activities need to be done and documented before the ball drops. Here's how to build the report, plus easy wins if you're short on time.",
+    primaryKeyword: "wildlife valuation annual report",
+    keywords: [
+      "wildlife valuation annual report",
+      "Texas wildlife annual report",
+      "1-d-1-w",
+      "TPWD annual report form",
+      "wildlife management practices Texas",
+      "wildlife tax valuation",
+      "PWD 888 annual report",
+    ],
+    datePublished: "2026-11-18",
+    dateModified: "2026-11-18",
+    readingTime: "3 min read",
+  },
+  {
     slug: "texas-wildlife-valuation-requirements-hays-blanco-llano-comal",
     title:
       "Texas Wildlife Valuation (1-d-1-w) Requirements: Hays, Blanco, Llano and Comal Counties",
